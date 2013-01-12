@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Resource", "Resource\Resource.vcproj", "{80911241-DB00-4F22-865F-0E2E54927169}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceTests", "ResourceTests\ResourceTests.vcproj", "{ACBCC7A8-C8D1-48EE-876E-8069CDD9109E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{80911241-DB00-4F22-865F-0E2E54927169} = {80911241-DB00-4F22-865F-0E2E54927169}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80911241-DB00-4F22-865F-0E2E54927169}.Debug|Win32.ActiveCfg = Debug|Win32
+		{80911241-DB00-4F22-865F-0E2E54927169}.Debug|Win32.Build.0 = Debug|Win32
+		{80911241-DB00-4F22-865F-0E2E54927169}.Release|Win32.ActiveCfg = Release|Win32
+		{80911241-DB00-4F22-865F-0E2E54927169}.Release|Win32.Build.0 = Release|Win32
+		{ACBCC7A8-C8D1-48EE-876E-8069CDD9109E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ACBCC7A8-C8D1-48EE-876E-8069CDD9109E}.Debug|Win32.Build.0 = Debug|Win32
+		{ACBCC7A8-C8D1-48EE-876E-8069CDD9109E}.Release|Win32.ActiveCfg = Release|Win32
+		{ACBCC7A8-C8D1-48EE-876E-8069CDD9109E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
