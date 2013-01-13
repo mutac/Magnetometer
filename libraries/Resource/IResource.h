@@ -14,14 +14,4 @@ public:
   virtual Variant get() = 0;
 };
 
-/**
- * 
- */
-class ResourceBase : public IResource
-{
-public:
-  virtual void set(const Variant& val) {}
-  virtual Variant get() { return Variant::Empty; }
-};
-
 #endif

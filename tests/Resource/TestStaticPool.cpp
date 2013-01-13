@@ -6,24 +6,34 @@
 class TestStaticPool : public cfixcc::TestFixture
 {
 private:
+  
   class TestClass
   {
+  public:
+    TestClass() :
+      mSomeData(0)
+    {
+    }
+
   private:
     int mSomeData;
   };
+
 public:
   void AllocateDeallocate()
   {
-    StaticPool<10, TestClass> pool10;
+    StaticPool<10, TestClass> pool;
 
-    for (int times = 0; times < 10; times++)
+    for (int times = 0; times < pool.getSize(); times++)
     {
-      TestClass* cls = pool10.allocate();
+      TestClass* cls = pool.allocate();
       CFIXCC_ASSERT (cls != NULL);
+      CFIXCC_ASSERT (pool.getAllocated() == times + 1);
     }
 
     // Full, no more allocations
-    CFIXCC_ASSERT (pool10.allocate() == NULL);
+    CFIXCC_ASSERT (pool.getAllocated() == pool.getSize());
+    CFIXCC_ASSERT (pool.allocate() == NULL);
   }
 };
 

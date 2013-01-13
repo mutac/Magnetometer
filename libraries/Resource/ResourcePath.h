@@ -36,12 +36,12 @@ public:
   }
 
   bool makeRelativeTo(const char* root);
-  bool isRelativeTo(const ResourcePath& root)
+  bool isChildOf(const ResourcePath& root)
   {
-    return isRelativeTo(root.getFullPath());
+    return isChildOf(root.getFullPath());
   }
 
-  bool isRelativeTo(const char* root);
+  bool isChildOf(const char* root);
 
   const char* getFullPath() const
   {

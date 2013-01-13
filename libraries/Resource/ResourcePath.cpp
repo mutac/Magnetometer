@@ -9,7 +9,7 @@ void ResourcePath::setPath(const char* path)
 
 bool ResourcePath::makeRelativeTo(const char* root)
 {
-  if (!isRelativeTo(root))
+  if (!isChildOf(root))
   {
     return false;
   }
@@ -26,7 +26,7 @@ bool ResourcePath::makeRelativeTo(const char* root)
   return true;
 }
 
-bool ResourcePath::isRelativeTo(const char* root)
+bool ResourcePath::isChildOf(const char* root)
 {
   // Bug - The full root does not have to be specified
   //

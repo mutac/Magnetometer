@@ -167,15 +167,15 @@
 	</References>
 	<Files>
 		<File
+			RelativePath="..\..\..\tests\Resource\TestResourceCollection.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\tests\Resource\TestResourcePath.cpp"
 			>
 		</File>
 		<File
 			RelativePath="..\..\..\tests\Resource\TestStaticPool.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\TestStaticResourceCollection.cpp"
 			>
 		</File>
 	</Files>

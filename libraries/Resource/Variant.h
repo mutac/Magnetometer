@@ -3,12 +3,12 @@
 #ifndef _VARIANT_H_
 #define _VARIANT_H_
 
-#include <var/variant.hpp>
+// #include <var/variant.hpp>
 
 /** Defines what the variant can hold.
  *  Keep the VariantType_* identifiers up-to-date.
  */
-typedef ttl::var::variant<float, int, char*> VarType;
+// typedef ttl::var::variant<float, int, char*> VarType;
 
 /** List of supported types, number implies index within VarType template
  */
@@ -21,7 +21,7 @@ enum VariantTypes
 
 /**
  */
-class Variant : public VarType
+class Variant /* : public VarType */
 {
 public:
   template<typename T>
@@ -33,6 +33,7 @@ public:
   static Variant Empty;
 
 private:
+  int which() const { return 1; }
 };
 
 template<>

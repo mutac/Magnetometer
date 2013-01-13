@@ -8,15 +8,36 @@
 #include "StaticPool.h"
 #include <string.h>
 
+class ResourceContainer
+{
+public:
+  ResourceContainer() :
+    mResource(0),
+    mNextChild(NULL),
+    mNextSibling(NULL)
+  {
+  }
+
+  void setResource(IResource* resource) { mResource = resource; }
+  IResource* getResource() { return mResource; }
+  ResourcePath& getPath() { return mPath; }
+
+private:
+  ResourcePath mPath;
+  IResource* mResource;
+  ResourceContainer* mNextChild;
+  ResourceContainer* mNextSibling;
+};
+
 /**
  * 
  */
-template <int CollectionSize>
 class StaticResourceCollection
 {
 public: 
-  StaticResourceCollection() :
-    mRoot(NULL)
+  StaticResourceCollection(IAllocator<ResourceContainer>& allocator) :
+    mRoot(NULL),
+    mAllocator(allocator)
   {
   }
 
@@ -42,33 +63,10 @@ public:
 
   // get(const char* path = NULL);
 
-  int getCount() const { return mPool.getAllocated(); }
-
 private:
 
-  class ResourceContainer
-  {
-  public:
-    ResourceContainer() :
-      mResource(0),
-      mNextChild(NULL),
-      mNextSibling(NULL)
-    {
-    }
-
-    void setResource(IResource* resource) { mResource = resource; }
-    IResource* getResource() { return mResource; }
-    ResourcePath& getPath() { return mPath; }
-
-  private:
-    ResourcePath mPath;
-    IResource* mResource;
-    ResourceContainer* mNextChild;
-    ResourceContainer* mNextSibling;
-  };
-
   ResourceContainer* mRoot;
-  StaticPool<CollectionSize, ResourceContainer> mPool;
+  IAllocator<ResourceContainer>& mAllocator;
 };
 
 #endif

@@ -66,12 +66,12 @@ public:
     CFIX_ASSERT (strcmp(path1.getPath(), "item") == 0);
 
     ResourcePath path2("system.devices.temperature");
-    CFIX_ASSERT (path2.isRelativeTo("system") == true);
-    CFIX_ASSERT (path2.isRelativeTo("system.devices") == true);
-    CFIX_ASSERT (path2.isRelativeTo("system.devices.temperature") == true);
-    CFIX_ASSERT (path2.isRelativeTo("objects") == false);
-    CFIX_ASSERT (path2.isRelativeTo("system.objects") == false);
-    CFIX_ASSERT (path2.isRelativeTo("system.objects.temperature") == false);
+    CFIX_ASSERT (path2.isChildOf("system") == true);
+    CFIX_ASSERT (path2.isChildOf("system.devices") == true);
+    CFIX_ASSERT (path2.isChildOf("system.devices.temperature") == true);
+    CFIX_ASSERT (path2.isChildOf("objects") == false);
+    CFIX_ASSERT (path2.isChildOf("system.objects") == false);
+    CFIX_ASSERT (path2.isChildOf("system.objects.temperature") == false);
   }
 };
 

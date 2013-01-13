@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "StaticResourceCollection.h"
+#include "StaticPool.h"
 #include "Resource.h"
 
 class TestResource1 : public ResourceBase
@@ -14,8 +15,10 @@ private:
 public:
   void ConstructDestruct()
   {
-    StaticResourceCollection<10> resources;
-    CFIX_ASSERT (resources.getCount() == 0);
+    StaticPool<10, ResourceContainer> allocator;
+    StaticResourceCollection resources(allocator);
+
+    // CFIX_ASSERT (resources.getCount() == 0);
 
     CFIX_ASSERT (resources.exists("system.anything") == false);
     CFIX_ASSERT (resources.exists("system") == false);
@@ -24,8 +27,8 @@ public:
 
   void Add()
   {
-    StaticResourceCollection<10> resources;
-    CFIX_ASSERT (resources.getCount() == 0);
+    StaticPool<10, ResourceContainer> allocator;
+    StaticResourceCollection resources(allocator);
 
     TestResource1 testResource1;
     CFIX_ASSERT (resources.add("system.devices.test", &testResource1) == true);
@@ -34,4 +37,5 @@ public:
 
 CFIXCC_BEGIN_CLASS(TestStaticResourceCollection)
 	CFIXCC_METHOD(ConstructDestruct)
+  CFIXCC_METHOD(Add)
 CFIXCC_END_CLASS()

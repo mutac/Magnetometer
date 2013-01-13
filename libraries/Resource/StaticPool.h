@@ -2,10 +2,11 @@
 #ifndef _STATIC_POOL_H_
 #define _STATIC_POOL_H_
 
+#include "IAllocator.h"
 #include <string.h>
 
-template <int PoolSize, class T>
-class StaticPool
+template <unsigned int PoolSize, class T>
+class StaticPool : public IAllocator<T>
 {
 public:
   StaticPool() :
@@ -25,6 +26,7 @@ public:
   
   void deallocate(T* t)
   {
+    // Nope...
   }
 
   int getSize() const
