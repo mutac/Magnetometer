@@ -30,25 +30,31 @@ public:
 
   void setPath(const char* path);
 
-  bool makeRelativeTo(const ResourcePath& root)
+  inline bool makeRelativeTo(const ResourcePath& root)
   {
     return makeRelativeTo(root.getFullPath());
   }
 
   bool makeRelativeTo(const char* root);
-  bool isChildOf(const ResourcePath& root)
+  inline bool matches(const ResourcePath& path) const 
+  {
+    return matches(path.getFullPath());
+  }
+
+  bool matches(const char* path) const;
+  inline bool isChildOf(const ResourcePath& root) const
   {
     return isChildOf(root.getFullPath());
   }
 
-  bool isChildOf(const char* root);
+  bool isChildOf(const char* root) const;
 
-  const char* getFullPath() const
+  inline const char* getFullPath() const
   {
     return mFullPath;
   }
 
-  int getFullPathLength() const
+  inline int getFullPathLength() const
   {
     if (mFullPath == NULL)
       return 0;
@@ -56,12 +62,12 @@ public:
       return strlen(mFullPath);
   }
 
-  const char* getPath() const
+  inline const char* getPath() const
   {
     return mRelativePath;
   }
 
-  int getPathLength() const
+  inline int getPathLength() const
   {
     if (mRelativePath == NULL)
       return 0;

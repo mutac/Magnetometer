@@ -19,83 +19,170 @@ public:
   {
   public:
     ResourceContainer() :
-      mResource(0),
+      mValue(NULL),
       mChild(NULL),
       mNextSibling(NULL)
     {
     }
 
-    void place(ResourceContainer* node)
+    /**
+     * @description Adds the resource container at the correct
+     * place within the path hierarchy.
+     *
+     * @returns The parent node to the hierarchy.
+     */
+    ResourceContainer* place(ResourceContainer* node)
     {
       if (node == NULL)
       {
-        return;
+        return this;
       }
 
-      if (node->isChildOf(this))
+      if (isChildOf(node))
+      {
+        // 'node' is actually a parent to 'this',
+        // so re-order and return the new parent.
+        node->place(this);
+        return node;
+      }
+      else if (node->isChildOf(this))
       {
         addChild(node);
+        return this;
       }
       else
       {
         addSibling(node);
+        return this;
       }
     }
 
-    void set(const char* path, IResource* resource) 
+    /**
+     * @see find(const ResourcePath& path)
+     */
+    ResourceContainer* find(const char* path)
     {
-      mResource = resource;
-      mPath.setPath(path);
+      ResourcePath resPath(path);
+      return find(resPath);
     }
 
-    bool isChildOf(ResourceContainer* node)
+    /**
+     * @description Finds a subsection of the tree.
+     * 
+     * @returns a subtree defined by 'path', or NULL if
+     * no subtree is found.
+     *
+     * TODO: Ineffiecient: 
+     *       1) path can be poped so that the full path isn't searched each time.
+     */
+    ResourceContainer* find(const ResourcePath& searchPath)
     {
-      if (node == NULL)
+      ResourceContainer* found = NULL;
+      // 1) it's an exact path: system.nodes.specific
+      // 2) it's a parent node: system.nodes
+      // 3) it's incorrect: system.doesnotexist
+
+      if (getPath().matches(searchPath))
       {
-        return false;
+        // The path is exact!
+        return this;
       }
 
+      found = findInSiblings(searchPath);
+      if (found != NULL)
+      {
+        return found;
+      }
+
+      found = findInChildren(searchPath);
+      if (found != NULL)
+      {
+        return found;
+      }
+
+      return NULL;
+    }
+
+    inline bool isChildOf(ResourceContainer* node) const
+    {
       return mPath.isChildOf(node->getPath());
     }
 
-    IResource* getResource() { return mResource; }
-    ResourcePath& getPath() { return mPath; }
+    inline bool isChildOf(const char* path) const
+    {
+      return mPath.isChildOf(path);
+    }
+
+    inline void setValue(IResource* val) { mValue = val; }
+    inline void setPath(const char* path) { mPath.setPath(path); }
+    inline IResource* getValue() { return mValue; }
+    inline ResourcePath& getPath() { return mPath; }
 
   private:
     void addChild(ResourceContainer* node)
     {
-      //
-      // Bug - This wont always work.. 
-      // Need to reorganize if adding a new parent
-      //
       if (mChild == NULL)
       {
         mChild = node;
       }
       else
       {
-        if (mChild->isChildOf(node))
-        {
-          // Swap children
-          node->place(mChild);
-          mChild = node;
-        }
-        else
-        {
-          mChild->place(node);
-        }
+        mChild = mChild->place(node);
       }
+
+      updateSiblings();
     }
 
     void addSibling(ResourceContainer* node)
     {
       ResourceContainer* temp = mNextSibling;
       mNextSibling = node;
+      node->mChild = mChild;
       node->mNextSibling = temp;
     }
 
+    void updateSiblings() 
+    {
+      ResourceContainer sibling = mNextSibling;
+      while (sibling != NULL)
+      {
+        sibling->mChild = mChild;
+        sibling = sibling->mNextSibling;
+      }
+    }
+
+    ResourceContainer* findInSiblings(const ResourcePath& searchPath)
+    {
+      ResourceContainer sibling = mNextSibling;
+      while (sibling != NULL)
+      {
+        //
+        // Don't do a depth search on siblings, it is unnecessary
+        //
+        if (sibling->getPath().matches(searchPath))
+        {
+          return sibling;
+        }
+
+        sibling = sibling->mNextSibling;
+      }
+      return NULL;
+    }
+
+    ResourceContainer* findInChildren(const ResourcePath& searchPath)
+    {
+      if (mChild != NULL)
+      {
+        return mChild->find(searchPath);
+      }
+      else
+      {
+        return NULL;
+      }
+    }
+
     ResourcePath mPath;
-    IResource* mResource;
+    IResource* mValue;
     ResourceContainer* mChild;
     ResourceContainer* mNextSibling;
   };
@@ -114,8 +201,13 @@ public:
     {
       return false;
     }
+    if (mRoot == NULL)
+    {
+      return false;
+    }
 
-    return false;
+    ResourceContainer* subTree = mRoot->find(path);
+    return (subTree != NULL);
   }
 
   bool add(const char* path, IResource* res)
@@ -136,7 +228,8 @@ public:
       return false;
     }
     
-    node->set(path, res);
+    node->setPath(path);
+    node->setValue(res);
 
     if (mRoot == NULL)
     {
@@ -144,16 +237,7 @@ public:
     }
     else
     {
-      if (mRoot->isChildOf(node))
-      {
-        // Swap roots
-        node->place(mRoot);
-        mRoot = node;
-      }
-      else
-      {
-        mRoot->place(node);
-      }
+      mRoot = mRoot->place(node);
     }
 
     return true;

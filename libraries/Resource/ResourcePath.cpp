@@ -26,10 +26,15 @@ bool ResourcePath::makeRelativeTo(const char* root)
   return true;
 }
 
-bool ResourcePath::isChildOf(const char* root)
+bool ResourcePath::matches(const char* path) const
+{
+  return (strcmp(getFullPath(), path) == 0);
+}
+
+bool ResourcePath::isChildOf(const char* root) const
 {
   // Bug - The full root does not have to be specified
   //
-  const char* rootLocation = strstr(mFullPath, root);
+  const char* rootLocation = strstr(getFullPath(), root);
   return (rootLocation != NULL);
 }
