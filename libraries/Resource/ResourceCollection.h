@@ -36,7 +36,7 @@ public:
       if (node == NULL)
       {
         return this;
-      }
+      } 
 
       if (isChildOf(node))
       {
@@ -121,44 +121,25 @@ public:
   private:
     void addChild(ResourceContainer* node)
     {
-      if (mChild == NULL)
-      {
-        mChild = node;
-      }
-      else
-      {
-        mChild = mChild->place(node);
-      }
-
-      updateSiblings();
+      //ResourceContainer* temp = mNextChild;
+      //mNextChild = mNextChild->place(node);
     }
 
     void addSibling(ResourceContainer* node)
     {
+      //
+      // TODO: This is incorrect. Possibly add to the child of a sibling
+      //
       ResourceContainer* temp = mNextSibling;
       mNextSibling = node;
-      node->mChild = mChild;
       node->mNextSibling = temp;
-    }
-
-    void updateSiblings() 
-    {
-      ResourceContainer sibling = mNextSibling;
-      while (sibling != NULL)
-      {
-        sibling->mChild = mChild;
-        sibling = sibling->mNextSibling;
-      }
     }
 
     ResourceContainer* findInSiblings(const ResourcePath& searchPath)
     {
-      ResourceContainer sibling = mNextSibling;
+      ResourceContainer* sibling = mNextSibling;
       while (sibling != NULL)
       {
-        //
-        // Don't do a depth search on siblings, it is unnecessary
-        //
         if (sibling->getPath().matches(searchPath))
         {
           return sibling;
@@ -171,19 +152,21 @@ public:
 
     ResourceContainer* findInChildren(const ResourcePath& searchPath)
     {
-      if (mChild != NULL)
+      ResourceContainer* child = mNextChild;
+      while (child != NULL)
       {
-        return mChild->find(searchPath);
+        ResourceContainer* found = child->find(searchPath);
+        if (found != NULL)
+        {
+          return found;
+        }
       }
-      else
-      {
-        return NULL;
-      }
+      return NULL;
     }
 
     ResourcePath mPath;
     IResource* mValue;
-    ResourceContainer* mChild;
+    ResourceContainer* mNextChild;
     ResourceContainer* mNextSibling;
   };
 
