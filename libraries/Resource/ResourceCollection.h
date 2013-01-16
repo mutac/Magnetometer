@@ -34,10 +34,7 @@ public:
      */
     ResourceContainer* place(ResourceContainer* node)
     {
-      if (node == NULL)
-      {
-        return this;
-      } 
+      mDiag_DebugAssert(node != NULL);
 
       if (isChildOf(node))
       {
@@ -108,12 +105,8 @@ public:
 
     inline bool isChildOf(ResourceContainer* node) const
     {
+      mDiag_DebugAssert(node != NULL);
       return mPath.isChildOf(node->getPath());
-    }
-
-    inline bool isChildOf(const char* path) const
-    {
-      return mPath.isChildOf(path);
     }
 
     inline void setValue(IResource* val) { mValue = val; }
