@@ -18,7 +18,7 @@ void ResourcePath::popFront()
 
   while (*next != '\0' && *next != sPathSeperator)
   {
-    *next++;
+    next++;
   }
 
   if (*next != '\0')

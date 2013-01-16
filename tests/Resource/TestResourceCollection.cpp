@@ -89,6 +89,6 @@ public:
 };
 
 CFIXCC_BEGIN_CLASS(TestResourceCollection)
-	CFIXCC_METHOD(ConstructDestruct)
+  CFIXCC_METHOD(ConstructDestruct)
   CFIXCC_METHOD(Add)
 CFIXCC_END_CLASS()
