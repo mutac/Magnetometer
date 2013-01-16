@@ -30,6 +30,12 @@ public:
 
   void setPath(const char* path);
 
+  /**
+   * @description Pop the front element of the path.  i.e.
+   *  'something.this.that' becomes 'this.that'
+   */
+  void popFront();
+
   inline bool makeRelativeTo(const ResourcePath& root)
   {
     return makeRelativeTo(root.getFullPath());

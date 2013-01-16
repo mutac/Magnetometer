@@ -124,13 +124,13 @@ public:
   private:
     void addToChildren(ResourceContainer* node)
     {
-      if (mChildren == NULL)
+      if (mChildren != NULL)
       {
-        mChildren = node;
+        mChildren = mChildren->place(node);
       }
       else
       {
-        mChildren = mChildren->place(node);
+        mChildren = node;
       }
     }
 
@@ -180,13 +180,13 @@ public:
 
     ResourceContainer* findInChildren(const ResourcePath& searchPath)
     {
-      if (mChildren == NULL)
+      if (mChildren != NULL)
       {
-        return NULL;
+        return mChildren->find(searchPath);
       }
       else
       {
-        return mChildren->find(searchPath);
+        return NULL;
       }
     }
 
@@ -244,13 +244,13 @@ public:
     node->setPath(path);
     node->setValue(res);
 
-    if (mRoot == NULL)
+    if (mRoot != NULL)
     {
-      mRoot = node;
+      mRoot = mRoot->place(node);
     }
     else
     {
-      mRoot = mRoot->place(node);
+      mRoot = node;
     }
 
     return true;

@@ -73,10 +73,26 @@ public:
     CFIX_ASSERT (path2.isChildOf("system.objects") == false);
     CFIX_ASSERT (path2.isChildOf("system.objects.temperature") == false);
   }
+
+  void Matches()
+  {
+  }
+
+  void Pop()
+  {
+    ResourcePath path1("system.part1.part2");
+
+    path1.popFront();
+    CFIX_ASSERT (strcmp(path1.getPath(), "part1.part2") == 0);
+    path1.popFront();
+    CFIX_ASSERT (strcmp(path1.getPath(), "part2") == 0);
+  }
 };
 
 CFIXCC_BEGIN_CLASS(TestResourcePath)
 	CFIXCC_METHOD(SetPath)
   CFIXCC_METHOD(Relative)
+  CFIXCC_METHOD(Matches)
+  CFIXCC_METHOD(Pop)
 CFIXCC_END_CLASS()
 

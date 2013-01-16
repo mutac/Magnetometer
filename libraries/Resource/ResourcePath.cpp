@@ -7,6 +7,23 @@ void ResourcePath::setPath(const char* path)
   mFullPath = mRelativePath = path;
 }
 
+void ResourcePath::popFront()
+{
+  const char* next = mRelativePath;
+
+  while (*next && *next != sPathSeperator)
+  {
+    *next++;
+  }
+
+  if (*next)
+  {
+    next++;
+  }
+
+  mRelativePath = next;
+}
+
 bool ResourcePath::makeRelativeTo(const char* root)
 {
   if (!isChildOf(root))
