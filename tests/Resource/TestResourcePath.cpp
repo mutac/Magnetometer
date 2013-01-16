@@ -46,10 +46,8 @@ public:
     CFIX_ASSERT (path1.makeRelativeTo("system.object") == true);
     CFIX_ASSERT (strcmp(path1.getPath(), "item") == 0);
 
-    // Don't allow path to be made relative to itself
-    CFIX_ASSERT (path1.makeRelativeTo("system.object.item") == false);
-    // Relative path should be unaffected.
-    CFIX_ASSERT (strcmp(path1.getPath(), "item") == 0);
+    CFIX_ASSERT (path1.makeRelativeTo("system.object.item") == true);
+    CFIX_ASSERT (strcmp(path1.getPath(), "") == 0);
 
     ResourcePath root("system");
     CFIX_ASSERT (path1.makeRelativeTo(root) == true);
@@ -60,10 +58,8 @@ public:
     CFIX_ASSERT (strcmp(path1.getPath(), "item") == 0);
 
     root.setPath("system.object.item");
-    // Don't allow path to be made relative to itself
-    CFIX_ASSERT (path1.makeRelativeTo("system.object.item") == false);
-    // Relative path should be unaffected.
-    CFIX_ASSERT (strcmp(path1.getPath(), "item") == 0);
+    CFIX_ASSERT (path1.makeRelativeTo("system.object.item") == true);
+    CFIX_ASSERT (strcmp(path1.getPath(), "") == 0);
 
     ResourcePath path2("system.devices.temperature");
     CFIX_ASSERT (path2.isChildOf("system") == true);
@@ -86,6 +82,10 @@ public:
     CFIX_ASSERT (strcmp(path1.getPath(), "part1.part2") == 0);
     path1.popFront();
     CFIX_ASSERT (strcmp(path1.getPath(), "part2") == 0);
+    path1.popFront();
+    CFIX_ASSERT (strcmp(path1.getPath(), "") == 0);
+    path1.popFront();
+    CFIX_ASSERT (strcmp(path1.getPath(), "") == 0);
   }
 };
 

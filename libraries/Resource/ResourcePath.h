@@ -50,7 +50,7 @@ public:
   bool matches(const char* path) const;
   inline bool isChildOf(const ResourcePath& root) const
   {
-    return isChildOf(root.getFullPath());
+    return isChildOf(root.getPath());
   }
 
   bool isChildOf(const char* root) const;

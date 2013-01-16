@@ -145,7 +145,7 @@ public:
           
           // Placement in this case should never result in a
           // new root.
-          mDiag_DbgAssert(checkRoot == sibling);
+          mDiag_DebugAssert(checkRoot == sibling);
           (void)checkRoot;
 
           return;
