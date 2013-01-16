@@ -10,7 +10,7 @@ private:
 public:
 	void SetPath()
 	{
-		ResourcePath path1;
+    ResourcePath path1;
     CFIX_ASSERT (path1.getFullPath() == NULL);
     CFIX_ASSERT (path1.getFullPathLength() == 0);
     CFIX_ASSERT (path1.getPath() == NULL);
