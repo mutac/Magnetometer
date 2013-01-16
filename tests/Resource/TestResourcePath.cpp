@@ -8,8 +8,8 @@ class TestResourcePath : public cfixcc::TestFixture
 private:
 
 public:
-	void SetPath()
-	{
+  void SetPath()
+  {
     ResourcePath path1;
     CFIX_ASSERT (path1.getFullPath() == NULL);
     CFIX_ASSERT (path1.getFullPathLength() == 0);
@@ -33,7 +33,7 @@ public:
     CFIX_ASSERT (path3.getFullPathLength() == 11);
     CFIX_ASSERT (strcmp(path3.getPath(), "system.core") == 0);
     CFIX_ASSERT (path3.getPathLength() == 11);
-	}
+  }
 
   void Relative()
   {
