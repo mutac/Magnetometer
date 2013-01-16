@@ -52,7 +52,7 @@ bool ResourcePath::matches(const char* path) const
 {
   mDiag_DebugAssert(path != NULL);
 
-  return (strcmp(getPath(), path) == 0);
+  return (strcmp(getFullPath(), path) == 0);
 }
 
 bool ResourcePath::isChildOf(const char* root) const
