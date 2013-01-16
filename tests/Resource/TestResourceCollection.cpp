@@ -7,6 +7,15 @@
 
 class TestResource : public ResourceBase
 {
+public:
+  TestResource(int id) :
+    mId(id)
+  {
+  }
+  
+  int Id() const { return mId; }
+private:
+  int mId;
 };
 
 class TestResourceCollection : public cfixcc::TestFixture
@@ -30,23 +39,50 @@ public:
     StaticPool<10, ResourceCollection::ResourceContainer> allocator;
     ResourceCollection resources(allocator);
 
-    // Add siblings
-    TestResource testResource1;
-    CFIX_ASSERT (resources.add("system.devices.test", &testResource1) == true);
+    ResourceCollection::ResourceContainer* found = NULL;
 
-    TestResource testResource2;
+    // Add siblings
+    TestResource testResource1(1);
+    CFIX_ASSERT (resources.add("system.devices.test1", &testResource1) == true);
+
+    TestResource testResource2(2);
     CFIX_ASSERT (resources.add("system.devices.test2", &testResource2) == true);
 
-    // Add children
-    TestResource testResource3;
-    CFIX_ASSERT (resources.add("system.devices.test2.somethingnew", &testResource3) == true);
+    found = resources.find("system.devices.test1");
+    CFIX_ASSERT (found != NULL);
+    CFIX_ASSERT (found->getPath().matches("system.devices.test1"));
+    CFIX_ASSERT (static_cast<TestResource*>(found->getValue())->Id() == 1);
 
-    TestResource testResource4;
+    found = resources.find("system.devices.test2");
+    CFIX_ASSERT (found != NULL);
+    CFIX_ASSERT (found->getPath().matches("system.devices.test2"));
+    CFIX_ASSERT (static_cast<TestResource*>(found->getValue())->Id() == 2);
+
+    // Add children
+    TestResource testResource3(3);
+    CFIX_ASSERT (resources.add("system.devices.test1.somethingnew", &testResource3) == true);
+
+    TestResource testResource4(4);
     CFIX_ASSERT (resources.add("system.devices.test2.somethingelsenew", &testResource4) == true);
 
+    found = resources.find("system.devices.test1.somethingnew");
+    CFIX_ASSERT (found != NULL);
+    CFIX_ASSERT (found->getPath().matches("system.devices.test1.somethingnew"));
+    CFIX_ASSERT (static_cast<TestResource*>(found->getValue())->Id() == 3);
+
+    found = resources.find("system.devices.test2.somethingelsenew");
+    CFIX_ASSERT (found != NULL);
+    CFIX_ASSERT (found->getPath().matches("system.devices.test2.somethingelsenew"));
+    CFIX_ASSERT (static_cast<TestResource*>(found->getValue())->Id() == 4);
+
     // Add parent
-    TestResource testResource5;
+    TestResource testResource5(5);
     CFIX_ASSERT (resources.add("system.objects", &testResource5) == true);
+
+    found = resources.find("system.objects");
+    CFIX_ASSERT (found != NULL);
+    CFIX_ASSERT (found->getPath().matches("system.objects"));
+    CFIX_ASSERT (static_cast<TestResource*>(found->getValue())->Id() == 5);
   }
 };
 

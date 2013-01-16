@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../libraries/Resource"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;RESOURCETESTS_EXPORTS"
+				PreprocessorDefinitions="mDebugging;WIN32;_DEBUG;_WINDOWS;_USRDLL;RESOURCETESTS_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"

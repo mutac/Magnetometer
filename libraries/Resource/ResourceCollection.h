@@ -5,6 +5,7 @@
 #include "IResource.h"
 #include "IAllocator.h"
 #include "ResourcePath.h"
+#include "Diagnostics.h"
 #include <string.h>
 
 /**
@@ -20,7 +21,7 @@ public:
   public:
     ResourceContainer() :
       mValue(NULL),
-      mChild(NULL),
+      mChildren(NULL),
       mNextSibling(NULL)
     {
     }
@@ -40,19 +41,21 @@ public:
 
       if (isChildOf(node))
       {
-        // 'node' is actually a parent to 'this',
-        // so re-order and return the new parent.
+        // Special case:
+        //   node is actually a parent to this,
+        //   so re-order and return the new parent.
+        //
         node->place(this);
         return node;
       }
       else if (node->isChildOf(this))
       {
-        addChild(node);
+        addToChildren(node);
         return this;
       }
       else
       {
-        addSibling(node);
+        addToSiblings(node);
         return this;
       }
     }
@@ -119,20 +122,44 @@ public:
     inline ResourcePath& getPath() { return mPath; }
 
   private:
-    void addChild(ResourceContainer* node)
+    void addToChildren(ResourceContainer* node)
     {
-      //ResourceContainer* temp = mNextChild;
-      //mNextChild = mNextChild->place(node);
+      if (mChildren == NULL)
+      {
+        mChildren = node;
+      }
+      else
+      {
+        mChildren = mChildren->place(node);
+      }
     }
 
-    void addSibling(ResourceContainer* node)
+    void addToSiblings(ResourceContainer* node)
     {
+      ResourceContainer* sibling = mNextSibling;
+      while (sibling != NULL)
+      {
+        if (node->isChildOf(sibling))
+        {
+          ResourceContainer* checkRoot = sibling->place(node);
+          
+          // Placement in this case should never result in a
+          // new root.
+          mDiag_DbgAssert(checkRoot == sibling);
+          (void)checkRoot;
+
+          return;
+        }
+
+        sibling = sibling->mNextSibling;
+      }
+
       //
-      // TODO: This is incorrect. Possibly add to the child of a sibling
+      // Not placed as a child of any sibling, so place it
+      // as a sibling.
       //
-      ResourceContainer* temp = mNextSibling;
+      node->mNextSibling = mNextSibling;
       mNextSibling = node;
-      node->mNextSibling = temp;
     }
 
     ResourceContainer* findInSiblings(const ResourcePath& searchPath)
@@ -140,9 +167,10 @@ public:
       ResourceContainer* sibling = mNextSibling;
       while (sibling != NULL)
       {
-        if (sibling->getPath().matches(searchPath))
+        ResourceContainer* match = sibling->find(searchPath);
+        if (match != NULL)
         {
-          return sibling;
+          return match;
         }
 
         sibling = sibling->mNextSibling;
@@ -152,21 +180,19 @@ public:
 
     ResourceContainer* findInChildren(const ResourcePath& searchPath)
     {
-      ResourceContainer* child = mNextChild;
-      while (child != NULL)
+      if (mChildren == NULL)
       {
-        ResourceContainer* found = child->find(searchPath);
-        if (found != NULL)
-        {
-          return found;
-        }
+        return NULL;
       }
-      return NULL;
+      else
+      {
+        return mChildren->find(searchPath);
+      }
     }
 
     ResourcePath mPath;
     IResource* mValue;
-    ResourceContainer* mNextChild;
+    ResourceContainer* mChildren;
     ResourceContainer* mNextSibling;
   };
 
@@ -178,19 +204,23 @@ public:
   {
   }
 
-  bool exists(const char* path) const
+  ResourceContainer* find(const char* path) const
   {
     if (path == NULL)
     {
-      return false;
+      return NULL;
     }
     if (mRoot == NULL)
     {
-      return false;
+      return NULL;
     }
 
-    ResourceContainer* subTree = mRoot->find(path);
-    return (subTree != NULL);
+    return mRoot->find(path);
+  }
+
+  bool exists(const char* path) const
+  {
+    return find(path) != NULL;
   }
 
   bool add(const char* path, IResource* res)
@@ -225,8 +255,6 @@ public:
 
     return true;
   }
-
-  // get(const char* path = NULL);
 
 private:
 
