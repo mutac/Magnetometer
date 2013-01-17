@@ -59,8 +59,10 @@ bool ResourcePath::isChildOf(const char* root) const
 {
   mDiag_DebugAssert(root != NULL);
 
+  // TODO: Optimize
+  //
   // Bug - The full root does not have to be specified
   //
   const char* rootLocation = strstr(getFullPath(), root);
-  return (rootLocation != NULL);
+  return (rootLocation != NULL && strcmp(rootLocation, getFullPath()) != 0);
 }

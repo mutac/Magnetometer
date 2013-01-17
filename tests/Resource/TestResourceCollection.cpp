@@ -43,12 +43,10 @@ public:
     CFIX_ASSERT (resources.exists("") == false);
   }
 
-  void Add()
+  void AddSimple()
   {
     StaticPool<10, ResourceCollection::ResourceContainer> allocator;
     ResourceCollection resources(allocator);
-
-    ResourceCollection::ResourceContainer* found = NULL;
 
     // Add a root
     TestResource testResource0(0);
@@ -86,9 +84,75 @@ public:
     VerifyFind(resources, "system.objects", testResource5);
     VerifyFind(resources, "diagnostics", testResource6);
   }
+
+  void AddWithRootReplacement()
+  {
+    StaticPool<10, ResourceCollection::ResourceContainer> allocator;
+    ResourceCollection resources(allocator);
+
+    int id = 1;
+
+    TestResource testResource1(id++);
+    CFIX_ASSERT (resources.add("a.b.c", &testResource1) == true);
+
+    TestResource testResource2(id++);
+    CFIX_ASSERT (resources.add("a.b.d", &testResource2) == true);
+
+    TestResource testResource3(id++);
+    CFIX_ASSERT (resources.add("a.c.a", &testResource3) == true);
+
+    TestResource testResource4(id++);
+    CFIX_ASSERT (resources.add("a.c.b", &testResource4) == true);
+
+    TestResource testResource5(id++);
+    CFIX_ASSERT (resources.add("c.a.b", &testResource5) == true);
+
+    TestResource testResource6(id++);
+    CFIX_ASSERT (resources.add("a.c.a.1", &testResource6) == true);
+
+    TestResource testResource7(id++);
+    CFIX_ASSERT (resources.add("a.c.a.2", &testResource7) == true);
+
+    TestResource testResource8(id++);
+    CFIX_ASSERT (resources.add("a.b.c.1", &testResource8) == true);
+
+    TestResource testResource9(id++);
+    CFIX_ASSERT (resources.add("a.b.c.2", &testResource9) == true);
+
+    //
+    // Insert a node that should become a parent to a.c.a as a sibling to a.b.d.
+    // Note: this new node should also become a parent to a.c.b, and a sibling to
+    // c.a.b.
+    //
+    TestResource testResource10(id++);
+    CFIX_ASSERT (resources.add("a.c", &testResource10) == true);
+
+    //
+    // Verify all nodes are still discoverable
+    //
+    VerifyFind(resources, "a.b.c", testResource1);
+    VerifyFind(resources, "a.b.d", testResource2);
+    VerifyFind(resources, "a.c.a", testResource3);
+    VerifyFind(resources, "a.c.b", testResource4);
+    VerifyFind(resources, "c.a.b", testResource5);
+    VerifyFind(resources, "a.c.a.1", testResource6);
+    VerifyFind(resources, "a.c.a.2", testResource7);
+    VerifyFind(resources, "a.b.c.1", testResource8);
+    VerifyFind(resources, "a.b.c.2", testResource9);
+    VerifyFind(resources, "a.c", testResource10);
+
+    //
+    // Verify expected relationships
+    //
+    ResourceCollection::ResourceContainer* aDotC = resources.find("a.c");
+    CFIX_ASSERT (aDotC != NULL);
+
+
+  }
 };
 
 CFIXCC_BEGIN_CLASS(TestResourceCollection)
   CFIXCC_METHOD(ConstructDestruct)
-  CFIXCC_METHOD(Add)
+  CFIXCC_METHOD(AddSimple)
+  CFIXCC_METHOD(AddWithRootReplacement)
 CFIXCC_END_CLASS()

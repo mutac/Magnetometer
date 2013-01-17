@@ -5,6 +5,8 @@
  *      Author: Andy Brown
  */
 
+#include <new>
+
 /**
  * Global placement operator new
  */

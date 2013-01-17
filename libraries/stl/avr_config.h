@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 
-
 namespace avrstl {
 
 // default alloc-ahead for vectors. quoting from the SGI docs:

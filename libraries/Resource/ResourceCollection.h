@@ -22,7 +22,7 @@ public:
     ResourceContainer() :
       mValue(NULL),
       mChildren(NULL),
-      mNextSibling(NULL)
+      mSiblings(NULL)
     {
     }
 
@@ -36,23 +36,55 @@ public:
     {
       mDiag_DebugAssert(node != NULL);
 
+
       if (isChildOf(node))
-      {
-        // Special case:
-        //   node is actually a parent to this,
-        //   so re-order and return the new parent.
+      { 
         //
+        // re-place 'this' down inside 'node', but first re-place all of its siblings
+        //
+
+        while (mSiblings)
+        {
+          // Truth: 'node' is a parent to 'this', therefore any sibling of 'this' 
+          // cannot be a parent to 'node'.  Thus we can ignore the return value
+          // of placement.
+
+          ResourceContainer* nextSibling = mSiblings->mSiblings;
+          mSiblings->mSiblings = NULL;
+
+          node->place(mSiblings);
+
+          mSiblings = nextSibling;
+        }
+
+        // Truth: We have already established that 'node' is a parent to 'this',
+        // thus we can can ignore the return value of placement.
         node->place(this);
+
         return node;
-      }
+      } 
       else if (node->isChildOf(this))
       {
-        addToChildren(node);
+        if (mChildren != NULL)
+        {
+          mChildren = mChildren->place(node);
+        }
+        else
+        {
+          mChildren = node;
+        }
         return this;
       }
       else
       {
-        addToSiblings(node);
+        if (mSiblings != NULL)
+        {
+          mSiblings = mSiblings->place(node);
+        }
+        else
+        {
+          mSiblings = node;
+        }
         return this;
       }
     }
@@ -74,10 +106,10 @@ public:
      *
      * TODO: Ineffiecient: 
      *       1) path can be poped so that the full path isn't searched each time.
+     *s
      */
     ResourceContainer* find(const ResourcePath& searchPath)
     {
-      ResourceContainer* found = NULL;
       // 1) it's an exact path: system.nodes.specific
       // 2) it's a parent node: system.nodes
       // 3) it's incorrect: system.doesnotexist
@@ -87,26 +119,20 @@ public:
         // The path is exact!
         return this;
       }
-
-      found = findInSiblings(searchPath);
-      if (found != NULL)
+      else if (getPath().isChildOf(searchPath))
       {
-        return found;
+        // TODO: isChildOf() is true if the searchPath == thisPath.
+        // That may change...
+        return NULL;
       }
-
-      found = findInChildren(searchPath);
-      if (found != NULL)
+      else if (searchPath.isChildOf(getPath()))
       {
-        return found;
+        return findInChildren(searchPath);
       }
-
-      return NULL;
-    }
-
-    inline bool isChildOf(ResourceContainer* node) const
-    {
-      mDiag_DebugAssert(node != NULL);
-      return mPath.isChildOf(node->getPath());
+      else
+      {
+        return findInSiblings(searchPath);
+      }
     }
 
     inline void setValue(IResource* val) { mValue = val; }
@@ -115,49 +141,15 @@ public:
     inline ResourcePath& getPath() { return mPath; }
 
   private:
-    void addToChildren(ResourceContainer* node)
+    inline bool isChildOf(ResourceContainer* node) const
     {
-      if (mChildren != NULL)
-      {
-        mChildren = mChildren->place(node);
-      }
-      else
-      {
-        mChildren = node;
-      }
-    }
-
-    void addToSiblings(ResourceContainer* node)
-    {
-      ResourceContainer* sibling = mNextSibling;
-      while (sibling != NULL)
-      {
-        if (node->isChildOf(sibling))
-        {
-          ResourceContainer* checkRoot = sibling->place(node);
-          
-          // Placement in this case should never result in a
-          // new root.
-          mDiag_DebugAssert(checkRoot == sibling);
-          (void)checkRoot;
-
-          return;
-        }
-
-        sibling = sibling->mNextSibling;
-      }
-
-      //
-      // Not placed as a child of any sibling, so place it
-      // as a sibling.
-      //
-      node->mNextSibling = mNextSibling;
-      mNextSibling = node;
+      mDiag_DebugAssert(node != NULL);
+      return mPath.isChildOf(node->getPath());
     }
 
     ResourceContainer* findInSiblings(const ResourcePath& searchPath)
     {
-      ResourceContainer* sibling = mNextSibling;
+      ResourceContainer* sibling = mSiblings;
       while (sibling != NULL)
       {
         ResourceContainer* match = sibling->find(searchPath);
@@ -166,7 +158,7 @@ public:
           return match;
         }
 
-        sibling = sibling->mNextSibling;
+        sibling = sibling->mSiblings;
       }
       return NULL;
     }
@@ -186,7 +178,7 @@ public:
     ResourcePath mPath;
     IResource* mValue;
     ResourceContainer* mChildren;
-    ResourceContainer* mNextSibling;
+    ResourceContainer* mSiblings;
   };
 
   /**
@@ -254,32 +246,5 @@ private:
   ResourceContainer* mRoot;
   IAllocator<ResourceContainer>& mAllocator;
 };
-
-/**
- * Example
- * 
- */
-
-/*
-class TemperatureSensorResource : public ResourceBase
-{
-public:
-private:
-};
-
-void Test()
-{
-  TemperatureSensorResource tempSensor;
-  ResourceCollection system;
-  
-  system.add("system.sensors.temperature", tempSensor);
-  
-  ResourceCollection sensors = system.get("system.sensors");
-  for (int idx = 0; idx < sensors.count(), idx++)
-  {
-    
-  }
-}
-*/
 
 #endif
