@@ -1,7 +1,7 @@
 
 
-#ifndef _VARIANT_H_
-#define _VARIANT_H_
+#ifndef _VARIANT_H_7b8ba50a_bf45_4dd2_9272_a13596a52582
+#define _VARIANT_H_7b8ba50a_bf45_4dd2_9272_a13596a52582
 
 #include "Defs.h"
 

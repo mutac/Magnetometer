@@ -203,10 +203,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libraries\Resource\StaticResourceCollection.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libraries\Resource\Variant.h"
 				>
 			</File>

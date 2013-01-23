@@ -1,8 +1,9 @@
 
-#ifndef _I_ALLOCATOR_H_
-#define _I_ALLOCATOR_H_
+#ifndef _IALLOCATOR_H_712b764c_c6dc_418d_9a82_0838b9e6e5b7
+#define _IALLOCATOR_H_712b764c_c6dc_418d_9a82_0838b9e6e5b7
 
 #include "Defs.h"
+
 template <class T>
 class IAllocator
 {

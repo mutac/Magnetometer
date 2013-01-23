@@ -1,6 +1,6 @@
 
-#ifndef _RESOURCE_COLLECTION_H_
-#define _RESOURCE_COLLECTION_H_
+#ifndef _RESOURCE_COLLECTION_H_9daeee6d_4dd1_4918_9de9_5658eb715728
+#define _RESOURCE_COLLECTION_H_9daeee6d_4dd1_4918_9de9_5658eb715728
 
 #include "Defs.h"
 #include "IResource.h"

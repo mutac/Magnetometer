@@ -1,6 +1,6 @@
 
-#ifndef _RESOURCE_PATH_H_
-#define _RESOURCE_PATH_H_
+#ifndef _RESOURCE_PATH_H_e8e60196_748d_4dd1_bc85_e6a5a4856cdd
+#define _RESOURCE_PATH_H_e8e60196_748d_4dd1_bc85_e6a5a4856cdd
 
 #include "Defs.h"
 #include <string.h>

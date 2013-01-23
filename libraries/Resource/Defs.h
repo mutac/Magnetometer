@@ -1,6 +1,6 @@
 
-#ifndef _DEFS_H_
-#define _DEFS_H_
+#ifndef _DEFS_H_9ce33353_44da_40a5_bb3b_de0f9b3dad12
+#define _DEFS_H_9ce33353_44da_40a5_bb3b_de0f9b3dad12
 
 //
 // Configure debugging
