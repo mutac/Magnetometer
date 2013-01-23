@@ -57,38 +57,37 @@ public:
 
   /**
    * @description Pop the front element of the path.  i.e.
-   *  'something.this.that' becomes 'this.that'
+   *  'something.this.that' becomes 'this.that'.  The last
+   *  path element cannot be popped.
    */
-  void popFront();
+  bool popFront();
 
   /**
-   * @see matches(const char* path)
+   * @see matches(const char* path, bool compareAbsolute)
    */
-  inline bool matches(const ResourcePath& path) const 
-  {
-    return matches(path.getPath());
-  }
+  bool matches(const ResourcePath& path, bool compareAbsolute = false) const;
 
   /**
    * @description Determines if this path matches path.
-   * @note The evaulation takes place on the full path.
+   * @param path A path to compare against.
+   * @param compareAbsolute If true, compare path and this using absolute paths.
    */
-  bool matches(const char* path) const;
+  bool matches(const char* path, bool compareAbsolute = false) const;
 
   /**
    * @see isChildOf(const char* root)
    * @param root The root path to check
-   * @param checkAbsolute use the absolute path from both root and 'this' to evalute child/parent relationship.
+   * @param compareAbsolute use the absolute path from both root and 'this' to evalute child/parent relationship.
    */
-  bool isChildOf(const ResourcePath& parent, bool checkAbsolute = false) const;
+  bool isChildOf(const ResourcePath& parent, bool compareAbsolute = false) const;
 
   /**
    * @description Evaluates of this path is a child of root.
    * @param root The root path to check
-   * @param checkAbsolute  When evaluating child/parent relationship, check the absolute path rather than the relative path.
+   * @param compareAbsolute  When evaluating child/parent relationship, check the absolute path rather than the relative path.
    * @returns True if this path is a child of root.
    */
-  bool isChildOf(const char* parent, bool checkAbsolute = false) const;
+  bool isChildOf(const char* parent, bool compareAbsolute = false) const;
 
   inline const char* getAbsolutePath() const
   {

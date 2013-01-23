@@ -3,7 +3,14 @@
 #define _DEFS_H_9ce33353_44da_40a5_bb3b_de0f9b3dad12
 
 //
+// TODO:
+//    * Add namespaces
+//    * Specialize inclusions and namepspace usage if compiling for arduino
+//
+
+//
 // Configure debugging
+//
 
 #ifndef mDebugging
 #if defined(_DEBUG) || !defined(NDEBUG)

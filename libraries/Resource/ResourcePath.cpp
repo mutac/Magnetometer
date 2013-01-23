@@ -2,7 +2,7 @@
 #include "ResourcePath.h"
 #include <string.h>
 
-void ResourcePath::popFront()
+bool ResourcePath::popFront()
 {
   mDebugAssert(mRelativePath != NULL);
 
@@ -14,11 +14,17 @@ void ResourcePath::popFront()
 
   if (*next != '\0')
   {
-    // Move beyond path separator
+    // Move beyond path separator, but
+    // don't allow the last element to
+    // be popped.
     next++;
+    mRelativePath = next;
+    return true;
   }
-
-  mRelativePath = next;
+  else
+  {
+    return false;
+  }
 }
 
 bool ResourcePath::makeRelativeTo(const char* root)
@@ -40,34 +46,67 @@ bool ResourcePath::makeRelativeTo(const char* root)
   return true;
 }
 
-bool ResourcePath::matches(const char* path) const
+bool ResourcePath::matches(const ResourcePath& path, bool compareAbsolute) const
 {
-  mDebugAssert(path != NULL);
-  return (strcmp(mRelativePath, path) == 0);
-}
-
-bool ResourcePath::isChildOf(const ResourcePath& parent, bool checkAbsolute) const
-{
-  if (checkAbsolute)
+  if (compareAbsolute)
   {
-    return isChildOf(parent.getAbsolutePath(), true);
+    return matches(path.getAbsolutePath(), compareAbsolute);
   }
   else
   {
-    return isChildOf(parent.getPath(), false);
+    return matches(path.getPath(), compareAbsolute);
   }
 }
 
-bool ResourcePath::isChildOf(const char* root, bool checkAbsolute) const
+bool ResourcePath::matches(const char* path, bool compareAbsolute) const
+{
+  mDebugAssert(path != NULL);
+
+  if (compareAbsolute)
+  {
+    mDebugAssert(mAbsolutePath != NULL);
+    return (strcmp(mAbsolutePath, path) == 0);
+  }
+  else 
+  {
+    mDebugAssert(mRelativePath != NULL);
+    return (strcmp(mRelativePath, path) == 0);
+  }
+}
+
+bool ResourcePath::isChildOf(const ResourcePath& parent, bool compareAbsolute) const
+{
+  if (compareAbsolute)
+  {
+    return isChildOf(parent.getAbsolutePath(), compareAbsolute);
+  }
+  else
+  {
+    return isChildOf(parent.getPath(), compareAbsolute);
+  }
+}
+
+bool ResourcePath::isChildOf(const char* root, bool compareAbsolute) const
 {
   mDebugAssert(root != NULL);
   mDebugAssert(mRelativePath != NULL);
+  mDebugAssert(mAbsolutePath != NULL);
+
+  if (matches(root, compareAbsolute))
+  {
+    return false;
+  }
 
   const char* checkAgainst = mRelativePath;
-  if (checkAbsolute)
+  if (compareAbsolute)
   {
     checkAgainst = mAbsolutePath;
   }
+
+  //
+  // BUG?: only a portion of the root needs to be specified.
+  //       strstr is not sufficient.
+  //
 
   const char* found = strstr(checkAgainst, root);
   return (found != NULL && found == checkAgainst);
