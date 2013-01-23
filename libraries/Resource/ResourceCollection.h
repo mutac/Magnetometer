@@ -34,8 +34,7 @@ public:
      */
     ResourceContainer* place(ResourceContainer* node)
     {
-      mDiag_DebugAssert(node != NULL);
-
+      mDebugAssert(node != NULL);
 
       if (isChildOf(node))
       { 
@@ -143,7 +142,7 @@ public:
   private:
     inline bool isChildOf(ResourceContainer* node) const
     {
-      mDiag_DebugAssert(node != NULL);
+      mDebugAssert(node != NULL);
       return mPath.isChildOf(node->getPath());
     }
 
