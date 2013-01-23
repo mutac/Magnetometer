@@ -183,7 +183,7 @@ public:
   {
     StaticPool<10, ResourceCollection::Container> allocator;
     ResourceCollection metal(allocator);
-    ResourceCollection::Iterator it;
+    ResourceCollection::Iterator types;
 
     TestResource res1;
     metal.add("earlymetal", &res1);
@@ -211,10 +211,10 @@ public:
 
     // Single element
     ResourceCollection grunge = metal.find("earlymetal.grunge");
-    it = grunge.begin();
-    CFIX_ASSERT (it.path()->matches("earlymetal.grunge"));
-    it++;
-    CFIX_ASSERT (it == grunge.end());
+    types = grunge.begin();
+    CFIX_ASSERT (types.path()->matches("earlymetal.grunge"));
+    types++;
+    CFIX_ASSERT (types == grunge.end());
 
     // TODO: Add wildcard and non-wildcard searches.  These will influence
     // the iterators traversal.

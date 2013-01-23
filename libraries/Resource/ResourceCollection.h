@@ -290,16 +290,20 @@ public:
    */
   ResourceCollection find(const char* path) const
   {
-    if (path == NULL)
-    {
-      return ResourceCollection();
-    }
-    if (mRoot == NULL)
+    if (path == NULL || mRoot == NULL)
     {
       return ResourceCollection();
     }
 
-    return ResourceCollection(mAllocator, mRoot->find(path));
+    Container* found = mRoot->find(path);
+    if (found)
+    {
+      return ResourceCollection(mAllocator, found);
+    }
+    else
+    {
+      return ResourceCollection();
+    }
   }
 
   bool empty() const
