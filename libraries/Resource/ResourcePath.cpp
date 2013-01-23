@@ -1,30 +1,21 @@
 
 #include "ResourcePath.h"
-#include "Diagnostics.h"
 #include <string.h>
-
-void ResourcePath::setPath(const char* path)
-{
-  mDiag_DebugAssert(path != NULL);
-
-  mFullPath = mRelativePath = path;
-}
 
 void ResourcePath::popFront()
 {
-  mDiag_DebugAssert(mRelativePath != NULL);
+  mDebugAssert(mRelativePath != NULL);
 
   const char* next = mRelativePath;
-
-  while (*next != '\0' && *next != sPathSeperator)
+  while (*next != '\0' && *next != sPathSeparator)
   {
     next++;
   }
 
   if (*next != '\0')
   {
-    next += sPathSeperatorLength;
-    mDiag_DebugAssert(sPathSeperatorLength == 1);
+    // Move beyond path separator
+    next++;
   }
 
   mRelativePath = next;
@@ -32,37 +23,52 @@ void ResourcePath::popFront()
 
 bool ResourcePath::makeRelativeTo(const char* root)
 {
-  mDiag_DebugAssert(root != NULL);
+  mDebugAssert(root != NULL);
+  mDebugAssert(mRelativePath != NULL);
 
   if (!isChildOf(root))
   {
     return false;
   }
   
-  mRelativePath = mFullPath + strlen(root);
+  mRelativePath = mRelativePath + strlen(root);
   if (*mRelativePath != '\0')
   {
-    mRelativePath += sPathSeperatorLength;
-    mDiag_DebugAssert(sPathSeperatorLength == 1);
+    // Move beyond path separator
+    mRelativePath++;
   }
   return true;
 }
 
 bool ResourcePath::matches(const char* path) const
 {
-  mDiag_DebugAssert(path != NULL);
-
-  return (strcmp(getFullPath(), path) == 0);
+  mDebugAssert(path != NULL);
+  return (strcmp(mRelativePath, path) == 0);
 }
 
-bool ResourcePath::isChildOf(const char* root) const
+bool ResourcePath::isChildOf(const ResourcePath& parent, bool checkAbsolute) const
 {
-  mDiag_DebugAssert(root != NULL);
+  if (checkAbsolute)
+  {
+    return isChildOf(parent.getAbsolutePath(), true);
+  }
+  else
+  {
+    return isChildOf(parent.getPath(), false);
+  }
+}
 
-  // TODO: Optimize
-  //
-  // Bug - The full root does not have to be specified
-  //
-  const char* rootLocation = strstr(getFullPath(), root);
-  return (rootLocation != NULL && strcmp(rootLocation, getFullPath()) != 0);
+bool ResourcePath::isChildOf(const char* root, bool checkAbsolute) const
+{
+  mDebugAssert(root != NULL);
+  mDebugAssert(mRelativePath != NULL);
+
+  const char* checkAgainst = mRelativePath;
+  if (checkAbsolute)
+  {
+    checkAgainst = mAbsolutePath;
+  }
+
+  const char* found = strstr(checkAgainst, root);
+  return (found != NULL && found == checkAgainst);
 }

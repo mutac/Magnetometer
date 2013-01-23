@@ -2,6 +2,7 @@
 #ifndef _RESOURCE_PATH_H_
 #define _RESOURCE_PATH_H_
 
+#include "Defs.h"
 #include <string.h>
 
 /**
@@ -11,7 +12,7 @@ class ResourcePath
 {
 public:
   ResourcePath() : 
-    mFullPath(NULL),
+    mAbsolutePath(NULL),
     mRelativePath(NULL)
   {
   }
@@ -26,7 +27,33 @@ public:
   /**
    * @description Set path (resets relative path as well)
    */
-  void setPath(const char* path);
+  inline void setPath(const char* path)
+  {
+    mDebugAssert(path != NULL);
+    mAbsolutePath = mRelativePath = path;
+  }
+
+  /**
+   * @description Resets a path to its full path
+   */
+  inline void resetPath()
+  {
+    mRelativePath = mAbsolutePath;
+  }
+
+  /**
+   * @see makeRelativeTo(const char* root)
+   */
+  inline bool makeRelativeTo(const ResourcePath& root)
+  {
+    return makeRelativeTo(root.getPath());
+  }
+
+  /**
+   * @description Make this path relative to root.  This path must be a child path to root.
+   * @returns false if root is not a true root to this path.
+   */
+  bool makeRelativeTo(const char* root);
 
   /**
    * @description Pop the front element of the path.  i.e.
@@ -35,26 +62,11 @@ public:
   void popFront();
 
   /**
-   * @see makeRelativeTo(const char* root)
-   */
-  inline bool makeRelativeTo(const ResourcePath& root)
-  {
-    return makeRelativeTo(root.getFullPath());
-  }
-
-  /**
-   * @description Make this path relative to root.  This path
-   *  must be a child path to root.
-   * @returns false if root is not a true root to this path.
-   */
-  bool makeRelativeTo(const char* root);
-
-  /**
    * @see matches(const char* path)
    */
   inline bool matches(const ResourcePath& path) const 
   {
-    return matches(path.getFullPath());
+    return matches(path.getPath());
   }
 
   /**
@@ -65,29 +77,30 @@ public:
 
   /**
    * @see isChildOf(const char* root)
+   * @param root The root path to check
+   * @param checkAbsolute use the absolute path from both root and 'this' to evalute child/parent relationship.
    */
-  inline bool isChildOf(const ResourcePath& root) const
-  {
-    return isChildOf(root.getFullPath());
-  }
+  bool isChildOf(const ResourcePath& parent, bool checkAbsolute = false) const;
 
   /**
    * @description Evaluates of this path is a child of root.
-   * @returns True if this path is a child of root
+   * @param root The root path to check
+   * @param checkAbsolute  When evaluating child/parent relationship, check the absolute path rather than the relative path.
+   * @returns True if this path is a child of root.
    */
-  bool isChildOf(const char* root) const;
+  bool isChildOf(const char* parent, bool checkAbsolute = false) const;
 
-  inline const char* getFullPath() const
+  inline const char* getAbsolutePath() const
   {
-    return mFullPath;
+    return mAbsolutePath;
   }
 
-  inline int getFullPathLength() const
+  inline int getAbsolutePathLength() const
   {
-    if (mFullPath == NULL)
+    if (mAbsolutePath == NULL)
       return 0;
     else
-      return strlen(mFullPath);
+      return strlen(mAbsolutePath);
   }
 
   inline const char* getPath() const
@@ -104,11 +117,10 @@ public:
   }
 
 private:
-  const char* mFullPath;
+  const char* mAbsolutePath;
   const char* mRelativePath;
 
-  static const char sPathSeperator = '.';
-  static const int sPathSeperatorLength = 1;
+  static const char sPathSeparator = '.';
 };
 
 #endif

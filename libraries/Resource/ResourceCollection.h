@@ -2,10 +2,10 @@
 #ifndef _RESOURCE_COLLECTION_H_
 #define _RESOURCE_COLLECTION_H_
 
+#include "Defs.h"
 #include "IResource.h"
 #include "IAllocator.h"
 #include "ResourcePath.h"
-#include "Diagnostics.h"
 #include <string.h>
 
 /**

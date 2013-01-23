@@ -2,6 +2,7 @@
 #ifndef _RESOURCE_H_
 #define _RESOURCE_H_
 
+#include "Defs.h"
 #include "IResource.h"
 
 /**

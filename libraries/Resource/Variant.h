@@ -3,6 +3,8 @@
 #ifndef _VARIANT_H_
 #define _VARIANT_H_
 
+#include "Defs.h"
+
 // #include <var/variant.hpp>
 
 /** Defines what the variant can hold.

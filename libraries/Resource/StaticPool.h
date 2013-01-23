@@ -2,6 +2,7 @@
 #ifndef _STATIC_POOL_H_
 #define _STATIC_POOL_H_
 
+#include "Defs.h"
 #include "IAllocator.h"
 #include <string.h>
 

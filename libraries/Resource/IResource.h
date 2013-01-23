@@ -2,6 +2,7 @@
 #ifndef _IRESOURCE_H_
 #define _IRESOURCE_H_
 
+#include "Defs.h"
 #include "Variant.h"
 
 /**

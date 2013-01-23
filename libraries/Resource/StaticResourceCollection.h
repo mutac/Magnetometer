@@ -3,6 +3,7 @@
 #ifndef _STATIC_RESOURCE_COLLECTION_H_
 #define _STATIC_RESOURCE_COLLECTION_H_
 
+#include "Defs.h"
 #include "IResource.h"
 #include "ResourcePath.h"
 #include "StaticPool.h"
