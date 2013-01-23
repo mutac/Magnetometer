@@ -16,10 +16,10 @@ class ResourceCollection
 public: 
   /**
    */
-  class ResourceContainer
+  class Container
   {
   public:
-    ResourceContainer() :
+    Container() :
       mValue(NULL),
       mChildren(NULL),
       mSiblings(NULL)
@@ -32,7 +32,7 @@ public:
      *
      * @returns The parent node to the hierarchy.
      */
-    ResourceContainer* place(ResourceContainer* node)
+    Container* place(Container* node)
     {
       mDebugAssert(node != NULL);
 
@@ -48,7 +48,7 @@ public:
           // cannot be a parent to 'node'.  Thus we can ignore the return value
           // of placement.
 
-          ResourceContainer* nextSibling = mSiblings->mSiblings;
+          Container* nextSibling = mSiblings->mSiblings;
           mSiblings->mSiblings = NULL;
 
           node->place(mSiblings);
@@ -91,7 +91,7 @@ public:
     /**
      * @see find(const ResourcePath& path)
      */
-    ResourceContainer* find(const char* path)
+    Container* find(const char* path)
     {
       ResourcePath resPath(path);
       return find(resPath);
@@ -107,22 +107,19 @@ public:
      *       1) path can be poped so that the full path isn't searched each time.
      *s
      */
-    ResourceContainer* find(const ResourcePath& searchPath)
+    Container* find(const ResourcePath& searchPath)
     {
       // 1) it's an exact path: system.nodes.specific
       // 2) it's a parent node: system.nodes
       // 3) it's incorrect: system.doesnotexist
 
-      if (getPath().matches(searchPath))
+      if (getPath().isChildOf(searchPath))
       {
-        // The path is exact!
-        return this;
-      }
-      else if (getPath().isChildOf(searchPath))
-      {
-        // TODO: isChildOf() is true if the searchPath == thisPath.
-        // That may change...
         return NULL;
+      }
+      else if (getPath().matches(searchPath))
+      {
+        return this;
       }
       else if (searchPath.isChildOf(getPath()))
       {
@@ -137,21 +134,21 @@ public:
     inline void setValue(IResource* val) { mValue = val; }
     inline void setPath(const char* path) { mPath.setPath(path); }
     inline IResource* getValue() { return mValue; }
-    inline ResourcePath& getPath() { return mPath; }
+    inline const ResourcePath& getPath() const { return mPath; }
 
   private:
-    inline bool isChildOf(ResourceContainer* node) const
+    inline bool isChildOf(Container* node) const
     {
       mDebugAssert(node != NULL);
       return mPath.isChildOf(node->getPath());
     }
 
-    ResourceContainer* findInSiblings(const ResourcePath& searchPath)
+    Container* findInSiblings(const ResourcePath& searchPath)
     {
-      ResourceContainer* sibling = mSiblings;
+      Container* sibling = mSiblings;
       while (sibling != NULL)
       {
-        ResourceContainer* match = sibling->find(searchPath);
+        Container* match = sibling->find(searchPath);
         if (match != NULL)
         {
           return match;
@@ -162,7 +159,7 @@ public:
       return NULL;
     }
 
-    ResourceContainer* findInChildren(const ResourcePath& searchPath)
+    Container* findInChildren(const ResourcePath& searchPath)
     {
       if (mChildren != NULL)
       {
@@ -176,35 +173,84 @@ public:
 
     ResourcePath mPath;
     IResource* mValue;
-    ResourceContainer* mChildren;
-    ResourceContainer* mSiblings;
+    Container* mChildren;
+    Container* mSiblings;
   };
 
   /**
    */
-  ResourceCollection(IAllocator<ResourceContainer>& allocator) :
+  class Iterator
+  {
+  public: 
+    Iterator() :
+      mRoot(NULL),
+      mPosition(NULL),
+      mIncludeChildren(false)
+    {
+    }
+
+    Iterator(Container* root) :
+      mRoot(root),
+      mPosition(root),
+      mIncludeChildren(false)
+    {
+    }
+
+  void next()
+  {
+    if (mIncludeChildren)
+    {
+    }
+  }
+
+  IResource* value()
+  {
+    mDebugAssert(mPosition != NULL);
+    return mPosition->getValue();
+  }
+
+  const ResourcePath* path()
+  {
+    mDebugAssert(mPosition != NULL);
+    return &mPosition->getPath();
+  }
+
+  bool empty()
+  {
+    return mPosition == NULL;
+  }
+
+  private:
+    Container* mRoot;
+    Container* mPosition;
+    bool mIncludeChildren;
+  };
+
+  /**
+   */
+  ResourceCollection(IAllocator<Container>& allocator) :
     mRoot(NULL),
     mAllocator(allocator)
   {
   }
 
-  ResourceContainer* find(const char* path) const
+  Iterator find(const char* path) const
   {
     if (path == NULL)
     {
-      return NULL;
+      return Iterator();
     }
     if (mRoot == NULL)
     {
-      return NULL;
+      return Iterator();
     }
 
-    return mRoot->find(path);
+    return Iterator(mRoot->find(path));
   }
 
   bool exists(const char* path) const
   {
-    return find(path) != NULL;
+    return !find(path).empty();
   }
 
   bool add(const char* path, IResource* res)
@@ -219,7 +265,7 @@ public:
       return false;
     }
 
-    ResourceContainer* node = mAllocator.allocate();
+    Container* node = mAllocator.allocate();
     if (node == NULL)
     {
       return false;
@@ -241,9 +287,8 @@ public:
   }
 
 private:
-
-  ResourceContainer* mRoot;
-  IAllocator<ResourceContainer>& mAllocator;
+  Container* mRoot;
+  IAllocator<Container>& mAllocator;
 };
 
 #endif
