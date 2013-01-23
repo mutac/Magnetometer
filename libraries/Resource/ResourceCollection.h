@@ -14,11 +14,16 @@
 class ResourceCollection
 {
 public: 
+  class Iterator;
+  class Container;
+
   /**
    */
   class Container
   {
   public:
+    friend class Iterator;
+
     Container() :
       mValue(NULL),
       mChildren(NULL),
@@ -196,31 +201,59 @@ public:
     {
     }
 
-  void next()
-  {
-    if (mIncludeChildren)
+    /**
+     * @description prefix increment (advance the iterator)
+     */
+    Iterator& operator++() 
     {
+      next();
+      return *this;
     }
-  }
 
-  IResource* value()
-  {
-    mDebugAssert(mPosition != NULL);
-    return mPosition->getValue();
-  }
+    /**
+     * @description postfix increment (advance the iterator)
+     */
+    Iterator operator++(int)
+    {
+      Iterator temp(*this);
+      operator++();
+      return temp;
+    }
 
-  const ResourcePath* path()
-  {
-    mDebugAssert(mPosition != NULL);
-    return &mPosition->getPath();
-  }
+    bool operator==(const Iterator& rhs)
+    {
+      return mPosition == rhs.mPosition;
+    }
 
-  bool empty()
-  {
-    return mPosition == NULL;
-  }
+    bool operator!=(const Iterator& rhs)
+    {
+      return mPosition != rhs.mPosition;
+    }
+
+    IResource* operator*()
+    {
+      return value();
+    }
+
+    IResource* value()
+    {
+      mDebugAssert(mPosition != NULL);
+      return mPosition->getValue();
+    }
+
+    const ResourcePath* path()
+    {
+      mDebugAssert(mPosition != NULL);
+      return &mPosition->getPath();
+    }
 
   private:
+    void next()
+    {
+      mDebugAssert(mPosition != NULL);
+      mPosition = mPosition->mSiblings;
+    }
+
     Container* mRoot;
     Container* mPosition;
     bool mIncludeChildren;
@@ -228,29 +261,56 @@ public:
 
   /**
    */
-  ResourceCollection(IAllocator<Container>& allocator) :
-    mRoot(NULL),
-    mAllocator(allocator)
+  ResourceCollection(
+    IAllocator<Container>& allocator = NullAllocator<Container>::instance(), 
+      Container* root = NULL) 
+    :
+    mAllocator(allocator),
+    mRoot(root)
   {
   }
 
-  Iterator find(const char* path) const
+  ResourceCollection(const ResourceCollection& rhs) :
+    mAllocator(rhs.mAllocator),
+    mRoot(rhs.mRoot)
+  {
+  }
+
+  Iterator begin(void) const
+  {
+    return Iterator(mRoot);
+  }
+
+  Iterator end(void) const
+  {
+    return Iterator();
+  }
+
+  /**
+   */
+  ResourceCollection find(const char* path) const
   {
     if (path == NULL)
     {
-      return Iterator();
+      return ResourceCollection();
     }
     if (mRoot == NULL)
     {
-      return Iterator();
+      return ResourceCollection();
     }
 
-    return Iterator(mRoot->find(path));
+    return ResourceCollection(mAllocator, mRoot->find(path));
+  }
+
+  bool empty() const
+  {
+    return mRoot == NULL;
   }
 
   bool exists(const char* path) const
   {
-    return !find(path).empty();
+    ResourceCollection exist = find(path);
+    return !exist.empty();
   }
 
   bool add(const char* path, IResource* res)
