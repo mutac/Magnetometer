@@ -4,8 +4,8 @@
 
 
 template <>
-NullAllocator<ResourceCollection::Container>& NullAllocator<ResourceCollection::Container>::instance()
+NullAllocator<ResourceCollection::PathTree>& NullAllocator<ResourceCollection::PathTree>::instance()
 {
-  static NullAllocator<ResourceCollection::Container> sTheInstance;
+  static NullAllocator<ResourceCollection::PathTree> sTheInstance;
   return sTheInstance;
 }

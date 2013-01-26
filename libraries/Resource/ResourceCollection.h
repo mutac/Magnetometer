@@ -15,88 +15,96 @@ class ResourceCollection
 {
 public: 
   class Iterator;
-  class Container;
+  class PathTree;
 
   /**
    */
-  class Container
+  class PathTree
   {
   public:
     friend class Iterator;
 
-    Container() :
+    PathTree() :
       mValue(NULL),
-      mChildren(NULL),
-      mSiblings(NULL)
+      mParent(NULL),
+      mChild(NULL),
+      mNextCousin(NULL)
     {
     }
 
     /**
-     * @description Adds the resource container at the correct
-     * place within the path hierarchy.
+     * @description Merges two path trees together.
      *
-     * @returns The parent node to the hierarchy.
+     * @returns The (potentially new) parent node to the hierarchy.
      */
-    Container* place(Container* node)
+    PathTree* merge(PathTree* rhs)
     {
-      mDebugAssert(node != NULL);
-
-      if (isChildOf(node))
+      mDebugAssert(rhs != NULL);
+     
+      if (isChildOf(rhs))
       { 
-        //
-        // re-place 'this' down inside 'node', but first re-place all of its siblings
-        //
-
-        while (mSiblings)
-        {
-          // Truth: 'node' is a parent to 'this', therefore any sibling of 'this' 
-          // cannot be a parent to 'node'.  Thus we can ignore the return value
-          // of placement.
-
-          Container* nextSibling = mSiblings->mSiblings;
-          mSiblings->mSiblings = NULL;
-
-          node->place(mSiblings);
-
-          mSiblings = nextSibling;
-        }
-
-        // Truth: We have already established that 'node' is a parent to 'this',
-        // thus we can can ignore the return value of placement.
-        node->place(this);
-
-        return node;
+        rhs->mParent = mParent;
+        return rhs->merge(this);
       } 
-      else if (node->isChildOf(this))
+      else if (rhs->isChildOf(this))
       {
-        if (mChildren != NULL)
+        if (mChild != NULL)
         {
-          mChildren = mChildren->place(node);
+          mChild = mChild->merge(rhs);
+          mChild->mParent = this;
         }
         else
         {
-          mChildren = node;
+          mChild = rhs;
+          mChild->mParent = this;
+
+          // Merge cousins!?
+          mergeCousins(rhs);
         }
+
         return this;
       }
       else
       {
-        if (mSiblings != NULL)
+        if (mNextCousin != NULL)
         {
-          mSiblings = mSiblings->place(node);
+          mNextCousin = mNextCousin->merge(rhs);
+          mNextCousin->mParent = mParent;
         }
         else
         {
-          mSiblings = node;
+          mNextCousin = rhs;
+          mNextCousin->mParent = mParent;
+
+          // Merge cousins!?
+          // This is incorrect. Cousins will be merged to a child, when
+          // they should possibly end up next to the parent.
+          mergeCousins(rhs);
         }
+
         return this;
+      }
+    }
+
+    /**
+     */
+    void mergeCousins(PathTree* rhs)
+    {
+      mDebugAssert(rhs != NULL);
+
+      // Detach cousins and merge
+      if (rhs->mNextCousin)
+      {
+        PathTree* cousins = rhs->mNextCousin;
+        rhs->mNextCousin = NULL;
+        merge(cousins);
       }
     }
 
     /**
      * @see find(const ResourcePath& path)
      */
-    Container* find(const char* path)
+    PathTree* find(const char* path)
     {
       ResourcePath resPath(path);
       return find(resPath);
@@ -108,11 +116,11 @@ public:
      * @returns a subtree defined by 'path', or NULL if
      * no subtree is found.
      *
-     * TODO: Ineffiecient: 
-     *       1) path can be poped so that the full path isn't searched each time.
+     * TODO: Inefficient: 
+     *       1) path can be popped so that the full path isn't searched each time.
      *s
      */
-    Container* find(const ResourcePath& searchPath)
+    PathTree* find(const ResourcePath& searchPath)
     {
       // 1) it's an exact path: system.nodes.specific
       // 2) it's a parent node: system.nodes
@@ -132,7 +140,7 @@ public:
       }
       else
       {
-        return findInSiblings(searchPath);
+        return findInCousins(searchPath);
       }
     }
 
@@ -141,34 +149,34 @@ public:
     inline IResource* getValue() { return mValue; }
     inline const ResourcePath& getPath() const { return mPath; }
 
-  private:
-    inline bool isChildOf(Container* node) const
+  protected:
+    inline bool isChildOf(PathTree* node) const
     {
       mDebugAssert(node != NULL);
       return mPath.isChildOf(node->getPath());
     }
 
-    Container* findInSiblings(const ResourcePath& searchPath)
+    PathTree* findInCousins(const ResourcePath& searchPath)
     {
-      Container* sibling = mSiblings;
-      while (sibling != NULL)
+      PathTree* cousin = mNextCousin;
+      while (cousin != NULL)
       {
-        Container* match = sibling->find(searchPath);
+        PathTree* match = cousin->find(searchPath);
         if (match != NULL)
         {
           return match;
         }
 
-        sibling = sibling->mSiblings;
+        cousin = cousin->mNextCousin;
       }
       return NULL;
     }
 
-    Container* findInChildren(const ResourcePath& searchPath)
+    PathTree* findInChildren(const ResourcePath& searchPath)
     {
-      if (mChildren != NULL)
+      if (mChild != NULL)
       {
-        return mChildren->find(searchPath);
+        return mChild->find(searchPath);
       }
       else
       {
@@ -176,10 +184,12 @@ public:
       }
     }
 
+  private:
     ResourcePath mPath;
     IResource* mValue;
-    Container* mChildren;
-    Container* mSiblings;
+    PathTree* mParent;
+    PathTree* mChild;
+    PathTree* mNextCousin;
   };
 
   /**
@@ -187,18 +197,20 @@ public:
   class Iterator
   {
   public: 
+    friend class ResourceCollection;
+
     Iterator() :
-      mRoot(NULL),
-      mPosition(NULL),
-      mIncludeChildren(false)
+      mOrigin(NULL),
+      mCurrent(NULL),
+      mNext(NULL),
+      mIncludeChildren(false),
+      mIncludeSiblings(false)
     {
     }
 
-    Iterator(Container* root) :
-      mRoot(root),
-      mPosition(root),
-      mIncludeChildren(false)
+    Iterator(const ResourceCollection& collection)
     {
+      *this = collection.begin();
     }
 
     /**
@@ -222,12 +234,12 @@ public:
 
     bool operator==(const Iterator& rhs)
     {
-      return mPosition == rhs.mPosition;
+      return mCurrent == rhs.mCurrent;
     }
 
     bool operator!=(const Iterator& rhs)
     {
-      return mPosition != rhs.mPosition;
+      return mCurrent != rhs.mCurrent;
     }
 
     IResource* operator*()
@@ -237,33 +249,61 @@ public:
 
     IResource* value()
     {
-      mDebugAssert(mPosition != NULL);
-      return mPosition->getValue();
+      mDebugAssert(mCurrent != NULL);
+      return mCurrent->getValue();
     }
 
     const ResourcePath* path()
     {
-      mDebugAssert(mPosition != NULL);
-      return &mPosition->getPath();
+      mDebugAssert(mCurrent != NULL);
+      return &mCurrent->getPath();
+    }
+
+  protected:
+    Iterator(PathTree* root) :
+      mOrigin(root),
+      mCurrent(root),
+      mNext(NULL),
+      mIncludeChildren(false),
+      mIncludeSiblings(false)
+    {
     }
 
   private:
     void next()
     {
-      mDebugAssert(mPosition != NULL);
-      mPosition = mPosition->mSiblings;
+      if (mIncludeSiblings && 
+          mCurrent &&
+          mCurrent->mNextCousin != NULL)
+      {
+        mNext = mCurrent->mNextCousin;
+      }
+      else if (mIncludeChildren && 
+               mCurrent &&
+               mCurrent->mChild != NULL)
+      {
+        mNext = mCurrent->mChild;
+      }
+      else
+      {
+        mNext = NULL;
+      }
+
+      mCurrent = mNext;
     }
 
-    Container* mRoot;
-    Container* mPosition;
+    PathTree* mOrigin;
+    PathTree* mCurrent;
+    PathTree* mNext;
     bool mIncludeChildren;
+    bool mIncludeSiblings;
   };
 
   /**
    */
   ResourceCollection(
-    IAllocator<Container>& allocator = NullAllocator<Container>::instance(), 
-      Container* root = NULL) 
+    IAllocator<PathTree>& allocator = NullAllocator<PathTree>::instance(), 
+      PathTree* root = NULL) 
     :
     mAllocator(allocator),
     mRoot(root)
@@ -288,14 +328,14 @@ public:
 
   /**
    */
-  ResourceCollection find(const char* path) const
+  const ResourceCollection find(const char* path) const
   {
     if (path == NULL || mRoot == NULL)
     {
       return ResourceCollection();
     }
 
-    Container* found = mRoot->find(path);
+    PathTree* found = mRoot->find(path);
     if (found)
     {
       return ResourceCollection(mAllocator, found);
@@ -329,7 +369,7 @@ public:
       return false;
     }
 
-    Container* node = mAllocator.allocate();
+    PathTree* node = mAllocator.allocate();
     if (node == NULL)
     {
       return false;
@@ -340,7 +380,7 @@ public:
 
     if (mRoot != NULL)
     {
-      mRoot = mRoot->place(node);
+      mRoot = mRoot->merge(node);
     }
     else
     {
@@ -351,8 +391,8 @@ public:
   }
 
 private:
-  Container* mRoot;
-  IAllocator<Container>& mAllocator;
+  PathTree* mRoot;
+  IAllocator<PathTree>& mAllocator;
 };
 
 #endif

@@ -44,7 +44,7 @@ private:
 public:
   void ConstructDestruct()
   {
-    StaticPool<10, ResourceCollection::Container> allocator;
+    StaticPool<10, ResourceCollection::PathTree> allocator;
     ResourceCollection metal(allocator);
 
     // CFIX_ASSERT (resources.getCount() == 0);
@@ -56,7 +56,7 @@ public:
 
   void AddSimple()
   {
-    StaticPool<10, ResourceCollection::Container> allocator;
+    StaticPool<10, ResourceCollection::PathTree> allocator;
     ResourceCollection metal(allocator);
 
     // Add a root
@@ -118,7 +118,7 @@ public:
 
   void AddWithRootReplacement()
   {
-    StaticPool<10, ResourceCollection::Container> allocator;
+    StaticPool<10, ResourceCollection::PathTree> allocator;
     ResourceCollection metal(allocator);
 
     TestResource testResource1;
@@ -181,7 +181,7 @@ public:
 
   void Iterate()
   {
-    StaticPool<10, ResourceCollection::Container> allocator;
+    StaticPool<10, ResourceCollection::PathTree> allocator;
     ResourceCollection metal(allocator);
     ResourceCollection::Iterator types;
 
@@ -210,11 +210,10 @@ public:
     metal.add("earlymetal.shockrock.industrialmetal.numetal", &res8);
 
     // Single element
-    ResourceCollection grunge = metal.find("earlymetal.grunge");
+    const ResourceCollection grunge = metal.find("earlymetal.grunge");
     types = grunge.begin();
     CFIX_ASSERT (types.path()->matches("earlymetal.grunge"));
-    types++;
-    CFIX_ASSERT (types == grunge.end());
+    CFIX_ASSERT (++types == grunge.end());
 
     // TODO: Add wildcard and non-wildcard searches.  These will influence
     // the iterators traversal.
