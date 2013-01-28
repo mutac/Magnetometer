@@ -93,10 +93,12 @@ public:
   /**
    * @description Evaluates of this path is a child of root.
    * @param root The root path to check
-   * @param compareAbsolute  When evaluating child/parent relationship, check the absolute path rather than the relative path.
    * @returns True if this path is a child of root.
    */
-  bool isChildOf(const ResourcePath& parent, bool compareAbsolute = false) const;
+  bool isChildOf(const ResourcePath& parent) const
+  {
+    return compare(parent) == kChildOf;
+  }
 
   /**
    */
@@ -133,15 +135,11 @@ public:
 private:
   /**
    */
-  static Comparison compare(const char* lhs, const char* rhs, bool* matchedByWild);
+  static Comparison sCompare(const char* lhs, const char* rhs, bool* matchedByWild);
 
   /**
    */
-  static bool isChildOf(const char* lhs, const char* rhs);
-
-  /**
-   */
-  static const char* popFront(const char* path);
+  static const char* sPopFront(const char* path);
 
   const char* mAbsolutePath;
   const char* mRelativePath;

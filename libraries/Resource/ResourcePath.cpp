@@ -4,7 +4,7 @@
 
 bool ResourcePath::popFront()
 {
-  const char* next = popFront(mRelativePath);
+  const char* next = sPopFront(mRelativePath);
 
   if (*next != '\0')
   {
@@ -42,47 +42,15 @@ ResourcePath::Comparison ResourcePath::compare(const ResourcePath& path, bool co
 {
   if (compareAbsolute)
   {
-    return compare(mAbsolutePath, path.mAbsolutePath, outMatchedWild);
+    return sCompare(mAbsolutePath, path.mAbsolutePath, outMatchedWild);
   }
   else
   {
-    return compare(mRelativePath, path.mRelativePath, outMatchedWild);
+    return sCompare(mRelativePath, path.mRelativePath, outMatchedWild);
   }
 }
 
-bool ResourcePath::isChildOf(const ResourcePath& parent, bool compareAbsolute) const
-{
-  if (compareAbsolute)
-  {
-    return isChildOf(mAbsolutePath, parent.mAbsolutePath);
-  }
-  else
-  {
-    return isChildOf(mRelativePath, parent.mRelativePath);
-  }
-}
-
-bool ResourcePath::isChildOf(const char* lhs, const char* rhs)
-{
-  mDebugAssert(lhs != NULL && rhs != NULL);
-
-  // 
-  // BUG?: only a portion of the root needs to be specified.
-  //       strstr is not sufficient.
-  //
-  // Inefficient..
-  //
-
-  if (strcmp(lhs, rhs) == 0)
-  {
-    return false;
-  }
-
-  const char* found = strstr(lhs, rhs);
-  return (found != NULL && found == lhs);
-}
-
-const char* ResourcePath::popFront(const char* path)
+const char* ResourcePath::sPopFront(const char* path)
 {
   mDebugAssert(path != NULL);
 
@@ -100,7 +68,7 @@ const char* ResourcePath::popFront(const char* path)
   return path;
 }
 
-ResourcePath::Comparison ResourcePath::compare(const char* lhs, const char* rhs, bool* outMatchedWild)
+ResourcePath::Comparison ResourcePath::sCompare(const char* lhs, const char* rhs, bool* outMatchedWild)
 {
   mDebugAssert(lhs != NULL && rhs != NULL);
   bool matchedWild = false;
@@ -115,8 +83,8 @@ ResourcePath::Comparison ResourcePath::compare(const char* lhs, const char* rhs,
           *rhs == sPathWildCard)
       {
         // But it's ok, it's a wild card!
-        lhs = popFront(lhs);
-        rhs = popFront(rhs);
+        lhs = sPopFront(lhs);
+        rhs = sPopFront(rhs);
         matchedWild = true;
         // Keep going...
       }
