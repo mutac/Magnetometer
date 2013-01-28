@@ -34,7 +34,6 @@ public:
 
     /**
      * @description Merges two path trees together.
-     *
      * @returns The (potentially new) parent node to the hierarchy.
      */
     PathTree* merge(PathTree* rhs)
@@ -58,7 +57,6 @@ public:
           mChild = rhs;
           mChild->mParent = this;
 
-          // Merge cousins!?
           mergeCousins(rhs);
         }
 
@@ -76,9 +74,6 @@ public:
           mNextCousin = rhs;
           mNextCousin->mParent = mParent;
 
-          // Merge cousins!?
-          // This is incorrect. Cousins will be merged to a child, when
-          // they should possibly end up next to the parent.
           mergeCousins(rhs);
         }
 
@@ -93,11 +88,15 @@ public:
       mDebugAssert(rhs != NULL);
 
       // Detach cousins and merge
-      if (rhs->mNextCousin)
+      PathTree* cousin = rhs->mNextCousin;
+      rhs->mNextCousin = NULL;
+
+      while (cousin != NULL)
       {
-        PathTree* cousins = rhs->mNextCousin;
-        rhs->mNextCousin = NULL;
-        merge(cousins);
+        PathTree* next = cousin->mNextCousin;
+        cousin->mNextCousin = NULL;
+        merge(cousin);
+        cousin = next;
       }
     }
 
@@ -111,7 +110,7 @@ public:
     }
 
     /**
-     * @description Finds a subsection of the tree.
+     * @description Finds a subtree.
      * 
      * @returns a subtree defined by 'path', or NULL if
      * no subtree is found.
@@ -130,7 +129,7 @@ public:
       {
         return NULL;
       }
-      else if (getPath().matches(searchPath))
+      else if (getPath() == searchPath)
       {
         return this;
       }
@@ -158,18 +157,14 @@ public:
 
     PathTree* findInCousins(const ResourcePath& searchPath)
     {
-      PathTree* cousin = mNextCousin;
-      while (cousin != NULL)
+      if (mNextCousin != NULL)
       {
-        PathTree* match = cousin->find(searchPath);
-        if (match != NULL)
-        {
-          return match;
-        }
-
-        cousin = cousin->mNextCousin;
+        return mNextCousin->find(searchPath);
       }
-      return NULL;
+      else
+      {
+        return NULL;
+      }
     }
 
     PathTree* findInChildren(const ResourcePath& searchPath)

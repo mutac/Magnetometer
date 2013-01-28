@@ -11,6 +11,15 @@
 class ResourcePath
 {
 public:
+
+  typedef enum
+  {
+    kUnequal,
+    kExact,
+    kParentOf,
+    kChildOf
+  } Comparison;
+
   ResourcePath() : 
     mAbsolutePath(NULL),
     mRelativePath(NULL)
@@ -20,6 +29,12 @@ public:
   ResourcePath(const char* path)
   {
     setPath(path);
+  }
+
+  ResourcePath(const ResourcePath& rhs) :
+    mAbsolutePath(rhs.mAbsolutePath),
+    mRelativePath(rhs.mRelativePath)
+  {
   }
 
   ~ResourcePath() {}
@@ -42,18 +57,10 @@ public:
   }
 
   /**
-   * @see makeRelativeTo(const char* root)
-   */
-  inline bool makeRelativeTo(const ResourcePath& root)
-  {
-    return makeRelativeTo(root.getPath());
-  }
-
-  /**
    * @description Make this path relative to root.  This path must be a child path to root.
    * @returns false if root is not a true root to this path.
    */
-  bool makeRelativeTo(const char* root);
+  bool makeRelativeTo(const ResourcePath& root);
 
   /**
    * @description Pop the front element of the path.  i.e.
@@ -63,32 +70,40 @@ public:
   bool popFront();
 
   /**
-   * @see matches(const char* path, bool compareAbsolute)
    */
-  bool matches(const ResourcePath& path, bool compareAbsolute = false) const;
+  inline bool operator==(const ResourcePath& rhs) const
+  {
+    return matches(rhs);
+  }
 
   /**
-   * @description Determines if this path matches path.
-   * @param path A path to compare against.
-   * @param compareAbsolute If true, compare path and this using absolute paths.
    */
-  bool matches(const char* path, bool compareAbsolute = false) const;
+  inline bool operator!=(const ResourcePath& rhs) const
+  {
+    return !matches(rhs);
+  }
 
   /**
-   * @see isChildOf(const char* root)
-   * @param root The root path to check
-   * @param compareAbsolute use the absolute path from both root and 'this' to evalute child/parent relationship.
    */
-  bool isChildOf(const ResourcePath& parent, bool compareAbsolute = false) const;
-
+  inline bool matches(const ResourcePath& path) const
+  {
+    return compare(path) == kExact;
+  }
+ 
   /**
    * @description Evaluates of this path is a child of root.
    * @param root The root path to check
    * @param compareAbsolute  When evaluating child/parent relationship, check the absolute path rather than the relative path.
    * @returns True if this path is a child of root.
    */
-  bool isChildOf(const char* parent, bool compareAbsolute = false) const;
+  bool isChildOf(const ResourcePath& parent, bool compareAbsolute = false) const;
 
+  /**
+   */
+  Comparison compare(const ResourcePath& path, bool compareAbsolute = false, bool* outMatchedWild = NULL) const;
+
+  /**
+   */
   inline const char* getAbsolutePath() const
   {
     return mAbsolutePath;
@@ -116,10 +131,23 @@ public:
   }
 
 private:
+  /**
+   */
+  static Comparison compare(const char* lhs, const char* rhs, bool* matchedByWild);
+
+  /**
+   */
+  static bool isChildOf(const char* lhs, const char* rhs);
+
+  /**
+   */
+  static const char* popFront(const char* path);
+
   const char* mAbsolutePath;
   const char* mRelativePath;
 
   static const char sPathSeparator = '.';
+  static const char sPathWildCard = '*';
 };
 
 #endif

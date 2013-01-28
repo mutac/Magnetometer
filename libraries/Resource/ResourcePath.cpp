@@ -4,20 +4,12 @@
 
 bool ResourcePath::popFront()
 {
-  mDebugAssert(mRelativePath != NULL);
-
-  const char* next = mRelativePath;
-  while (*next != '\0' && *next != sPathSeparator)
-  {
-    next++;
-  }
+  const char* next = popFront(mRelativePath);
 
   if (*next != '\0')
   {
-    // Move beyond path separator, but
-    // don't allow the last element to
+    // Don't allow the last element to
     // be popped.
-    next++;
     mRelativePath = next;
     return true;
   }
@@ -27,9 +19,9 @@ bool ResourcePath::popFront()
   }
 }
 
-bool ResourcePath::makeRelativeTo(const char* root)
+bool ResourcePath::makeRelativeTo(const ResourcePath& root)
 {
-  mDebugAssert(root != NULL);
+  mDebugAssert(root.getPath() != NULL);
   mDebugAssert(mRelativePath != NULL);
 
   if (!isChildOf(root))
@@ -37,7 +29,7 @@ bool ResourcePath::makeRelativeTo(const char* root)
     return false;
   }
   
-  mRelativePath = mRelativePath + strlen(root);
+  mRelativePath = mRelativePath + root.getPathLength();
   if (*mRelativePath != '\0')
   {
     // Move beyond path separator
@@ -46,31 +38,15 @@ bool ResourcePath::makeRelativeTo(const char* root)
   return true;
 }
 
-bool ResourcePath::matches(const ResourcePath& path, bool compareAbsolute) const
+ResourcePath::Comparison ResourcePath::compare(const ResourcePath& path, bool compareAbsolute, bool* outMatchedWild) const
 {
   if (compareAbsolute)
   {
-    return matches(path.getAbsolutePath(), compareAbsolute);
+    return compare(mAbsolutePath, path.mAbsolutePath, outMatchedWild);
   }
   else
   {
-    return matches(path.getPath(), compareAbsolute);
-  }
-}
-
-bool ResourcePath::matches(const char* path, bool compareAbsolute) const
-{
-  mDebugAssert(path != NULL);
-
-  if (compareAbsolute)
-  {
-    mDebugAssert(mAbsolutePath != NULL);
-    return (strcmp(mAbsolutePath, path) == 0);
-  }
-  else 
-  {
-    mDebugAssert(mRelativePath != NULL);
-    return (strcmp(mRelativePath, path) == 0);
+    return compare(mRelativePath, path.mRelativePath, outMatchedWild);
   }
 }
 
@@ -78,36 +54,107 @@ bool ResourcePath::isChildOf(const ResourcePath& parent, bool compareAbsolute) c
 {
   if (compareAbsolute)
   {
-    return isChildOf(parent.getAbsolutePath(), compareAbsolute);
+    return isChildOf(mAbsolutePath, parent.mAbsolutePath);
   }
   else
   {
-    return isChildOf(parent.getPath(), compareAbsolute);
+    return isChildOf(mRelativePath, parent.mRelativePath);
   }
 }
 
-bool ResourcePath::isChildOf(const char* root, bool compareAbsolute) const
+bool ResourcePath::isChildOf(const char* lhs, const char* rhs)
 {
-  mDebugAssert(root != NULL);
-  mDebugAssert(mRelativePath != NULL);
-  mDebugAssert(mAbsolutePath != NULL);
+  mDebugAssert(lhs != NULL && rhs != NULL);
 
-  if (matches(root, compareAbsolute))
+  // 
+  // BUG?: only a portion of the root needs to be specified.
+  //       strstr is not sufficient.
+  //
+  // Inefficient..
+  //
+
+  if (strcmp(lhs, rhs) == 0)
   {
     return false;
   }
 
-  const char* checkAgainst = mRelativePath;
-  if (compareAbsolute)
+  const char* found = strstr(lhs, rhs);
+  return (found != NULL && found == lhs);
+}
+
+const char* ResourcePath::popFront(const char* path)
+{
+  mDebugAssert(path != NULL);
+
+  while (*path != '\0' && *path != sPathSeparator)
   {
-    checkAgainst = mAbsolutePath;
+    path++;
   }
 
-  //
-  // BUG?: only a portion of the root needs to be specified.
-  //       strstr is not sufficient.
-  //
+  if (*path != '\0')
+  {
+    // Move beyond path separator
+    path++;
+  }
 
-  const char* found = strstr(checkAgainst, root);
-  return (found != NULL && found == checkAgainst);
+  return path;
 }
+
+ResourcePath::Comparison ResourcePath::compare(const char* lhs, const char* rhs, bool* outMatchedWild)
+{
+  mDebugAssert(lhs != NULL && rhs != NULL);
+  bool matchedWild = false;
+
+  while (*lhs != '\0' &&
+         *rhs != '\0')
+  {
+    if (*lhs != *rhs)
+    {
+      // Not a match
+      if (*lhs == sPathWildCard ||
+          *rhs == sPathWildCard)
+      {
+        // But it's ok, it's a wild card!
+        lhs = popFront(lhs);
+        rhs = popFront(rhs);
+        matchedWild = true;
+        // Keep going...
+      }
+      else
+      {
+        // Nope, dang...
+        break;
+      }
+    }
+    else
+    {
+      lhs++;
+      rhs++;
+    }
+  }
+
+  if (outMatchedWild)
+  {
+    *outMatchedWild = matchedWild;
+  }
+
+  if (*lhs == '\0' && *rhs == '\0')
+  {
+    return kExact;
+  }
+  else if (*rhs == sPathSeparator &&
+           *lhs == '\0')
+  {
+    return kParentOf;
+  }
+  else if (*lhs == sPathSeparator &&
+           *rhs == '\0')
+  {
+    return kChildOf;
+  }
+  else
+  {
+    return kUnequal;
+  }
+}
+
