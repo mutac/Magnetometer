@@ -174,10 +174,12 @@ public:
     CFIX_ASSERT (relative.makeRelativeTo("all") == true);
     CFIX_ASSERT (relative.isChildOf("life") == true);
     CFIX_ASSERT (relative.compare("all.life", true) == ResourcePath::kIsChild);
+    //CFIX_ASSERT (ResourcePath("all.life").isParentOf(relative) == true);
     CFIX_ASSERT (ResourcePath("all.life").compare(relative, true) == ResourcePath::kIsParent);
     CFIX_ASSERT (relative.makeRelativeTo("life") == true);
     CFIX_ASSERT (relative.isChildOf("is") == true);
     CFIX_ASSERT (relative.compare("all.life.is", true) == ResourcePath::kIsChild);
+    //CFIX_ASSERT (ResourcePath("all.life.is").isParentOf(relative) == true);
     CFIX_ASSERT (ResourcePath("all.life.is").compare(relative, true) == ResourcePath::kIsParent);
     CFIX_ASSERT (relative.makeRelativeTo("is") == true);
     CFIX_ASSERT (relative.isChildOf("cyclic") == false);

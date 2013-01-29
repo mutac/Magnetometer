@@ -104,15 +104,6 @@ public:
     }
 
     /**
-     * @see find(const ResourcePath& path)
-     */
-    PathTree* find(const char* path)
-    {
-      ResourcePath resPath(path);
-      return find(resPath);
-    }
-
-    /**
      * @description Finds a subtree.
      * 
      * @returns a subtree defined by 'path', or NULL if

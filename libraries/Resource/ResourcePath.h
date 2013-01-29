@@ -85,19 +85,23 @@ public:
 
   /**
    */
-  inline bool matches(const ResourcePath& path) const
+  inline bool matches(const ResourcePath& rhs) const
   {
-    return compare(path) == kMatches;
+    return compare(rhs) == kMatches;
   }
  
   /**
-   * @description Evaluates of this path is a child of root.
-   * @param root The root path to check
-   * @returns True if this path is a child of root.
    */
-  bool isChildOf(const ResourcePath& parent) const
+  inline bool isChildOf(const ResourcePath& rhs) const
   {
-    return compare(parent) == kIsChild;
+    return compare(rhs) == kIsChild;
+  }
+
+  /**
+   */
+  inline bool isParentOf(const ResourcePath& rhs) const
+  {
+    return compare(rhs) == kIsParent;
   }
 
   /**
