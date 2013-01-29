@@ -108,17 +108,17 @@ ResourcePath::Comparison ResourcePath::sCompare(const char* lhs, const char* rhs
 
   if (*lhs == '\0' && *rhs == '\0')
   {
-    return kExact;
+    return kMatches;
   }
   else if (*rhs == sPathSeparator &&
            *lhs == '\0')
   {
-    return kParentOf;
+    return kIsParent;
   }
   else if (*lhs == sPathSeparator &&
            *rhs == '\0')
   {
-    return kChildOf;
+    return kIsChild;
   }
   else
   {

@@ -15,9 +15,9 @@ public:
   typedef enum
   {
     kUnequal,
-    kExact,
-    kParentOf,
-    kChildOf
+    kMatches,
+    kIsChild,
+    kIsParent
   } Comparison;
 
   ResourcePath() : 
@@ -87,7 +87,7 @@ public:
    */
   inline bool matches(const ResourcePath& path) const
   {
-    return compare(path) == kExact;
+    return compare(path) == kMatches;
   }
  
   /**
@@ -97,7 +97,7 @@ public:
    */
   bool isChildOf(const ResourcePath& parent) const
   {
-    return compare(parent) == kChildOf;
+    return compare(parent) == kIsChild;
   }
 
   /**

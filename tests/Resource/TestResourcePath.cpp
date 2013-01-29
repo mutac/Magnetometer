@@ -47,40 +47,6 @@ public:
     CFIX_ASSERT (path4.getPathLength() == 26);
   }
 
-  void ChildOf()
-  {
-    ResourcePath path2("system.devices.temperature");
-    CFIX_ASSERT (path2.isChildOf("system") == true);
-    CFIX_ASSERT (path2.isChildOf("system.devices") == true);
-    CFIX_ASSERT (path2.isChildOf("system.devices.temperature") == false);
-    CFIX_ASSERT (path2.isChildOf("objects") == false);
-    CFIX_ASSERT (path2.isChildOf("system.objects") == false);
-    CFIX_ASSERT (path2.isChildOf("system.objects.temperature") == false);
-    CFIX_ASSERT (path2.isChildOf("devices") == false);
-    CFIX_ASSERT (path2.isChildOf("temperature") == false);
-
-    ResourcePath parent1("system");
-    CFIX_ASSERT (path2.isChildOf(parent1) == true);
-
-    ResourcePath parent2("system.devices");
-    CFIX_ASSERT (path2.isChildOf(parent2) == true);
-
-    //
-    // Check behavior with relative/absolute paths
-    // 
-    ResourcePath relative("all.life.is.cyclic");
-
-    CFIX_ASSERT (relative.makeRelativeTo("all") == true);
-    CFIX_ASSERT (relative.isChildOf("life") == true);
-    CFIX_ASSERT (relative.compare("all.life", true) == ResourcePath::kChildOf);
-    CFIX_ASSERT (relative.makeRelativeTo("life") == true);
-    CFIX_ASSERT (relative.isChildOf("is") == true);
-    CFIX_ASSERT (relative.compare("all.life.is", true) == ResourcePath::kChildOf);
-    CFIX_ASSERT (relative.makeRelativeTo("is") == true);
-    CFIX_ASSERT (relative.isChildOf("cyclic") == false);
-    CFIX_ASSERT (relative.compare("all.life.is.cyclic", true) == ResourcePath::kExact);
-  }
-
   void Relative()
   {
     ResourcePath path1("system.object.item");
@@ -138,13 +104,13 @@ public:
   void Comparison()
   {
     ResourcePath path1("system.object.item.blah");
-    CFIX_ASSERT (path1.compare("system.object.item.blah") == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare("system.object.item.blah") == ResourcePath::kMatches);
     CFIX_ASSERT (path1.matches("system.object.item.blah"));
     CFIX_ASSERT (path1 == "system.object.item.blah");
 
 
     ResourcePath path2("system.object.item.blah");
-    CFIX_ASSERT (path1.compare(path2) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2) == ResourcePath::kMatches);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
 
@@ -153,20 +119,20 @@ public:
     //
 
     path1.makeRelativeTo("system");
-    CFIX_ASSERT (path1.compare(path2, true) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, true) == ResourcePath::kMatches);
     // These check the relative path only, so they should fail
     CFIX_ASSERT (path1.compare(path2, false) == ResourcePath::kUnequal);
     CFIX_ASSERT (!path1.matches(path2));
     CFIX_ASSERT (path1 != path2);
 
     path2.makeRelativeTo("system");
-    CFIX_ASSERT (path1.compare(path2, true) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, true) == ResourcePath::kMatches);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
-    CFIX_ASSERT (path1.compare(path2, false) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false) == ResourcePath::kMatches);
 
     path2.makeRelativeTo("object");
-    CFIX_ASSERT (path1.compare(path2, true) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, true) == ResourcePath::kMatches);
     // These check the relative path only, so they should fail
     CFIX_ASSERT (path1.compare(path2, false) == ResourcePath::kUnequal);
     CFIX_ASSERT (!path1.matches(path2));
@@ -178,65 +144,101 @@ public:
 
     parent = "system.devices";
     child = "system.devices.device1";
-    CFIX_ASSERT (child.compare(parent) == ResourcePath::kChildOf);
-    CFIX_ASSERT (parent.compare(child) == ResourcePath::kParentOf);
+    CFIX_ASSERT (child.compare(parent) == ResourcePath::kIsChild);
+    CFIX_ASSERT (parent.compare(child) == ResourcePath::kIsParent);
   }
 
-  void WildCard()
+  void ChildOf()
+  {
+    ResourcePath path2("system.devices.temperature");
+    CFIX_ASSERT (path2.isChildOf("system") == true);
+    CFIX_ASSERT (path2.isChildOf("system.devices") == true);
+    CFIX_ASSERT (path2.isChildOf("system.devices.temperature") == false);
+    CFIX_ASSERT (path2.isChildOf("objects") == false);
+    CFIX_ASSERT (path2.isChildOf("system.objects") == false);
+    CFIX_ASSERT (path2.isChildOf("system.objects.temperature") == false);
+    CFIX_ASSERT (path2.isChildOf("devices") == false);
+    CFIX_ASSERT (path2.isChildOf("temperature") == false);
+
+    ResourcePath parent1("system");
+    CFIX_ASSERT (path2.isChildOf(parent1) == true);
+
+    ResourcePath parent2("system.devices");
+    CFIX_ASSERT (path2.isChildOf(parent2) == true);
+
+    //
+    // Check behavior with relative/absolute paths
+    // 
+    ResourcePath relative("all.life.is.cyclic");
+
+    CFIX_ASSERT (relative.makeRelativeTo("all") == true);
+    CFIX_ASSERT (relative.isChildOf("life") == true);
+    CFIX_ASSERT (relative.compare("all.life", true) == ResourcePath::kIsChild);
+    CFIX_ASSERT (ResourcePath("all.life").compare(relative, true) == ResourcePath::kIsParent);
+    CFIX_ASSERT (relative.makeRelativeTo("life") == true);
+    CFIX_ASSERT (relative.isChildOf("is") == true);
+    CFIX_ASSERT (relative.compare("all.life.is", true) == ResourcePath::kIsChild);
+    CFIX_ASSERT (ResourcePath("all.life.is").compare(relative, true) == ResourcePath::kIsParent);
+    CFIX_ASSERT (relative.makeRelativeTo("is") == true);
+    CFIX_ASSERT (relative.isChildOf("cyclic") == false);
+    CFIX_ASSERT (relative.compare("all.life.is.cyclic", true) == ResourcePath::kMatches);
+  }
+
+  void WildCard() 
   {
     bool matchedWild = false;
     ResourcePath path1("follow.in.your.footsteps");
     ResourcePath path2("");
 
     path2.setPath("follow.in.your.*");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == true);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
     path2.setPath("follow.in.*.footsteps");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == true);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
     path2.setPath("follow.*.your.footsteps");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == true);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
     path2.setPath("*.in.your.footsteps");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == true);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
 
     path2.setPath("follow.in.*.*");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == true);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
     path2.setPath("*.*.your.footsteps");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == true);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
     path2.setPath("*.*.*.*");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == true);
     CFIX_ASSERT (path1.matches(path2));
     CFIX_ASSERT (path1 == path2);
 
     path2.setPath("follow.in.your.footsteps");
-    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kExact);
+    CFIX_ASSERT (path1.compare(path2, false, &matchedWild) == ResourcePath::kMatches);
     CFIX_ASSERT (matchedWild == false);
   }
 };
 
 CFIXCC_BEGIN_CLASS(TestResourcePath)
 	CFIXCC_METHOD(SetPath)
-  CFIXCC_METHOD(ChildOf)
   CFIXCC_METHOD(Relative)
   CFIXCC_METHOD(Pop)
   CFIXCC_METHOD(Comparison)
+  CFIXCC_METHOD(ChildOf)
   CFIXCC_METHOD(WildCard)
 CFIXCC_END_CLASS()
 

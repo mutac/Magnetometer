@@ -40,12 +40,15 @@ public:
     {
       mDebugAssert(rhs != NULL);
      
-      if (isChildOf(rhs))
+      ResourcePath::Comparison thisIs = mPath.compare(rhs->mPath);
+      mDebugAssert(thisIs != ResourcePath::kMatches);
+
+      if (thisIs == ResourcePath::kIsChild)
       { 
         rhs->mParent = mParent;
         return rhs->merge(this);
       } 
-      else if (rhs->isChildOf(this))
+      else if (thisIs == ResourcePath::kIsParent)
       {
         if (mChild != NULL)
         {
@@ -125,15 +128,17 @@ public:
       // 2) it's a parent node: system.nodes
       // 3) it's incorrect: system.doesnotexist
 
-      if (getPath().isChildOf(searchPath))
+      ResourcePath::Comparison thisIs = mPath.compare(searchPath);
+
+      if (thisIs == ResourcePath::kIsChild)
       {
         return NULL;
       }
-      else if (getPath() == searchPath)
+      else if (thisIs == ResourcePath::kMatches)
       {
         return this;
       }
-      else if (searchPath.isChildOf(getPath()))
+      else if (thisIs == ResourcePath::kIsParent)
       {
         return findInChildren(searchPath);
       }
@@ -149,12 +154,6 @@ public:
     inline const ResourcePath& getPath() const { return mPath; }
 
   protected:
-    inline bool isChildOf(PathTree* node) const
-    {
-      mDebugAssert(node != NULL);
-      return mPath.isChildOf(node->getPath());
-    }
-
     PathTree* findInCousins(const ResourcePath& searchPath)
     {
       if (mNextCousin != NULL)
