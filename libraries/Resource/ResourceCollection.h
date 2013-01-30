@@ -85,25 +85,6 @@ public:
     }
 
     /**
-     */
-    void mergeCousins(PathTree* rhs)
-    {
-      mDebugAssert(rhs != NULL);
-
-      // Detach cousins and merge
-      PathTree* cousin = rhs->mNextCousin;
-      rhs->mNextCousin = NULL;
-
-      while (cousin != NULL)
-      {
-        PathTree* next = cousin->mNextCousin;
-        cousin->mNextCousin = NULL;
-        merge(cousin);
-        cousin = next;
-      }
-    }
-
-    /**
      * @description Finds a subtree.
      * 
      * @returns a subtree defined by 'path', or NULL if
@@ -144,6 +125,25 @@ public:
     inline const PathName& getPath() const { return mPath; }
 
   protected:
+    /**
+     */
+    void mergeCousins(PathTree* rhs)
+    {
+      mDebugAssert(rhs != NULL);
+
+      // Detach cousins and merge
+      PathTree* cousin = rhs->mNextCousin;
+      rhs->mNextCousin = NULL;
+
+      while (cousin != NULL)
+      {
+        PathTree* next = cousin->mNextCousin;
+        cousin->mNextCousin = NULL;
+        merge(cousin);
+        cousin = next;
+      }
+    }
+
     PathTree* findInCousins(const PathName& searchPath)
     {
       if (mNextCousin != NULL)

@@ -49,8 +49,9 @@ public:
 
     // CFIX_ASSERT (resources.getCount() == 0);
 
-    CFIX_ASSERT (metal.exists("system.anything") == false);
-    CFIX_ASSERT (metal.exists("system") == false);
+    CFIX_ASSERT (metal.exists("anything.at.all") == false);
+    CFIX_ASSERT (metal.exists("nothing") == false);
+    CFIX_ASSERT (metal.exists("*") == false);
     CFIX_ASSERT (metal.exists("") == false);
   }
 
@@ -209,14 +210,21 @@ public:
     TestResource res8;
     metal.add("earlymetal.shockrock.industrialmetal.numetal", &res8);
 
+    // Failed search
+    const ResourceCollection empty = metal.find("screamo");
+    CFIX_ASSERT (empty.begin() == empty.end());
+
     // Single element
     const ResourceCollection grunge = metal.find("earlymetal.grunge");
     types = grunge.begin();
+    CFIX_ASSERT (types != grunge.end());
     CFIX_ASSERT (types.path()->matches("earlymetal.grunge"));
     CFIX_ASSERT (++types == grunge.end());
 
-    // TODO: Add wildcard and non-wildcard searches.  These will influence
-    // the iterators traversal.
+    // Multiple siblings
+    const ResourceCollection shockRock = metal.find("earlymetal.shockrock.*");
+    types = shockRock.begin();
+    CFIX_ASSERT (types != shockRock.end());
   }
 };
 
