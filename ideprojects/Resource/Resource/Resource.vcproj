@@ -161,11 +161,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\..\libraries\Resource\ResourceCollection.cpp"
+				RelativePath="..\..\..\libraries\Resource\PathName.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libraries\Resource\ResourcePath.cpp"
+				RelativePath="..\..\..\libraries\Resource\ResourceCollection.cpp"
 				>
 			</File>
 			<File
@@ -191,15 +191,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\PathName.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\Resource.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\ResourceCollection.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libraries\Resource\ResourcePath.h"
 				>
 			</File>
 			<File

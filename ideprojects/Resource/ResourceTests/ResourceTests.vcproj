@@ -167,11 +167,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\tests\Resource\TestResourceCollection.cpp"
+			RelativePath="..\..\..\tests\Resource\TestPathName.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\..\tests\Resource\TestResourcePath.cpp"
+			RelativePath="..\..\..\tests\Resource\TestResourceCollection.cpp"
 			>
 		</File>
 		<File

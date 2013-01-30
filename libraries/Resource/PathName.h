@@ -8,7 +8,7 @@
 /**
  * @description A convenience class useful for storing and comparing paths.
  */
-class ResourcePath
+class PathName
 {
 public:
 
@@ -20,24 +20,24 @@ public:
     kIsParent
   } Comparison;
 
-  ResourcePath() : 
+  PathName() : 
     mAbsolutePath(NULL),
     mRelativePath(NULL)
   {
   }
 
-  ResourcePath(const char* path)
+  PathName(const char* path)
   {
     setPath(path);
   }
 
-  ResourcePath(const ResourcePath& rhs) :
+  PathName(const PathName& rhs) :
     mAbsolutePath(rhs.mAbsolutePath),
     mRelativePath(rhs.mRelativePath)
   {
   }
 
-  ~ResourcePath() {}
+  ~PathName() {}
 
   /**
    * @description Set path (resets relative path as well)
@@ -60,7 +60,7 @@ public:
    * @description Make this path relative to root.  This path must be a child path to root.
    * @returns false if root is not a true root to this path.
    */
-  bool makeRelativeTo(const ResourcePath& root);
+  bool makeRelativeTo(const PathName& root);
 
   /**
    * @description Pop the front element of the path.  i.e.
@@ -71,42 +71,42 @@ public:
 
   /**
    */
-  inline bool operator==(const ResourcePath& rhs) const
+  inline bool operator==(const PathName& rhs) const
   {
     return matches(rhs);
   }
 
   /**
    */
-  inline bool operator!=(const ResourcePath& rhs) const
+  inline bool operator!=(const PathName& rhs) const
   {
     return !matches(rhs);
   }
 
   /**
    */
-  inline bool matches(const ResourcePath& rhs) const
+  inline bool matches(const PathName& rhs) const
   {
     return compare(rhs) == kMatches;
   }
  
   /**
    */
-  inline bool isChildOf(const ResourcePath& rhs) const
+  inline bool isChildOf(const PathName& rhs) const
   {
     return compare(rhs) == kIsChild;
   }
 
   /**
    */
-  inline bool isParentOf(const ResourcePath& rhs) const
+  inline bool isParentOf(const PathName& rhs) const
   {
     return compare(rhs) == kIsParent;
   }
 
   /**
    */
-  Comparison compare(const ResourcePath& path, bool compareAbsolute = false, bool* outMatchedWild = NULL) const;
+  Comparison compare(const PathName& path, bool compareAbsolute = false, bool* outMatchedWild = NULL) const;
 
   /**
    */

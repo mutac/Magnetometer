@@ -1,14 +1,14 @@
 
-#include "ResourcePath.h"
+#include "PathName.h"
 #include <string.h>
 
-bool ResourcePath::popFront()
+bool PathName::popFront()
 {
   const char* next = sPopFront(mRelativePath);
 
   if (*next != '\0')
   {
-    // Don't allow the last element to
+    // Don't allow the last path element to
     // be popped.
     mRelativePath = next;
     return true;
@@ -19,7 +19,7 @@ bool ResourcePath::popFront()
   }
 }
 
-bool ResourcePath::makeRelativeTo(const ResourcePath& root)
+bool PathName::makeRelativeTo(const PathName& root)
 {
   mDebugAssert(root.getPath() != NULL);
   mDebugAssert(mRelativePath != NULL);
@@ -35,10 +35,11 @@ bool ResourcePath::makeRelativeTo(const ResourcePath& root)
     // Move beyond path separator
     mRelativePath++;
   }
+
   return true;
 }
 
-ResourcePath::Comparison ResourcePath::compare(const ResourcePath& path, bool compareAbsolute, bool* outMatchedWild) const
+PathName::Comparison PathName::compare(const PathName& path, bool compareAbsolute, bool* outMatchedWild) const
 {
   if (compareAbsolute)
   {
@@ -50,7 +51,7 @@ ResourcePath::Comparison ResourcePath::compare(const ResourcePath& path, bool co
   }
 }
 
-const char* ResourcePath::sPopFront(const char* path)
+const char* PathName::sPopFront(const char* path)
 {
   mDebugAssert(path != NULL);
 
@@ -68,7 +69,7 @@ const char* ResourcePath::sPopFront(const char* path)
   return path;
 }
 
-ResourcePath::Comparison ResourcePath::sCompare(const char* lhs, const char* rhs, bool* outMatchedWild)
+PathName::Comparison PathName::sCompare(const char* lhs, const char* rhs, bool* outMatchedWild)
 {
   mDebugAssert(lhs != NULL && rhs != NULL);
   bool matchedWild = false;

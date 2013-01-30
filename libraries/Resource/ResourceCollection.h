@@ -5,7 +5,7 @@
 #include "Defs.h"
 #include "IResource.h"
 #include "IAllocator.h"
-#include "ResourcePath.h"
+#include "PathName.h"
 #include <string.h>
 
 /**
@@ -34,21 +34,21 @@ public:
 
     /**
      * @description Merges two path trees together.
-     * @returns The (potentially new) parent node to the hierarchy.
+     * @returns The parent node to the hierarchy.
      */
     PathTree* merge(PathTree* rhs)
     {
       mDebugAssert(rhs != NULL);
      
-      ResourcePath::Comparison thisIs = mPath.compare(rhs->mPath);
-      mDebugAssert(thisIs != ResourcePath::kMatches);
+      PathName::Comparison relationship = mPath.compare(rhs->mPath);
+      mDebugAssert(relationship != PathName::kMatches);
 
-      if (thisIs == ResourcePath::kIsChild)
+      if (relationship == PathName::kIsChild)
       { 
         rhs->mParent = mParent;
         return rhs->merge(this);
       } 
-      else if (thisIs == ResourcePath::kIsParent)
+      else if (relationship == PathName::kIsParent)
       {
         if (mChild != NULL)
         {
@@ -113,23 +113,22 @@ public:
      *       1) path can be popped so that the full path isn't searched each time.
      *s
      */
-    PathTree* find(const ResourcePath& searchPath)
+    PathTree* find(const PathName& searchPath)
     {
-      // 1) it's an exact path: system.nodes.specific
-      // 2) it's a parent node: system.nodes
-      // 3) it's incorrect: system.doesnotexist
+      bool matchedWild = false;
 
-      ResourcePath::Comparison thisIs = mPath.compare(searchPath);
+      PathName::Comparison relationship = mPath.compare(searchPath, false, &matchedWild);
 
-      if (thisIs == ResourcePath::kIsChild)
+      if (relationship == PathName::kIsChild)
       {
+        // TODO: is this correct?
         return NULL;
       }
-      else if (thisIs == ResourcePath::kMatches)
+      else if (relationship == PathName::kMatches)
       {
         return this;
       }
-      else if (thisIs == ResourcePath::kIsParent)
+      else if (relationship == PathName::kIsParent)
       {
         return findInChildren(searchPath);
       }
@@ -142,10 +141,10 @@ public:
     inline void setValue(IResource* val) { mValue = val; }
     inline void setPath(const char* path) { mPath.setPath(path); }
     inline IResource* getValue() { return mValue; }
-    inline const ResourcePath& getPath() const { return mPath; }
+    inline const PathName& getPath() const { return mPath; }
 
   protected:
-    PathTree* findInCousins(const ResourcePath& searchPath)
+    PathTree* findInCousins(const PathName& searchPath)
     {
       if (mNextCousin != NULL)
       {
@@ -157,7 +156,7 @@ public:
       }
     }
 
-    PathTree* findInChildren(const ResourcePath& searchPath)
+    PathTree* findInChildren(const PathName& searchPath)
     {
       if (mChild != NULL)
       {
@@ -170,7 +169,7 @@ public:
     }
 
   private:
-    ResourcePath mPath;
+    PathName mPath;
     IResource* mValue;
     PathTree* mParent;
     PathTree* mChild;
@@ -238,7 +237,7 @@ public:
       return mCurrent->getValue();
     }
 
-    const ResourcePath* path()
+    const PathName* path()
     {
       mDebugAssert(mCurrent != NULL);
       return &mCurrent->getPath();
