@@ -1,5 +1,6 @@
 #include <cfixcc.h>
 #include <string.h>
+#include <iostream>
 
 #include "ResourceCollection.h"
 #include "StaticPool.h"
@@ -225,6 +226,11 @@ public:
     const ResourceCollection shockRock = metal.find("earlymetal.shockrock.*");
     types = shockRock.begin();
     CFIX_ASSERT (types != shockRock.end());
+
+    //for (types = shockRock.begin(); types != shockRock.end(); types++)
+    //{
+    //  std::cout << types.path()->getPath() << std::endl;
+    //}
   }
 };
 

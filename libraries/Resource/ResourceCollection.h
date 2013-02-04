@@ -17,12 +17,29 @@ public:
   class Iterator;
   class PathTree;
 
+  typedef enum
+  {
+    kRootVisibility,
+    kAllVisibility,
+    kDefaultVisibility = kRootVisibility
+  } Visibility;
+
   /**
    */
   class PathTree
   {
   public:
-    friend class Iterator;
+    class IVisitor
+    {
+    public:
+      virtual void visit(PathTree* node) = 0;
+    };
+
+    class IConstVisitor
+    {
+    public:
+      virtual void visit(const PathTree* node) = 0;
+    };
 
     PathTree() :
       mValue(NULL),
@@ -119,6 +136,51 @@ public:
       }
     }
 
+    void visit(IVisitor& visitor) 
+    {
+      visitor.visit(this);
+
+      if (mNextCousin != NULL)
+      {
+        mNextCousin->visit(visitor);
+      }
+
+      if (mChild != NULL)
+      {
+        mChild->visit(visitor);
+      }
+    }
+
+    void visitConst(IConstVisitor& visitor) const
+    {
+      visitor.visit(this);
+
+      if (mNextCousin != NULL)
+      {
+        mNextCousin->visitConst(visitor);
+      }
+
+      if (mChild != NULL)
+      {
+        mChild->visitConst(visitor);
+      }
+    }
+
+    inline PathTree* getParent() { return mParent; }
+    inline PathTree* getChild() { return mChild; }
+    inline PathTree* getCousin() { return mNextCousin; }
+    inline PathTree* getBeginningCousin()
+    {
+      if (mParent != NULL)
+      {
+        return mParent->mChild;
+      }
+      else
+      {
+        return this;
+      }
+    }
+
     inline void setValue(IResource* val) { mValue = val; }
     inline void setPath(const char* path) { mPath.setPath(path); }
     inline IResource* getValue() { return mValue; }
@@ -186,9 +248,8 @@ public:
     Iterator() :
       mOrigin(NULL),
       mCurrent(NULL),
-      mNext(NULL),
-      mIncludeChildren(false),
-      mIncludeSiblings(false)
+      mVisibility(kDefaultVisibility),
+      mDepth(0)
     {
     }
 
@@ -244,53 +305,71 @@ public:
     }
 
   protected:
-    Iterator(PathTree* root) :
+    Iterator(PathTree* root, Visibility visibility) :
       mOrigin(root),
       mCurrent(root),
-      mNext(NULL),
-      mIncludeChildren(false),
-      mIncludeSiblings(false)
+      mVisibility(visibility),
+      mDepth(0)
     {
     }
 
   private:
     void next()
     {
-      if (mIncludeSiblings && 
-          mCurrent &&
-          mCurrent->mNextCousin != NULL)
+      if (mCurrent == NULL)
       {
-        mNext = mCurrent->mNextCousin;
-      }
-      else if (mIncludeChildren && 
-               mCurrent &&
-               mCurrent->mChild != NULL)
-      {
-        mNext = mCurrent->mChild;
-      }
-      else
-      {
-        mNext = NULL;
+        return;
       }
 
-      mCurrent = mNext;
+      if (mVisibility == kRootVisibility)
+      {
+        mCurrent = NULL;
+        return;
+      }
+
+      if (mVisibility == kAllVisibility)
+      {
+        if (mCurrent->getChild())
+        {
+          ++mDepth;
+          mCurrent = mCurrent->getChild();
+        }
+        else if (mCurrent->getCousin())
+        {
+          mCurrent = mCurrent->getCousin();
+        }
+        else if (mDepth != 0 && mCurrent->getParent())
+        {
+          --mDepth;
+          mCurrent = mCurrent->getParent();
+        }
+        else
+        {
+          mCurrent = NULL;
+        }
+        return;
+      }
+
+      // Mode not implemented...
+      mDebugAssert(0);
     }
 
+    int mDepth;
     PathTree* mOrigin;
     PathTree* mCurrent;
-    PathTree* mNext;
-    bool mIncludeChildren;
-    bool mIncludeSiblings;
+    Visibility mVisibility;
   };
 
   /**
    */
   ResourceCollection(
     IAllocator<PathTree>& allocator = NullAllocator<PathTree>::instance(), 
-      PathTree* root = NULL) 
+      PathTree* root = NULL,
+      Visibility visibility = kAllVisibility) 
     :
     mAllocator(allocator),
-    mRoot(root)
+    mRoot(root),
+    mVisibility(visibility)
   {
   }
 
@@ -302,7 +381,7 @@ public:
 
   Iterator begin(void) const
   {
-    return Iterator(mRoot);
+    return Iterator(mRoot, mVisibility);
   }
 
   Iterator end(void) const
@@ -322,7 +401,26 @@ public:
     PathTree* found = mRoot->find(path);
     if (found)
     {
-      return ResourceCollection(mAllocator, found);
+      // TODO: Put this somewhere else
+      bool matchedWild = false;
+      PathName::Comparison relationship = 
+        found->getPath().compare(path, false, &matchedWild);
+
+      // Use the path relationship to determine visibility
+      // of search results.
+      Visibility visibility = kDefaultVisibility;
+      if (matchedWild)
+      {
+        // TODO: expand on this...
+        visibility = kAllVisibility;
+      }
+
+      // Returning a const, so no need for it to have
+      // an allocator.
+      return ResourceCollection(
+        NullAllocator<PathTree>::instance(), 
+        found, 
+        visibility);
     }
     else
     {
@@ -377,6 +475,7 @@ public:
 private:
   PathTree* mRoot;
   IAllocator<PathTree>& mAllocator;
+  Visibility mVisibility;
 };
 
 #endif
