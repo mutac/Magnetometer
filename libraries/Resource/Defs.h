@@ -25,6 +25,7 @@
 // Configure assertion functions
 //
 
+#include <stdlib.h>
 #include <assert.h>
 
 /**

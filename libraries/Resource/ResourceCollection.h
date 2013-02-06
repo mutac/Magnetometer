@@ -8,6 +8,7 @@
 #include "PathName.h"
 #include <string.h>
 
+
 /**
  * 
  */
@@ -58,6 +59,8 @@ public:
       mDebugAssert(rhs != NULL);
      
       PathName::Comparison relationship = mPath.compare(rhs->mPath);
+
+      // TODO: could attempt to merge cousins and children.
       mDebugAssert(relationship != PathName::kMatches);
 
       if (relationship == PathName::kIsChild)

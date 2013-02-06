@@ -30,7 +30,16 @@ public:
   /**
    * @note There only needs to be one of these.
    */
-  static NullAllocator<T>& instance();
+  static NullAllocator<T>& instance()
+  {
+    // This is tricky.  Not all compilers support
+    // method-static variables within a template. 
+    // And others don't fully support template 
+    // specialization... so...
+    // 
+    static NullAllocator<T> sAllocator;
+    return sAllocator;
+  }
 };
 
 #endif
