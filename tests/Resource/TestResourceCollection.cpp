@@ -1,38 +1,38 @@
 #include <cfixcc.h>
 #include <string.h>
 #include <iostream>
+#include <set>
 
 #include "ResourceCollection.h"
 #include "StaticPool.h"
 #include "Resource.h"
 
-class TestResource : public ResourceBase
-{
-public:
-  TestResource() :
-    mId(sNextId)
-  {
-    sNextId++;
-  }
-
-  TestResource(const TestResource& rhs) :
-    mId(rhs.mId)
-  {
-  }
-
-  int Id() const { return mId; }
-
-private:
-  int mId;
-  static int sNextId;
-};
-
-int TestResource::sNextId = 0;
-
 class TestResourceCollection : public cfixcc::TestFixture
 {
 private:
-  void VerifyFind(ResourceCollection& collection, const char* path, TestResource& item)
+  class TestResource : public ResourceBase
+  {
+  public:
+    TestResource() :
+      mId(sNextId)
+    {
+      sNextId++;
+    }
+
+    TestResource(const TestResource& rhs) :
+      mId(rhs.mId)
+    {
+    }
+
+    int Id() const { return mId; }
+
+  private:
+    int mId;
+    static int sNextId;
+  };
+
+  void VerifyFind(ResourceCollection& collection, const char* path, 
+    TestResource& item)
   {
     ResourceCollection found = collection.find(path);
     CFIX_ASSERT (found.empty() == false);
@@ -40,6 +40,22 @@ private:
     ResourceCollection::Iterator foundItem = found.begin();
     CFIX_ASSERT (foundItem.path()->matches(path));
     CFIX_ASSERT (static_cast<TestResource*>(foundItem.value())->Id() == item.Id());
+  }
+
+  void VerifyIteration(const ResourceCollection& collection, 
+    const std::set<PathName>& expected)
+  {
+    std::set<PathName> foundPaths;
+
+    for(ResourceCollection::Iterator it = collection.begin(); 
+        it != collection.end(); 
+        ++it)
+    {
+      CFIX_ASSERT (foundPaths.find(*it.path()) == foundPaths.end());
+      foundPaths.insert(*it.path());
+    }
+
+    CFIX_ASSERT (expected == foundPaths);
   }
 
 public:
@@ -217,22 +233,39 @@ public:
 
     // Single element
     const ResourceCollection grunge = metal.find("earlymetal.grunge");
-    types = grunge.begin();
-    CFIX_ASSERT (types != grunge.end());
-    CFIX_ASSERT (types.path()->matches("earlymetal.grunge"));
-    CFIX_ASSERT (++types == grunge.end());
+
+    std::set<PathName> expectedGrunge;
+    expectedGrunge.insert("earlymetal.grunge");
+
+    VerifyIteration(grunge, expectedGrunge);
 
     // Multiple siblings
     const ResourceCollection shockRock = metal.find("earlymetal.shockrock.*");
-    types = shockRock.begin();
-    CFIX_ASSERT (types != shockRock.end());
 
-    //for (types = shockRock.begin(); types != shockRock.end(); types++)
-    //{
-    //  std::cout << types.path()->getPath() << std::endl;
-    //}
+    std::set<PathName> expectedShockRock;
+    expectedShockRock.insert("earlymetal.shockrock.glamrock");
+    expectedShockRock.insert("earlymetal.shockrock.industrialmetal");
+    expectedShockRock.insert("earlymetal.shockrock.industrialmetal.numetal");
+
+    VerifyIteration(shockRock, expectedShockRock);
+
+    // Everything
+    const ResourceCollection earlyMetal = metal.find("earlymetal.*");
+
+    std::set<PathName> expectedEarlyMetal;
+    expectedEarlyMetal.insert("earlymetal.grunge");
+    expectedEarlyMetal.insert("earlymetal.powermetal");
+    expectedEarlyMetal.insert("earlymetal.shockrock");
+    expectedEarlyMetal.insert("earlymetal.powermetal.britishheavymetal");
+    expectedEarlyMetal.insert("earlymetal.shockrock.glamrock");
+    expectedEarlyMetal.insert("earlymetal.shockrock.industrialmetal");
+    expectedEarlyMetal.insert("earlymetal.shockrock.industrialmetal.numetal");
+
+    VerifyIteration(earlyMetal, expectedEarlyMetal);
   }
 };
+
+int TestResourceCollection::TestResource::sNextId = 0;
 
 CFIXCC_BEGIN_CLASS(TestResourceCollection)
   CFIXCC_METHOD(ConstructDestruct)

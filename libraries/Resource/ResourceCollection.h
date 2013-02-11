@@ -122,7 +122,6 @@ public:
 
       if (relationship == PathName::kIsChild)
       {
-        // TODO: is this correct?
         return NULL;
       }
       else if (relationship == PathName::kMatches)
@@ -295,6 +294,11 @@ public:
       return value();
     }
 
+    IResource* operator->()
+    {
+      return value();
+    }
+
     IResource* value()
     {
       mDebugAssert(mCurrent != NULL);
@@ -327,34 +331,34 @@ public:
       if (mVisibility == kRootVisibility)
       {
         mCurrent = NULL;
-        return;
       }
-
-      if (mVisibility == kAllVisibility)
+      else if (mVisibility == kAllVisibility)
       {
         if (mCurrent->getChild())
         {
-          ++mDepth;
           mCurrent = mCurrent->getChild();
         }
         else if (mCurrent->getCousin())
         {
           mCurrent = mCurrent->getCousin();
         }
-        else if (mDepth != 0 && mCurrent->getParent())
-        {
-          --mDepth;
-          mCurrent = mCurrent->getParent();
-        }
         else
         {
-          mCurrent = NULL;
+          if (mCurrent->getParent())
+          {
+            mCurrent = mCurrent->getParent()->getCousin();
+          }
+          else
+          {
+            mCurrent = NULL;
+          }
         }
-        return;
       }
-
-      // Mode not implemented...
-      mDebugAssert(0);
+      else 
+      {
+        // Mode not implemented...
+        mDebugAssert(0);
+      }
     }
 
     int mDepth;

@@ -85,6 +85,13 @@ public:
 
   /**
    */
+  inline bool operator<(const PathName& rhs) const
+  {
+    return strcmp(mRelativePath, rhs.mRelativePath) < 0;
+  }
+
+  /**
+   */
   inline bool matches(const PathName& rhs) const
   {
     return compare(rhs) == kMatches;
