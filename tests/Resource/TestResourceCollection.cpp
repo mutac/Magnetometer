@@ -47,14 +47,17 @@ private:
   {
     std::set<PathName> foundPaths;
 
-    for(ResourceCollection::Iterator it = collection.begin(); 
-        it != collection.end(); 
-        ++it)
+    unsigned int expectedCount = 0; 
+    for(ResourceCollection::Iterator it = collection.begin();
+        it != collection.end() && expectedCount < expected.size();
+        expectedCount++, it++)
     {
+      // Only appear once?
       CFIX_ASSERT (foundPaths.find(*it.path()) == foundPaths.end());
       foundPaths.insert(*it.path());
     }
 
+    CFIX_ASSERT (expectedCount == expected.size());
     CFIX_ASSERT (expected == foundPaths);
   }
 
@@ -62,109 +65,109 @@ public:
   void ConstructDestruct()
   {
     StaticPool<10, ResourceCollection::PathTree> allocator;
-    ResourceCollection metal(allocator);
+    ResourceCollection tree(allocator);
 
-    // CFIX_ASSERT (resources.getCount() == 0);
+    CFIX_ASSERT (tree.empty());
 
-    CFIX_ASSERT (metal.exists("anything.at.all") == false);
-    CFIX_ASSERT (metal.exists("nothing") == false);
-    CFIX_ASSERT (metal.exists("*") == false);
-    CFIX_ASSERT (metal.exists("") == false);
+    CFIX_ASSERT (tree.exists("anything.at.all") == false);
+    CFIX_ASSERT (tree.exists("nothing") == false);
+    CFIX_ASSERT (tree.exists("*") == false);
+    CFIX_ASSERT (tree.exists("") == false);
   }
 
   void AddSimple()
   {
     StaticPool<10, ResourceCollection::PathTree> allocator;
-    ResourceCollection metal(allocator);
+    ResourceCollection tree(allocator);
 
     // Add a root
     TestResource testResource0;
-    CFIX_ASSERT (metal.add("root", &testResource0) == true);
+    CFIX_ASSERT (tree.add("root", &testResource0) == true);
 
-    VerifyFind(metal, "root", testResource0);
+    VerifyFind(tree, "root", testResource0);
 
     //
     // Add siblings
     //
 
     TestResource testResource1;
-    CFIX_ASSERT (metal.add("system.devices.test1", &testResource1) == true);
+    CFIX_ASSERT (tree.add("system.devices.test1", &testResource1) == true);
 
     TestResource testResource2;
-    CFIX_ASSERT (metal.add("system.devices.test2", &testResource2) == true);
+    CFIX_ASSERT (tree.add("system.devices.test2", &testResource2) == true);
 
-    VerifyFind(metal, "system.devices.test1", testResource1);
-    VerifyFind(metal, "system.devices.test2", testResource2);
+    VerifyFind(tree, "system.devices.test1", testResource1);
+    VerifyFind(tree, "system.devices.test2", testResource2);
 
     //
     // Add children
     //
 
     TestResource testResource3;
-    CFIX_ASSERT (metal.add("system.devices.test1.somethingnew", &testResource3) == true);
+    CFIX_ASSERT (tree.add("system.devices.test1.somethingnew", &testResource3) == true);
 
     TestResource testResource4;
-    CFIX_ASSERT (metal.add("system.devices.test2.somethingelsenew", &testResource4) == true);
+    CFIX_ASSERT (tree.add("system.devices.test2.somethingelsenew", &testResource4) == true);
 
-    VerifyFind(metal, "system.devices.test1.somethingnew", testResource3);
-    VerifyFind(metal, "system.devices.test2.somethingelsenew", testResource4);
+    VerifyFind(tree, "system.devices.test1.somethingnew", testResource3);
+    VerifyFind(tree, "system.devices.test2.somethingelsenew", testResource4);
 
     //
     // Add parents
     //
 
     TestResource testResource5;
-    CFIX_ASSERT (metal.add("system.objects", &testResource5) == true);
+    CFIX_ASSERT (tree.add("system.objects", &testResource5) == true);
 
     TestResource testResource6;
-    CFIX_ASSERT (metal.add("diagnostics", &testResource6) == true);
+    CFIX_ASSERT (tree.add("diagnostics", &testResource6) == true);
 
-    VerifyFind(metal, "system.objects", testResource5);
-    VerifyFind(metal, "diagnostics", testResource6);
+    VerifyFind(tree, "system.objects", testResource5);
+    VerifyFind(tree, "diagnostics", testResource6);
 
     //
     // Keep adding until allocator runs out
     //
 
     TestResource exhausted;
-    CFIX_ASSERT (metal.add("diagnostics.node.7", &exhausted) == true);
-    CFIX_ASSERT (metal.add("diagnostics.node.8", &exhausted) == true);
-    CFIX_ASSERT (metal.add("diagnostics.node.9", &exhausted) == true);
-    CFIX_ASSERT (metal.add("diagnostics.node.10", &exhausted) == false);
-    CFIX_ASSERT (metal.add("diagnostics.node.11", &exhausted) == false);
+    CFIX_ASSERT (tree.add("diagnostics.node.7", &exhausted) == true);
+    CFIX_ASSERT (tree.add("diagnostics.node.8", &exhausted) == true);
+    CFIX_ASSERT (tree.add("diagnostics.node.9", &exhausted) == true);
+    CFIX_ASSERT (tree.add("diagnostics.node.10", &exhausted) == false);
+    CFIX_ASSERT (tree.add("diagnostics.node.11", &exhausted) == false);
   }
 
   void AddWithRootReplacement()
   {
     StaticPool<10, ResourceCollection::PathTree> allocator;
-    ResourceCollection metal(allocator);
+    ResourceCollection tree(allocator);
 
     TestResource testResource1;
-    CFIX_ASSERT (metal.add("a.b.c", &testResource1) == true);
+    CFIX_ASSERT (tree.add("a.b.c", &testResource1) == true);
 
     TestResource testResource2;
-    CFIX_ASSERT (metal.add("a.b.d", &testResource2) == true);
+    CFIX_ASSERT (tree.add("a.b.d", &testResource2) == true);
 
     TestResource testResource3;
-    CFIX_ASSERT (metal.add("a.c.a", &testResource3) == true);
+    CFIX_ASSERT (tree.add("a.c.a", &testResource3) == true);
 
     TestResource testResource4;
-    CFIX_ASSERT (metal.add("a.c.b", &testResource4) == true);
+    CFIX_ASSERT (tree.add("a.c.b", &testResource4) == true);
 
     TestResource testResource5;
-    CFIX_ASSERT (metal.add("c.a.b", &testResource5) == true);
+    CFIX_ASSERT (tree.add("c.a.b", &testResource5) == true);
 
     TestResource testResource6;
-    CFIX_ASSERT (metal.add("a.c.a.1", &testResource6) == true);
+    CFIX_ASSERT (tree.add("a.c.a.1", &testResource6) == true);
 
     TestResource testResource7;
-    CFIX_ASSERT (metal.add("a.c.a.2", &testResource7) == true);
+    CFIX_ASSERT (tree.add("a.c.a.2", &testResource7) == true);
 
     TestResource testResource8;
-    CFIX_ASSERT (metal.add("a.b.c.1", &testResource8) == true);
+    CFIX_ASSERT (tree.add("a.b.c.1", &testResource8) == true);
 
     TestResource testResource9;
-    CFIX_ASSERT (metal.add("a.b.c.2", &testResource9) == true);
+    CFIX_ASSERT (tree.add("a.b.c.2", &testResource9) == true);
 
     //
     // Insert a node that should become a parent to a.c.a as a sibling to a.b.d.
@@ -172,28 +175,28 @@ public:
     // c.a.b.
     //
     TestResource testResource10;
-    CFIX_ASSERT (metal.add("a.c", &testResource10) == true);
+    CFIX_ASSERT (tree.add("a.c", &testResource10) == true);
 
     //
     // Verify all nodes are still discoverable
     //
 
-    VerifyFind(metal, "a.b.c", testResource1);
-    VerifyFind(metal, "a.b.d", testResource2);
-    VerifyFind(metal, "a.c.a", testResource3);
-    VerifyFind(metal, "a.c.b", testResource4);
-    VerifyFind(metal, "c.a.b", testResource5);
-    VerifyFind(metal, "a.c.a.1", testResource6);
-    VerifyFind(metal, "a.c.a.2", testResource7);
-    VerifyFind(metal, "a.b.c.1", testResource8);
-    VerifyFind(metal, "a.b.c.2", testResource9);
-    VerifyFind(metal, "a.c", testResource10);
+    VerifyFind(tree, "a.b.c", testResource1);
+    VerifyFind(tree, "a.b.d", testResource2);
+    VerifyFind(tree, "a.c.a", testResource3);
+    VerifyFind(tree, "a.c.b", testResource4);
+    VerifyFind(tree, "c.a.b", testResource5);
+    VerifyFind(tree, "a.c.a.1", testResource6);
+    VerifyFind(tree, "a.c.a.2", testResource7);
+    VerifyFind(tree, "a.b.c.1", testResource8);
+    VerifyFind(tree, "a.b.c.2", testResource9);
+    VerifyFind(tree, "a.c", testResource10);
 
     //
     // Verify expected relationships
     //
 
-    ResourceCollection aDotC = metal.find("a.c");
+    ResourceCollection aDotC = tree.find("a.c");
     CFIX_ASSERT (aDotC.empty() == false);
   }
 
