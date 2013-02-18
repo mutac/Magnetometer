@@ -42,6 +42,9 @@ struct TypeWrapper<T&>
   typedef const T& CONSTREFTYPE;
 };
 
+/**
+ * @brief
+ */
 class Variant
 {
 public:
@@ -52,6 +55,7 @@ public:
 
   template<class T>
   Variant(T inValue) :
+    // TODO: Allocator/deallocator
     mImpl(new VariantImpl<typename TypeWrapper<T>::TYPE>(inValue))
   {
   }
@@ -60,7 +64,7 @@ public:
   typename TypeWrapper<T>::REFTYPE get()
   {
     VariantImpl<typename TypeWrapper<T>::TYPE> valRef = 
-      *reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl);
+      *reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl.get());
 
     return valRef.mValue;
   }
@@ -68,12 +72,13 @@ public:
   template<class T>
   typename TypeWrapper<T>::CONSTREFTYPE get() const
   {
-    return reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(*implRef).mValue;
+    return reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl.get()).mValue;
   }
 
   template<class T>
   void set(typename TypeWrapper<T>::CONSTREFTYPE inValue)
   {
+    // TODO: Allocator/deallocator
     mImpl = new VariantImpl<typename TypeWrapper<T>::TYPE>(inValue);
   }
 
@@ -93,8 +98,7 @@ private:
     T mValue;
   };
 
-  //SharedPointer<AbstractVariantImpl> mImpl;
-  AbstractVariantImpl* mImpl;
+  SharedPointer<AbstractVariantImpl> mImpl;
 };
 
 #endif
