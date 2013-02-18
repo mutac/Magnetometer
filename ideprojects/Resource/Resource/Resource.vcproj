@@ -169,6 +169,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\SharedCount.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\Variant.cpp"
 				>
 			</File>
@@ -200,6 +204,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\ResourceCollection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\SharedCount.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\SharedPointer.h"
 				>
 			</File>
 			<File

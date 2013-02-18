@@ -4,65 +4,97 @@
 #define _VARIANT_H_7b8ba50a_bf45_4dd2_9272_a13596a52582
 
 #include "Defs.h"
+#include "SharedPointer.h"
 
-// #include <var/variant.hpp>
-
-/** Defines what the variant can hold.
- *  Keep the VariantType_* identifiers up-to-date.
- */
-// typedef ttl::var::variant<float, int, char*> VarType;
-
-/** List of supported types, number implies index within VarType template
- */
-enum VariantTypes
+template <typename T>
+struct TypeWrapper
 {
-  VariantTypes_float = 0,
-  VariantTypes_int = 1,
-  VariantTypes_charPtr = 2
+  typedef T TYPE;
+  typedef const T CONSTTYPE;
+  typedef T& REFTYPE;
+  typedef const T& CONSTREFTYPE;
 };
 
-/**
- */
-class Variant /* : public VarType */
+template <typename T>
+struct TypeWrapper<const T>
+{
+  typedef T TYPE;
+  typedef const T CONSTTYPE;
+  typedef T& REFTYPE;
+  typedef const T& CONSTREFTYPE;
+};
+
+template <typename T>
+struct TypeWrapper<const T&>
+{
+  typedef T TYPE;
+  typedef const T CONSTTYPE;
+  typedef T& REFTYPE;
+  typedef const T& CONSTREFTYPE;
+};
+
+template <typename T>
+struct TypeWrapper<T&>
+{
+  typedef T TYPE;
+  typedef const T CONSTTYPE;
+  typedef T& REFTYPE;
+  typedef const T& CONSTREFTYPE;
+};
+
+class Variant
 {
 public:
-  template<typename T>
-  inline bool isType() const;
+  Variant() :
+    mImpl(NULL)
+  {
+  }
 
-  /** 
-   * Pre-defined variant constants 
-   */
-  static Variant Empty;
+  template<class T>
+  Variant(T inValue) :
+    mImpl(new VariantImpl<typename TypeWrapper<T>::TYPE>(inValue))
+  {
+  }
+
+  template<class T>
+  typename TypeWrapper<T>::REFTYPE get()
+  {
+    VariantImpl<typename TypeWrapper<T>::TYPE> valRef = 
+      *reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl);
+
+    return valRef.mValue;
+  }
+
+  template<class T>
+  typename TypeWrapper<T>::CONSTREFTYPE get() const
+  {
+    return reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(*implRef).mValue;
+  }
+
+  template<class T>
+  void set(typename TypeWrapper<T>::CONSTREFTYPE inValue)
+  {
+    mImpl = new VariantImpl<typename TypeWrapper<T>::TYPE>(inValue);
+  }
 
 private:
-  int which() const { return 1; }
-};
+  struct AbstractVariantImpl
+  {
+    virtual ~AbstractVariantImpl() {}
+  };
 
-template<>
-inline bool Variant::isType<float>() const
-{
-  return which() == (int)VariantTypes_float;
-}
+  template<class T>
+  struct VariantImpl : public AbstractVariantImpl
+  {
+    VariantImpl(T inValue) : mValue(inValue) { }
 
-template<>
-inline bool Variant::isType<int>() const
-{
-  return which() == (int)VariantTypes_int;
-}
+    ~VariantImpl() {}
 
-template<>
-inline bool Variant::isType<char*>() const
-{
-  return which() == (int)VariantTypes_charPtr;
-}
+    T mValue;
+  };
 
-/**
- */
-class VariantVisitor 
-{
-  virtual void operator()(float val) {}
-  virtual void operator()(int val) {}
-  virtual void operator()(char* val) {}
+  //SharedPointer<AbstractVariantImpl> mImpl;
+  AbstractVariantImpl* mImpl;
 };
 
 #endif

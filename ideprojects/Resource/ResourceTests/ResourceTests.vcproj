@@ -175,7 +175,19 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\..\tests\Resource\TestSharedCount.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\tests\Resource\TestSharedPointer.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\tests\Resource\TestStaticPool.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\tests\Resource\TestVariant.cpp"
 			>
 		</File>
 	</Files>

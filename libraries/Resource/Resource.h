@@ -12,7 +12,7 @@ class ResourceBase : public IResource
 {
 public:
   virtual void set(const Variant& val) {}
-  virtual Variant get() { return Variant::Empty; }
+  virtual Variant get() { return Variant(); }
 };
 
 #endif

@@ -71,23 +71,23 @@ public:
 
   /**
    */
-  inline bool operator==(const PathName& rhs) const
+  friend inline bool operator==(PathName const & lhs, PathName const & rhs)
   {
-    return matches(rhs);
+    return lhs.matches(rhs);
   }
 
   /**
    */
-  inline bool operator!=(const PathName& rhs) const
+  friend inline bool operator!=(PathName const & lhs, PathName const & rhs)
   {
-    return !matches(rhs);
+    return !(lhs.matches(rhs));
   }
 
   /**
    */
-  inline bool operator<(const PathName& rhs) const
+  friend inline bool operator<(PathName const & lhs, PathName const & rhs)
   {
-    return strcmp(mRelativePath, rhs.mRelativePath) < 0;
+    return strcmp(lhs.mRelativePath, rhs.mRelativePath) < 0;
   }
 
   /**
@@ -113,7 +113,8 @@ public:
 
   /**
    */
-  Comparison compare(const PathName& path, bool compareAbsolute = false, bool* outMatchedWild = NULL) const;
+  Comparison compare(const PathName& path, 
+    bool compareAbsolute = false, bool* outMatchedWild = NULL) const;
 
   /**
    */
