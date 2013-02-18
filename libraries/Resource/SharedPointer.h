@@ -73,14 +73,13 @@ public:
 
 private:
   /**
-   * @note Warning: Caller must release mCount
+   * @note Caller must release mCount
    */
   void release()
   {
-    if (mCount.getUseCount() == 1)
+    if (mShared != NULL)
     {
-      // TODO: Allocator/Deallocator
-      if (mShared != NULL)
+      if (mCount.getUseCount() == 1)
       {
         delete mShared;
       }
@@ -101,6 +100,24 @@ template<class T, class U>
 inline bool operator!=(SharedPointer<T> const & rhs, SharedPointer<U> const & lhs)
 {
   return rhs.get() != lhs.get();
+}
+
+/**
+ * Cheat to allow comparison to null.
+ */
+template<class T>
+inline bool operator==(SharedPointer<T> const & rhs, int lhs)
+{
+  return rhs.get() == reinterpret_cast<T*>(lhs);
+}
+
+/**
+ * Cheat to allow comparison to null.
+ */
+template<class T>
+inline bool operator!=(SharedPointer<T> const & rhs, int lhs)
+{
+  return rhs.get() != reinterpret_cast<T*>(lhs);
 }
 
 #endif
