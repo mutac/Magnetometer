@@ -42,6 +42,31 @@ struct TypeWrapper<T&>
   typedef const T& CONSTREFTYPE;
 };
 
+struct AbstractVariantImpl
+{
+  virtual ~AbstractVariantImpl() {}
+  //virtual void* getUntyped() = 0;
+};
+
+//
+// TODO: Ownership of value?
+// 
+template<class T>
+class VariantImpl : public AbstractVariantImpl
+{
+public:
+  VariantImpl(T inValue) : mValue(inValue) { }
+  virtual ~VariantImpl() {}
+
+  T& get()
+  {
+    return mValue;
+  }
+
+private:
+  T mValue;
+};
+
 /**
  * @brief
  */
@@ -63,16 +88,25 @@ public:
   template<class T>
   typename TypeWrapper<T>::REFTYPE get()
   {
-    VariantImpl<typename TypeWrapper<T>::TYPE> valRef = 
-      *reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl.get());
+    //VariantImpl<typename TypeWrapper<T>::TYPE>* valRef = 
+    //  reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl.get());
 
-    return valRef.mValue;
+    //mdebugAssert(valRef != NULL);
+    //return valRef->get<typename TypeWrapper<T>::TYPE>();
+    AbstractVariantImpl* impl = mImpl.get();
+    return impl->get<typename TypeWrapper<T>::TYPE>();
   }
 
   template<class T>
   typename TypeWrapper<T>::CONSTREFTYPE get() const
   {
-    return reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl.get()).mValue;
+    //VariantImpl<typename TypeWrapper<T>::TYPE>* valRef =
+    //  reinterpret_cast<VariantImpl<typename TypeWrapper<T>::TYPE>*>(mImpl.get());
+
+    //mDebugAssert(valRef != NULL);
+    //return valRef->get<typename TypeWrapper<T>::TYPE>();
+    AbstractVariantImpl* impl = mImpl.get();
+    return impl->get<typename TypeWrapper<T>::TYPE>();
   }
 
   template<class T>
@@ -83,21 +117,6 @@ public:
   }
 
 private:
-  struct AbstractVariantImpl
-  {
-    virtual ~AbstractVariantImpl() {}
-  };
-
-  template<class T>
-  struct VariantImpl : public AbstractVariantImpl
-  {
-    VariantImpl(T inValue) : mValue(inValue) { }
-
-    ~VariantImpl() {}
-
-    T mValue;
-  };
-
   SharedPointer<AbstractVariantImpl> mImpl;
 };
 

@@ -103,7 +103,7 @@ inline bool operator!=(SharedPointer<T> const & rhs, SharedPointer<U> const & lh
 }
 
 /**
- * Cheat to allow comparison to null.
+ * Special case: Cheat to allow comparison to null.
  */
 template<class T>
 inline bool operator==(SharedPointer<T> const & rhs, int lhs)
@@ -112,7 +112,7 @@ inline bool operator==(SharedPointer<T> const & rhs, int lhs)
 }
 
 /**
- * Cheat to allow comparison to null.
+ * Special case: Cheat to allow comparison to null.
  */
 template<class T>
 inline bool operator!=(SharedPointer<T> const & rhs, int lhs)

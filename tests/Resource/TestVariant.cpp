@@ -11,6 +11,9 @@ public:
     v.set<float>(100.0f);
     float f = v.get<float>();
     CFIX_ASSERT (f == 100.0f);
+
+    int i = v.get<int>();
+    CFIX_ASSERT (i == 100);
   }
 };
 

@@ -35,9 +35,6 @@ public:
 
     SharedPointer<SharedClass> ptr2;
     CFIX_ASSERT (ptr != ptr2);
-
-    const char* test = "hello";
-    //CFIX_ASSERT (ptr != test);
   }
 };
 
