@@ -2,7 +2,7 @@
 #ifndef _SHAREDPOINTER_H_02b6f995_7ac4_42db_91b1_c94199cef10c
 #define _SHAREDPOINTER_H_02b6f995_7ac4_42db_91b1_c94199cef10c
 
-#include "Defs.h"
+#include "mDefs.h"
 #include "SharedCount.h"
 
 // TODO: make more memory efficient:

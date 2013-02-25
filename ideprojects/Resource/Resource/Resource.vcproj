@@ -161,6 +161,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mStd.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\PathName.cpp"
 				>
 			</File>
@@ -183,15 +187,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\..\libraries\Resource\Defs.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libraries\Resource\IAllocator.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\IResource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\mDefs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\mStd.h"
 				>
 			</File>
 			<File

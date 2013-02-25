@@ -1,12 +1,44 @@
-
+/**
+ * @file Defs.h
+ * @description Common macros, definitions and configurations
+ *
+ * TODO:
+ *  * Add namespaces
+ *  * Specialize inclusions and namespace usage if compiling for arduino
+ *
+ */
 #ifndef _DEFS_H_9ce33353_44da_40a5_bb3b_de0f9b3dad12
 #define _DEFS_H_9ce33353_44da_40a5_bb3b_de0f9b3dad12
 
+#include <stdlib.h>
+#include <assert.h>
+
 //
-// TODO:
-//    * Add namespaces
-//    * Specialize inclusions and namepspace usage if compiling for arduino
+// Exception use
 //
+
+/**
+ * Enable exceptions
+ */
+// #define mUseExceptions
+
+//
+// STL use
+//
+
+/** 
+ * @description Configure STL usage
+ */
+// #define mUseStl
+
+//
+// RTTI
+//
+
+/**
+ * @description Set if compiling with RTTI
+ */
+// #define mUseRtti
 
 //
 // Configure debugging
@@ -22,11 +54,8 @@
 #endif // ifndef mDebugging
 
 // 
-// Configure assertion functions
+// Configure assertion macros
 //
-
-#include <stdlib.h>
-#include <assert.h>
 
 /**
  * @description Assert if expression is false

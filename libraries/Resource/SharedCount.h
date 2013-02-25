@@ -2,7 +2,7 @@
 #ifndef _SHAREDCOUNT_H_19519545_a1e1_4a41_860d_49eab62331f0
 #define _SHAREDCOUNT_H_19519545_a1e1_4a41_860d_49eab62331f0
 
-#include "Defs.h"
+#include "mDefs.h"
 
 /**
  * @brief Type used to count references

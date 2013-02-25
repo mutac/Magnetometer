@@ -2,7 +2,7 @@
 #ifndef _IALLOCATOR_H_712b764c_c6dc_418d_9a82_0838b9e6e5b7
 #define _IALLOCATOR_H_712b764c_c6dc_418d_9a82_0838b9e6e5b7
 
-#include "Defs.h"
+#include "mDefs.h"
 #include <string.h>
 
 /**
