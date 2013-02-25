@@ -198,7 +198,8 @@ public:
   template <typename ValueType>
   Variant& operator=(const ValueType& rhs)
   {
-    return swap(Variant(rhs));
+    Variant tmp(rhs);
+    return swap(tmp);
   }
 
   /**
@@ -218,22 +219,6 @@ public:
       return NULL;
     }
 #endif // mUseRtti
-  }
-
-  /**
-   */
-  template <typename ValueType>
-  ValueType toValue(const Variant& rhs)
-  {
-    ValueType* result = rhs.toPtr<ValueType>();
-    if (result == NULL)
-    {
-#ifdef mUseExceptions
-      throw std::bad_cast();
-#endif // mUseExceptions
-    }
-
-    return result;
   }
 private:
   /**
@@ -275,11 +260,27 @@ private:
       // TODO: Allocator/Deallocator
       return new Holder(mHeld);
     }
-  private:
+  
     const TypeHeld mHeld;
   };
 
   PlaceHolder* mContent;
 };
+
+/**
+ */
+template <typename ValueType>
+ValueType variant_cast(const Variant& rhs)
+{
+  const ValueType* result = rhs.toPtr<ValueType>();
+  if (result == NULL)
+  {
+#ifdef mUseExceptions
+    throw std::bad_cast();
+#endif // mUseExceptions
+  }
+
+  return *result;
+}
 
 #endif // header guard
