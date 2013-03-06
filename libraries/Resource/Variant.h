@@ -140,6 +140,11 @@ public:
   {
   }
 
+  Variant(const Variant& rhs) :
+    mContent(rhs.mContent ? rhs.mContent->clone() : NULL)
+  {
+  }
+
   template<typename ValueType>
   Variant(const ValueType& value) :
     mContent(new Holder<ValueType>(value))
@@ -270,7 +275,7 @@ private:
 /**
  */
 template <typename ValueType>
-ValueType variant_cast(const Variant& rhs)
+const ValueType& variant_cast(const Variant& rhs)
 {
   const ValueType* result = rhs.toPtr<ValueType>();
   if (result == NULL)
