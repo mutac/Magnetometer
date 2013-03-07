@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\ObjectTraits.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\PathName.h"
 				>
 			</File>

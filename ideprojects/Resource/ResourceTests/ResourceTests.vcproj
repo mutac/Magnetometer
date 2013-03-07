@@ -167,6 +167,10 @@
 	</References>
 	<Files>
 		<File
+			RelativePath="..\..\..\tests\Resource\TestObjectTraits.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\tests\Resource\TestPathName.cpp"
 			>
 		</File>
