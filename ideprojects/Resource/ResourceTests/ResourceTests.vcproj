@@ -167,6 +167,14 @@
 	</References>
 	<Files>
 		<File
+			RelativePath="..\..\..\tests\Resource\TestAllocationPolicy.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\tests\Resource\TestAllocator.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\tests\Resource\TestObjectTraits.cpp"
 			>
 		</File>

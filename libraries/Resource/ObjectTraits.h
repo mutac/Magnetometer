@@ -36,11 +36,6 @@ public:
     new(ptr) T(t);
   }
 
-  inline void construct(T* ptr)
-  {
-    new(ptr) T;
-  }
-
   inline void destroy(T* ptr)
   {
     ptr->~T();
