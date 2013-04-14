@@ -1,6 +1,5 @@
 
 #include "ResourceCollection.h"
-#include "IAllocator.h"
 
 /*
 template <>

@@ -4,13 +4,14 @@
 
 #include "mDefs.h"
 #include "IResource.h"
-#include "IAllocator.h"
+#include "Allocator.h"
 #include "PathName.h"
 #include <string.h>
 
 /**
  * 
  */
+template<typename Alloc = Allocator<ResourceCollection> >
 class ResourceCollection
 {
 public: 
@@ -369,19 +370,20 @@ public:
   /**
    */
   ResourceCollection(
-    IAllocator<PathTree>& allocator = NullAllocator<PathTree>::instance(), 
+      Alloc allocator = Alloc(),
       PathTree* root = NULL,
       Visibility visibility = kAllVisibility) 
     :
-    mAllocator(allocator),
     mRoot(root),
-    mVisibility(visibility)
+    mVisibility(visibility),
+    mAllocator(allocator)
   {
   }
 
   ResourceCollection(const ResourceCollection& rhs) :
-    mAllocator(rhs.mAllocator),
-    mRoot(rhs.mRoot)
+    mRoot(rhs.mRoot),
+    mVisibility(rhs.mVisibility),
+    mAllocator(rhs.mAllocator)
   {
   }
 
@@ -424,7 +426,6 @@ public:
       // Returning a const, so no need for it to have
       // an allocator.
       return ResourceCollection(
-        NullAllocator<PathTree>::instance(), 
         found, 
         visibility);
     }
@@ -457,7 +458,7 @@ public:
       return false;
     }
 
-    PathTree* node = mAllocator.allocate();
+    PathTree* node = mAllocator.rebind<PathTree>.other.allocate(1);
     if (node == NULL)
     {
       return false;
@@ -480,8 +481,8 @@ public:
 
 private:
   PathTree* mRoot;
-  IAllocator<PathTree>& mAllocator;
   Visibility mVisibility;
+  Alloc mAllocator;
 };
 
 #endif
