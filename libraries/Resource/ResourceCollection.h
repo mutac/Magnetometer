@@ -11,7 +11,7 @@
 /**
  * 
  */
-template<class T, class Alloc = Allocator<T> >
+template<typename T, typename Alloc = Allocator<T> >
 class PathCollection
 {
 public: 
@@ -183,7 +183,7 @@ public:
       }
     }
 
-    inline void setValue(IResource* val) { mValue = val; }
+    inline void setValue(T* val) { mValue = val; }
     inline void setPath(const char* path) { mPath.setPath(path); }
     inline T* getValue() { return mValue; }
     inline const PathName& getPath() const { return mPath; }
@@ -411,8 +411,7 @@ public:
     {
       // TODO: Put this somewhere else
       bool matchedWild = false;
-      PathName::Comparison relationship = 
-        found->getPath().compare(path, false, &matchedWild);
+      found->getPath().compare(path, false, &matchedWild);
 
       // Use the path relationship to determine visibility
       // of search results.
@@ -447,7 +446,7 @@ public:
     return !exist.empty();
   }
 
-  bool add(const char* path, IResource* res)
+  bool add(const char* path, T* res)
   {
     if (path == NULL || res == NULL)
     {
@@ -459,12 +458,12 @@ public:
       return false;
     }
 
-    PathTree* node = Alloc::rebind<PathTree>::other(mAllocator).allocate(1);
+    PathTree* node = mAllocator.allocate(1);
     if (node == NULL)
     {
       return false;
     }
-    Alloc::rebind<PathTree>::other(mAllocator).construct(node, PathTree());
+    mAllocator.construct(node);
     
     node->setPath(path);
     node->setValue(res);
@@ -482,9 +481,11 @@ public:
   }
 
 private:
+  typedef typename Alloc::template rebind<PathTree>::other NodeAllocator;
+
   PathTree* mRoot;
   Visibility mVisibility;
-  Alloc mAllocator;
+  NodeAllocator mAllocator;
 };
 
 #endif

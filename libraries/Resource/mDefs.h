@@ -14,13 +14,26 @@
 #include <assert.h>
 
 //
+// Compiler warning
+//
+#ifdef _MSC_VER
+// Visual Studio 
+#define mCompilerWarning(str) message(__FILE__ "(" mConcat(__LINE__) ") : Warning: " #str)
+#elif __GNUC__
+// Gcc
+#define mCompilerWarning(str) message __FILE__ "(" mConcat(__LINE__) ") : Warning: " #str
+#endif
+
+//
 // Exception use
 //
 
 /**
  * Enable exceptions
  */
-// #define mUseExceptions
+#ifdef _MSC_VER
+#define mUseExceptions
+#endif
 
 //
 // STL use
@@ -39,6 +52,20 @@
  * @description Set if compiling with RTTI
  */
 // #define mUseRtti
+
+//
+// New/delete
+//
+#ifdef __AVR_ARCH__
+#define mHasNew
+// No placement new
+#define mHasDelete
+#else // Default platform runtime
+#define mHasNew
+#define mHasPlacementNew
+#define mHasDelete
+#endif // __AVR_ARCH__
+
 
 //
 // Configure debugging
@@ -92,5 +119,15 @@
  */
 #define mCountOf(staticArray) \
   (sizeof(staticArray) / sizeof(*staticArray))
+
+/**
+ * @see mConcat
+ */
+#define mConcatImpl(s) #s
+
+/**
+ * Concatenate two macro tokens
+ */
+#define mConcat(s) mConcatImpl(s)
 
 #endif // Header guard

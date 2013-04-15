@@ -26,9 +26,11 @@ public:
   template<typename U>
   struct rebind
   {
-    typedef Allocator<U, 
-      typename AllocationPolicy::rebind<U>::other, 
-      typename ObjTraits::rebind<U>::other> other;
+  private:
+    typedef typename AllocationPolicy::template rebind<U>::other otherPolicy;
+    typedef typename ObjTraits::template rebind<U>::other otherTraits;
+  public:
+    typedef Allocator<U, otherPolicy, otherTraits> other;
   };
 
   inline explicit Allocator() {}
@@ -45,10 +47,6 @@ public:
   template<typename U, typename P, typename OT>
   inline Allocator(Allocator<U, P, OT> const& rhs) :
     Policy(rhs), Traits(rhs)
-  {
-  }
-
-  void nothing() const
   {
   }
 };

@@ -7,12 +7,11 @@
 #include "StaticPool.h"
 #include "Resource.h"
 
-typedef PathCollection<IResource> ResourceCollection;
 
 class TestPathCollection : public cfixcc::TestFixture
 {
 private:
-  class TestResource : public ResourceBase
+  class TestResource
   {
   public:
     TestResource() :
@@ -32,6 +31,8 @@ private:
     int mId;
     static int sNextId;
   };
+
+  typedef PathCollection<TestResource> ResourceCollection;
 
   void VerifyFind(ResourceCollection& collection, const char* path, 
     TestResource& item)

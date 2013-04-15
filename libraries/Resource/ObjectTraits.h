@@ -3,6 +3,7 @@
 #define _OBJECTTRAITS_H_6b3b83a1_30e4_420a_8f27_cffe477add6a
 
 #include "mDefs.h"
+#include "mNew.h"
 
 // http://www.codeproject.com/Articles/4795/C-Standard-Allocator-An-Introduction-and-Implement
 
@@ -33,7 +34,12 @@ public:
 
   inline void construct(T* ptr, const T& t)
   {
-    new(ptr) T(t);
+    new ((void*)ptr) T(t);
+  }
+
+    inline void construct(T* ptr)
+  {
+    new ((void*)ptr) T();
   }
 
   inline void destroy(T* ptr)

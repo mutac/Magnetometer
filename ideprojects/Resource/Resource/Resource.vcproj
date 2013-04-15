@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mNew.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\mStd.h"
 				>
 			</File>

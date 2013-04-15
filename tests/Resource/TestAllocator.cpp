@@ -65,7 +65,7 @@ private:
   class AllocatorTests
   {
   public:
-    template<class AllocatorType>
+    template<typename AllocatorType>
     void allocateConstructDestructDeallocate()
     {
       ClassObserver observer;
