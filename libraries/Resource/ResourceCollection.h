@@ -11,8 +11,8 @@
 /**
  * 
  */
-template<typename Alloc = Allocator<ResourceCollection> >
-class ResourceCollection
+template<class T, class Alloc = Allocator<T> >
+class PathCollection
 {
 public: 
   class Iterator;
@@ -185,7 +185,7 @@ public:
 
     inline void setValue(IResource* val) { mValue = val; }
     inline void setPath(const char* path) { mPath.setPath(path); }
-    inline IResource* getValue() { return mValue; }
+    inline T* getValue() { return mValue; }
     inline const PathName& getPath() const { return mPath; }
 
   protected:
@@ -234,7 +234,7 @@ public:
 
   private:
     PathName mPath;
-    IResource* mValue;
+    T* mValue;
     PathTree* mParent;
     PathTree* mChild;
     PathTree* mNextCousin;
@@ -245,7 +245,7 @@ public:
   class Iterator
   {
   public: 
-    friend class ResourceCollection;
+    friend class PathCollection;
 
     Iterator() :
       mOrigin(NULL),
@@ -255,7 +255,7 @@ public:
     {
     }
 
-    Iterator(const ResourceCollection& collection)
+    Iterator(const PathCollection& collection)
     {
       *this = collection.begin();
     }
@@ -289,17 +289,17 @@ public:
       return mCurrent != rhs.mCurrent;
     }
 
-    IResource* operator*()
+    T* operator*()
     {
       return value();
     }
 
-    IResource* operator->()
+    T* operator->()
     {
       return value();
     }
 
-    IResource* value()
+    T* value()
     {
       mDebugAssert(mCurrent != NULL);
       return mCurrent->getValue();
@@ -369,7 +369,7 @@ public:
 
   /**
    */
-  ResourceCollection(
+  PathCollection(
       Alloc allocator = Alloc(),
       PathTree* root = NULL,
       Visibility visibility = kAllVisibility) 
@@ -380,7 +380,7 @@ public:
   {
   }
 
-  ResourceCollection(const ResourceCollection& rhs) :
+  PathCollection(const PathCollection& rhs) :
     mRoot(rhs.mRoot),
     mVisibility(rhs.mVisibility),
     mAllocator(rhs.mAllocator)
@@ -399,11 +399,11 @@ public:
 
   /**
    */
-  const ResourceCollection find(const char* path) const
+  const PathCollection find(const char* path) const
   {
     if (path == NULL || mRoot == NULL)
     {
-      return ResourceCollection();
+      return PathCollection();
     }
 
     PathTree* found = mRoot->find(path);
@@ -425,13 +425,14 @@ public:
 
       // Returning a const, so no need for it to have
       // an allocator.
-      return ResourceCollection(
+      return PathCollection<T>(
+        mAllocator,
         found, 
         visibility);
     }
     else
     {
-      return ResourceCollection();
+      return PathCollection();
     }
   }
 
@@ -442,7 +443,7 @@ public:
 
   bool exists(const char* path) const
   {
-    ResourceCollection exist = find(path);
+    PathCollection exist = find(path);
     return !exist.empty();
   }
 
@@ -458,11 +459,12 @@ public:
       return false;
     }
 
-    PathTree* node = mAllocator.rebind<PathTree>.other.allocate(1);
+    PathTree* node = Alloc::rebind<PathTree>::other(mAllocator).allocate(1);
     if (node == NULL)
     {
       return false;
     }
+    Alloc::rebind<PathTree>::other(mAllocator).construct(node, PathTree());
     
     node->setPath(path);
     node->setValue(res);

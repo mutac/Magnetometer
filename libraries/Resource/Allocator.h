@@ -47,6 +47,10 @@ public:
     Policy(rhs), Traits(rhs)
   {
   }
+
+  void nothing() const
+  {
+  }
 };
 
 #endif // header guard

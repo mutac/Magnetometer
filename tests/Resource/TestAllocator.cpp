@@ -4,39 +4,95 @@
 class TestAllocator : public cfixcc::TestFixture
 {
 private:
-  //template<template<typename T, typename P, typename OT> class AllocatorType>
-  //class AllocatorTests
-  //{
-  //public:
-  //  template<typename T>
-  //  void allocate()
-  //  {
-  //    AllocatorType<T, P, OT> allocator;
-  //  }
-  //}
-
-  class DummyClass
+  class ClassObserver
   {
   public:
-    DummyClass()
+    ClassObserver() :
+      mConstructorCalled(false),
+      mDestructorCalled(false)
     {
     }
+
+    void onConstruct()
+    {
+      mConstructorCalled = true;
+    }
+
+    bool constructorCalled() const
+    {
+      return mConstructorCalled;
+    }
+
+    void onDestruct()
+    {
+      mDestructorCalled = true;
+    }
+
+    bool destructorCalled() const
+    {
+      return mDestructorCalled;
+    }
+
+    void reset() 
+    {
+      mConstructorCalled = false;
+      mDestructorCalled = false;
+    }
+
   private:
-    char mBigSize[1000];
+    bool mConstructorCalled;
+    bool mDestructorCalled;
+  };
+
+  class ObservableClass
+  {
+  public:
+    ObservableClass(ClassObserver& observer)
+      : mObserver(observer)
+    {
+      mObserver.onConstruct();
+    }
+
+    ~ObservableClass()
+    {
+      mObserver.onDestruct();
+    }
+
+  private:
+    ClassObserver& mObserver;
+  };
+
+  class AllocatorTests
+  {
+  public:
+    template<class AllocatorType>
+    void allocateConstructDestructDeallocate()
+    {
+      ClassObserver observer;
+      AllocatorType::rebind<ObservableClass>::other allocator;
+
+      ObservableClass* p = allocator.allocate(1);
+      CFIX_ASSERT(p != NULL);
+
+      allocator.construct(p, ObservableClass(observer));
+      CFIX_ASSERT(observer.constructorCalled());
+
+      allocator.destroy(p);
+      CFIX_ASSERT(observer.destructorCalled());
+
+      allocator.deallocate(p, 1);
+    }
   };
 
 public:
-  void Simple()
+  void AllocateConstructDestructDeallocate()
   {
-    Allocator<DummyClass> allocator;
+    AllocatorTests tests;
 
-    DummyClass* p = allocator.allocate(1);
-    allocator.construct(p, DummyClass());
-    allocator.destroy(p);
-    allocator.deallocate(p, 1);
+    tests.allocateConstructDestructDeallocate<Allocator<int> >();
   }
 };
 
 CFIXCC_BEGIN_CLASS(TestAllocator)
-  CFIXCC_METHOD(Simple)
+  CFIXCC_METHOD(AllocateConstructDestructDeallocate)
 CFIXCC_END_CLASS()

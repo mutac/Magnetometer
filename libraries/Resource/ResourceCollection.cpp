@@ -3,9 +3,9 @@
 
 /*
 template <>
-NullAllocator<ResourceCollection::PathTree>& NullAllocator<ResourceCollection::PathTree>::instance()
+NullAllocator<PathCollection::PathTree>& NullAllocator<PathCollection::PathTree>::instance()
 {
-  static NullAllocator<ResourceCollection::PathTree> sTheInstance;
+  static NullAllocator<PathCollection::PathTree> sTheInstance;
   return sTheInstance;
 }
 */

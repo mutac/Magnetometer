@@ -7,7 +7,9 @@
 #include "StaticPool.h"
 #include "Resource.h"
 
-class TestResourceCollection : public cfixcc::TestFixture
+typedef PathCollection<IResource> ResourceCollection;
+
+class TestPathCollection : public cfixcc::TestFixture
 {
 private:
   class TestResource : public ResourceBase
@@ -64,8 +66,8 @@ private:
 public:
   void ConstructDestruct()
   {
-    StaticPool<10, ResourceCollection::PathTree> allocator;
-    ResourceCollection tree(allocator);
+    //StaticPool<10, ResourceCollection::PathTree> allocator;
+    ResourceCollection tree;
 
     CFIX_ASSERT (tree.empty());
 
@@ -77,8 +79,7 @@ public:
 
   void AddSimple()
   {
-    StaticPool<10, ResourceCollection::PathTree> allocator;
-    ResourceCollection tree(allocator);
+    ResourceCollection tree;
 
     // Add a root
     TestResource testResource0;
@@ -124,23 +125,11 @@ public:
 
     VerifyFind(tree, "system.objects", testResource5);
     VerifyFind(tree, "diagnostics", testResource6);
-
-    //
-    // Keep adding until allocator runs out
-    //
-
-    TestResource exhausted;
-    CFIX_ASSERT (tree.add("diagnostics.node.7", &exhausted) == true);
-    CFIX_ASSERT (tree.add("diagnostics.node.8", &exhausted) == true);
-    CFIX_ASSERT (tree.add("diagnostics.node.9", &exhausted) == true);
-    CFIX_ASSERT (tree.add("diagnostics.node.10", &exhausted) == false);
-    CFIX_ASSERT (tree.add("diagnostics.node.11", &exhausted) == false);
   }
 
   void AddWithRootReplacement()
   {
-    StaticPool<10, ResourceCollection::PathTree> allocator;
-    ResourceCollection tree(allocator);
+    ResourceCollection tree;
 
     TestResource testResource1;
     CFIX_ASSERT (tree.add("a.b.c", &testResource1) == true);
@@ -202,8 +191,7 @@ public:
 
   void Iterate()
   {
-    StaticPool<10, ResourceCollection::PathTree> allocator;
-    ResourceCollection metal(allocator);
+    ResourceCollection metal;
     ResourceCollection::Iterator types;
 
     TestResource res1;
@@ -268,9 +256,9 @@ public:
   }
 };
 
-int TestResourceCollection::TestResource::sNextId = 0;
+int TestPathCollection::TestResource::sNextId = 0;
 
-CFIXCC_BEGIN_CLASS(TestResourceCollection)
+CFIXCC_BEGIN_CLASS(TestPathCollection)
   CFIXCC_METHOD(ConstructDestruct)
   CFIXCC_METHOD(AddSimple)
   CFIXCC_METHOD(AddWithRootReplacement)
