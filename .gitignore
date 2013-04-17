@@ -1,0 +1,6 @@
+*.ncb
+*.suo
+*.user
+ideprojects/Resource/Debug
+ideprojects/Resource/Resource/Debug
+ideprojects/Resource/ResourceTests/Debug
