@@ -15,4 +15,4 @@ public:
   virtual void get(IRequest* request) = 0;
 };
 
-#endif
+#endif // Header guard

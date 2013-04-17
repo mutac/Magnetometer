@@ -10,6 +10,7 @@
 class IRequest
 {
 public:
+  virtual void nothing() = 0;
 };
 
 #endif // Header guard

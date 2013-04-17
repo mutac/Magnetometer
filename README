@@ -1,1 +1,1 @@
-A light weight and embedded friendly set of components that can be used to expose resources (sensor readings, device properties, actions, etc.) in a variety of modalities (over serial, HTTP, etc.).
+A light weight and embedded friendly set of components that can be used to expose resources (sensor readings, device properties, actions, etc.) to a variety of modalities (over serial, HTTP, etc.).
