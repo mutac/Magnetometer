@@ -446,9 +446,9 @@ public:
     return !exist.empty();
   }
 
-  bool add(const char* path, T* res)
+  bool add(const char* path, T* v)
   {
-    if (path == NULL || res == NULL)
+    if (path == NULL || v == NULL)
     {
       return false;
     }
@@ -466,7 +466,7 @@ public:
     mAllocator.construct(node);
     
     node->setPath(path);
-    node->setValue(res);
+    node->setValue(v);
 
     if (mRoot != NULL)
     {

@@ -187,6 +187,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\..\tests\Resource\TestRequestHandler.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\tests\Resource\TestSharedCount.cpp"
 			>
 		</File>

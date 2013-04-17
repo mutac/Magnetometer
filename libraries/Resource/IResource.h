@@ -5,14 +5,4 @@
 #include "mDefs.h"
 #include "IRequest.h"
 
-/**
- * 
- */
-class IResource
-{
-public:
-  virtual void set(IRequest* request) = 0;
-  virtual void get(IRequest* request) = 0;
-};
-
 #endif // Header guard
