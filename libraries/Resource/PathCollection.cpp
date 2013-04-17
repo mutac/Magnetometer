@@ -1,5 +1,5 @@
 
-#include "ResourceCollection.h"
+#include "PathCollection.h"
 
 /*
 template <>

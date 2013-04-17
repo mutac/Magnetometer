@@ -169,11 +169,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libraries\Resource\PathName.cpp"
+				RelativePath="..\..\..\libraries\Resource\PathCollection.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libraries\Resource\ResourceCollection.cpp"
+				RelativePath="..\..\..\libraries\Resource\PathName.cpp"
 				>
 			</File>
 			<File
@@ -219,15 +219,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\PathCollection.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\PathName.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\Resource.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libraries\Resource\ResourceCollection.h"
 				>
 			</File>
 			<File
