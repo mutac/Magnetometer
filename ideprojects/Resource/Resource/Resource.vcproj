@@ -199,6 +199,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\Delegate.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\IRequest.h"
 				>
 			</File>
