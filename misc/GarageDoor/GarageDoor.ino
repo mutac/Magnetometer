@@ -1,15 +1,135 @@
+#include <string.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiServer.h>
-#include <ResourceCollection.h>
+#include <IRequest.h>
 
-char ssid[] = "";
-char pass[] = "";
-int keyInex = 0;
+class WiFiDevice
+{
+public:
+  WiFiDevice() :
+    mSsid(""),
+    mPass(""),
+    mKeyIndex(0),
+    mMaxConnectionAttempts(1)
+  {
+  }
+  
+  bool addResources(Resources* system)
+  {
+    system->add("system.wifi.ssid", this, &WiFiDevice::ssid);
+    system->add("system.wifi.password", this, &WiFiDevice::password);
+    system->add("system.wifi.connect", this, &WiFiDevice::connect);
+    system->add("system.wifi.status", this, &WiFiDevice::status);
+    return true;
+  }
+  
+  bool checkHardware()
+  {
+    return WiFi.status() != WL_NO_SHIELD;
+  }
+  
+  void connect(IRequest* request)
+  {
+    if (request->type() != IRequest::eInvoke)
+    {
+      request->respond()->setFailure();
+    }
+    
+    if (!checkHardware())
+    {
+      request->respond()->setFailure();
+    }
+    
+    if (strlen(mSsid) == 0)
+    {
+      request->respond()->setFailure();
+    }
+  
+    int connectionAttempt = 1;
+    for (int attempts = 1; 
+      attempts <= mMaxConnectionAttempts && WiFi.status() != WL_CONNECTED; 
+      attempts++)
+    {
+      Serial.print("[");
+      Serial.print(connectionAttempt);
+      Serial.print("]");
+      Serial.print("Attempting to connect to SSID: ");
+      Serial.println(mSsid);
 
-WiFiServer server(80);
+      char* ssid = const_cast<char*>(mSsid);
+      char* pass = const_cast<char*>(mPass);
+      WiFi.begin(ssid, pass);
+      delay(10000); 
+    }
+    
+    request->respond()->write("status", WiFi.status() == WL_CONNECTED);
+    
+    if (WiFi.status() != WL_CONNECTED)
+    {
+      request->respond()->setFailure();
+    }
+  }
+  
+  void status(IRequest* request) 
+  {
+    Serial.print("SSID: ");
+    Serial.println(WiFi.SSID());
+    
+    IPAddress ip = WiFi.localIP();
+    Serial.print("IP Address: ");
+    Serial.println(ip);
+    
+    long rssi = WiFi.RSSI();
+    Serial.print("Signal Strength: ");
+    Serial.print(rssi);
+    Serial.println(" dBm");
+  }
+  
+  void ssid(IRequest* request)
+  {
+    if (request->type() == IRequest::eSet)
+    {
+      mSsid = variant_cast<const char*>(request->getValue());
+    }
+    else if (request->type() == IRequest::eGet)
+    {
+      request->respond()->write("ssid", mSsid);
+    }
+    else
+    {
+      request->respond()->setFailure();
+    }
+  }
+  
+  void password(IRequest* request)
+  {
+    if (request->type() == IRequest::eSet)
+    {
+      mPass = variant_cast<const char*>(request->getValue());
+    }
+    else if (request->type() == IRequest::eGet)
+    {
+      request->respond()->write("passwor", mPass);
+    }
+    else
+    {
+      request->respond()->setFailure();
+    }
+  }
+  
+private:
+  const char* mSsid;
+  const char* mPass;
+  int mKeyIndex;
+  int mMaxConnectionAttempts;
+};
 
-void fatal(int code)
+Resources gSystem;
+WiFiDevice gWiFiDevice;
+WiFiServer gServer(80);
+
+void fatal(unsigned int code)
 {
   while(1)
   {
@@ -20,53 +140,24 @@ void fatal(int code)
 }
 
 void setup()
-{
-  PathCollection<int> paths;
-  
-  int doo = 10;
-  paths.add("test.doo", &doo);
-  
+{ 
   Serial.begin(9600);
   
-  if (WiFi.status() == WL_NO_SHIELD)
-  {
-    Serial.println("WiFi shield not present");
-    fatal(911000);
-  }
+  gWiFiDevice.addResources(&gSystem);
+      
+  // 
+  // Configure
+  //
   
-  int connectionAttempt = 1;
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print("[");
-    Serial.print(connectionAttempt);
-    Serial.print("]");
-    Serial.print("Attempting to connect to SSID: ");
-    Serial.println(ssid);
-   
-    WiFi.begin(ssid, pass);
-    delay(10000); 
-  }
-  
-  printWiFiStatus();
+  gSystem.set("system.wifi.ssid", "mySsid");
+  gSystem.set("system.wifi.password", "secret");
+
+  gSystem.invoke("system.wifi.connect");
+  gSystem.invoke("system.wifi.status");
 }
 
 void loop()
 {
-}
-
-void printWiFiStatus() 
-{
-  Serial.print("SSID: ");
-  Serial.println(WiFi.SSID());
-  
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
-  
-  long rssi = WiFi.RSSI();
-  Serial.print("Signal Strength: ");
-  Serial.print(rssi);
-  Serial.println(" dBm");
 }
 
 

@@ -1,129 +1,68 @@
 #include <cfixcc.h>
 #include "IRequest.h"
+#include <string.h>
 
 class TestRequest : public cfixcc::TestFixture
 {
 public:
-  class ObservingRequest: public IRequest
+  class WifiDevice
   {
   public:
-    ObservingRequest() :
-      mBegun(false),
-      mEnded(false)
+    static bool GetInitialized() { return sInitialized; }
+    static void Initialize(IRequest* request)
     {
+      if (request->type() == IRequest::eInvoke)
+      {
+        sInitialized = true;
+      }
+      else
+      {
+        request->respond()->setFailure();
+      }
     }
 
-    void reset()
+    const char* getSsid() { return mSsid; }
+    void ssid(IRequest* request)
     {
-      mBegun = false;
-      mEnded = false;
+      if (request->type() == IRequest::eSet)
+      {
+        mSsid = variant_cast<const char*>(request->getValue());
+      }
+      else if (request->type() == IRequest::eGet)
+      {
+        request->respond()->write("ssid", mSsid);
+      }
+      else
+      {
+        request->respond()->setFailure();
+      }
     }
 
-    void beginResponse()
-    {
-      mBegun = true;
-    }
-
-    bool begun() const
-    {
-      return mBegun;
-    }
-
-    void endResponse()
-    {
-      mEnded = true;
-    }
-
-    bool ended() const
-    {
-      return mEnded;
-    }
-
-  private:
-    bool mBegun;
-    bool mEnded;
-  };
-
-  class TestResources
-  {
-  public:
-    TestResources() :
-      mSetInstanceVariable(false)
-    {
-    }
-
-    void reset()
-    {
-      mSetInstanceVariable = false;
-      mSetStaticVariable = false;
-    }
-
-    void instanceProperty(IRequest& request)
-    {
-      request.beginResponse();
-      mSetInstanceVariable = true;
-      request.endResponse();
-    };
-
-    bool instanceVariableSet() const
-    {
-      return mSetInstanceVariable;
-    }
-
-    static void StaticProperty(IRequest& request)
-    {
-      request.beginResponse();
-      mSetStaticVariable = true;
-      request.endResponse();
-    }
-
-    static bool StaticVariableSet()
-    {
-      return mSetStaticVariable;
-    }
-
-  private:
-    bool mSetInstanceVariable;
-    static bool mSetStaticVariable;
+  protected:
+    const char* mSsid;
+    static bool sInitialized;
   };
 
   void Simple()
   {
-    ResourceCollection system;
-    TestResources resources;
+    bool status = false;
 
-    bool success = true;
+    Resources system;
+    WifiDevice wifiDevice;
 
-    success = system.add("system.staticProperty", 
-      new RequestHandler(&TestResources::StaticProperty));
-    CFIX_ASSERT(success);
-    success = system.add("system.instanceProperty", 
-      new RequestHandler(&resources, &TestResources::instanceProperty));
-    CFIX_ASSERT(success);
+    status = system.add("system.wifi.initialize", &WifiDevice::Initialize);
+    CFIX_ASSERT(status == true);
 
-    ObservingRequest testRequest;
+    status = system.add("system.wifi.ssid", &wifiDevice, &WifiDevice::ssid);
+    CFIX_ASSERT(status == true);
 
-    success = Request::Invoke(system, "system.staticProperty", testRequest);
-    CFIX_ASSERT(success);
-    CFIX_ASSERT(testRequest.begun());
-    CFIX_ASSERT(testRequest.ended());
-    CFIX_ASSERT(TestResources::StaticVariableSet());
-
-    testRequest.reset();
-    resources.reset();
-
-    success = Request::Invoke(system, "system.instanceProperty", testRequest);
-    CFIX_ASSERT(success);
-    CFIX_ASSERT(testRequest.begun());
-    CFIX_ASSERT(testRequest.ended());
-    CFIX_ASSERT(resources.instanceVariableSet());
-
-    testRequest.reset();
-    resources.reset();
+    status = system.set("system.wifi.ssid", "myWifiNetwork");
+    CFIX_ASSERT(status == true);
+    CFIX_ASSERT(strcmp(wifiDevice.getSsid(), "myWifiNetwork") == 0);
   }
 };
 
-bool TestRequest::TestResources::mSetStaticVariable = false;
+bool TestRequest::WifiDevice::sInitialized = false;
 
 CFIXCC_BEGIN_CLASS(TestRequest)
   CFIXCC_METHOD(Simple)
