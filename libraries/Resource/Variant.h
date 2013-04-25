@@ -5,7 +5,6 @@
 
 #include "mDefs.h"
 #include "mStd.h"
-#include "mString.h"
 
 template <typename T>
 struct TypeWrapper
@@ -43,20 +42,40 @@ struct TypeWrapper<T&>
   typedef const T& CONSTREFTYPE;
 };
 
+class Variant;
+
+typedef int TypeInfo;
+static const TypeInfo TypeInfo_Unknown = 0;
+static const TypeInfo TypeInfo_Char = 1;
+static const TypeInfo TypeInfo_ConstCharArray = 3;
+static const TypeInfo TypeInfo_Int = 4;
+static const TypeInfo TypeInfo_Bool = 5;
+static const TypeInfo TypeInfo_Float = 6;
+static const TypeInfo TypeInfo_Double = 7;
+static const TypeInfo TypeInfo_String = 8;
+/** Begin user types at 20 */
+
+/**
+ * Variant type info method, specialize for your new type.
+ */
+template <typename ValueType>
+const TypeInfo& variant_type_info();
+
+/**
+ * Variant type conversion, specialize for your new type.
+ */
+template <typename FromType>
+inline bool variant_convert(const FromType& from, 
+                     const TypeInfo& toType, 
+                     Variant* outVar)
+{
+  // TODO: Remove default impl
+  return false;
+}
+
 class Variant
 {
 public:
-  typedef int TypeInfo;
-  static const TypeInfo TypeInfo_Unknown = 0;
-  static const TypeInfo TypeInfo_Char = 1;
-  static const TypeInfo TypeInfo_String = 3;
-  static const TypeInfo TypeInfo_Int = 4;
-  //static const TypeInfo TypeInfo_UnsignedInt = 5;
-  static const TypeInfo TypeInfo_Float = 6;
-  static const TypeInfo TypeInfo_Double = 7;
-  /** Begin user types at 20 */
-
-
   Variant() :
     mContent(NULL)
   {
@@ -202,7 +221,6 @@ private:
       // You gotta make one of these:
       mTypeInfo = variant_type_info<TypeHeld>();
     }
-
     /**
      */
     PlaceHolder* clone() const
@@ -218,7 +236,7 @@ private:
 
     bool convertTo(const TypeInfo& toType, Variant* outConverted) const
     {
-      // You gotta make one of these:
+      // You gotta make one of these too:
       return variant_convert<TypeHeld>(mHeld, toType, outConverted);
     }
   
@@ -229,23 +247,6 @@ private:
   PlaceHolder* mContent;
 };
 
-/**
- * Variant type info method, specialize for your new type.
- */
-template <typename ValueType>
-const Variant::TypeInfo& variant_type_info();
-
-/**
- * Variant type conversion, specialize for your new type.
- */
-template <typename FromType>
-inline bool variant_convert(const FromType& from, 
-                     const Variant::TypeInfo& toType, 
-                     Variant* outVar)
-{
-  return false;
-}
-
-#include "VariantPrimitives.h"
+#include "VariantImpl.h"
 
 #endif // header guard

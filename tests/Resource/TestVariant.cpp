@@ -17,7 +17,7 @@ public:
     v = (unsigned char)'c';
     v = 100.0f;
     v = 100.0;
-    //v = (char*)"hello";
+    v = (const char*)"hello";
   }
 
   void ConvertPrimitives()

@@ -4,6 +4,7 @@
 
 #include "mDefs.h"
 #include <string.h>
+#include <float.h>
 
 /**
  */
@@ -12,12 +13,14 @@ class mString
 public:
   mString() :
     mStr(NULL),
+    mSize(0),
     mOwned(true)
   {
   }
 
   mString(char* other) :
     mStr(NULL),
+    mSize(0),
     mOwned(true)
   {
     *this = other;
@@ -25,9 +28,35 @@ public:
 
   mString(const char* other) :
     mStr(NULL),
+    mSize(0),
     mOwned(true)
   {
     *this = other;
+  }
+
+  mString(int other) :
+    mStr(NULL),
+    mSize(0),
+    mOwned(true)
+  {
+    if (ensureSize(11 + 1))
+    {
+      itoa(other, mStr, 10);
+    }
+  }
+
+  mString(float other) :
+    mStr(NULL),
+    mSize(0),
+    mOwned(true)
+  {
+  }
+
+  mString(double other) :
+    mStr(NULL),
+    mSize(0),
+    mOwned(true)
+  {
   }
 
   ~mString()
@@ -90,7 +119,25 @@ public:
   }
 
 private:
+  
+  bool ensureSize(size_t size)
+  {
+    if (size > mSize)
+    {
+      dispose();
+
+      mStr = new char[size];
+      mOwned = true;
+      return mStr != NULL;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
   char* mStr;
+  size_t mSize;
   bool mOwned;
 };
 

@@ -259,7 +259,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libraries\Resource\VariantPrimitives.h"
+				RelativePath="..\..\..\libraries\Resource\VariantImpl.h"
 				>
 			</File>
 		</Filter>

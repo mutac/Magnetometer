@@ -121,7 +121,7 @@ public:
   {
     if (request->type() == IRequest::eSet)
     {
-      mSsid = variant_cast<const char*>(request->getValue());
+      //mSsid = variant_cast<const char*>(request->getValue());
     }
     else if (request->type() == IRequest::eGet)
     {
@@ -137,7 +137,7 @@ public:
   {
     if (request->type() == IRequest::eSet)
     {
-      mPass = variant_cast<const char*>(request->getValue());
+      //mPass = variant_cast<const char*>(request->getValue());
     }
     else if (request->type() == IRequest::eGet)
     {

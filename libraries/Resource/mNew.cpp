@@ -8,6 +8,13 @@ void* operator new(size_t size)
 }
 #endif // !defined(mHasNew)
 
+#ifndef mHasArrayNew
+void* operator new[](size_t size)
+{
+  return malloc(size);
+}
+#endif // !defined(mHasArrayNew)
+
 #ifndef mHasPlacementNew
 void* operator new(size_t size, void* ptr)
 {
@@ -21,3 +28,10 @@ void operator delete(void* ptr)
   free(ptr);
 }
 #endif // !defined(mHasDelete)
+
+#ifndef mHasArrayDelete
+void operator delete[](void* ptr)
+{
+  free(ptr);
+}
+#endif // !defined(mHasArrayDelete)

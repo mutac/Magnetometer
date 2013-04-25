@@ -60,10 +60,14 @@
 #define mHasNew
 // No placement new
 #define mHasDelete
+// No array new
+// No array delete
 #else // Default platform runtime
 #define mHasNew
 #define mHasPlacementNew
 #define mHasDelete
+#define mHasArrayNew
+#define mHasArrayDelete
 #endif // __AVR_ARCH__
 
 

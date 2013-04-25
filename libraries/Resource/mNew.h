@@ -11,6 +11,7 @@
 
 #ifndef mHasNew
 void* operator new(size_t size);
+void* operator new[](size_t size);
 #endif // !defined(mHasNew)
 
 #ifndef mHasPlacementNew
@@ -19,6 +20,7 @@ void* operator new(size_t size, void* ptr);
 
 #ifndef mHasDelete
 void operator delete(void* ptr);
+voidi operator delete[](void* ptr);
 #endif // !defined(mHasDelete)
 
 #endif // Header guard
