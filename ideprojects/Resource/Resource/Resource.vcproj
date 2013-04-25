@@ -223,6 +223,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mString.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\ObjectTraits.h"
 				>
 			</File>
@@ -252,6 +256,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\Variant.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\VariantPrimitives.h"
 				>
 			</File>
 		</Filter>

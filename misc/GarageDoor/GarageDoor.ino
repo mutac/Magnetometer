@@ -4,6 +4,37 @@
 #include <WiFiServer.h>
 #include <IRequest.h>
 
+class SerialResponse : public IResponse
+{
+public:
+  SerialResponse(int baud) :
+    mFailed(false)
+  {
+    Serial.begin(baud);
+  }
+  
+  void write(const char* name, const Variant& val)
+  {
+    Serial.print(name);
+    Serial.print(": ");
+  }
+  
+  void setFailure(const char* reason = "")
+  {
+    mFailed = true;
+    Serial.print("Request failure: ");
+    Serial.println(reason);
+  }
+  
+  bool failed() const
+  {
+    return mFailed;
+  }
+  
+private:
+  bool mFailed;
+};
+
 class WiFiDevice
 {
 public:

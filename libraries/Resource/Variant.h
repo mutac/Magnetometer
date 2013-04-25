@@ -5,7 +5,7 @@
 
 #include "mDefs.h"
 #include "mStd.h"
-//#include "SharedPointer.h"
+#include "mString.h"
 
 template <typename T>
 struct TypeWrapper
@@ -43,98 +43,20 @@ struct TypeWrapper<T&>
   typedef const T& CONSTREFTYPE;
 };
 
-///**
-// */
-//struct IVariantContainer
-//{
-//  virtual ~IVariantContainer() {}
-//};
-//
-///**
-// */
-//template<class T>
-//class VariantContainer : public IVariantContainer
-//{
-//public:
-//  VariantContainer(T inValue) : mValue(inValue) { }
-//  virtual ~VariantContainer() {}
-//private:
-//  T mValue;
-//};
-//
-///**
-// * @brief
-// */
-//class Variant
-//{
-//public:
-//  Variant() :
-//    mImpl(NULL)
-//  {
-//  }
-//
-//  template<class T>
-//  Variant(T inValue) :
-//    // TODO: Allocator/deallocator
-//    mImpl(new VariantContainer<typename TypeWrapper<T>::TYPE>(inValue))
-//  {
-//  }
-//
-//  bool empty() const
-//  {
-//    return mImpl == NULL;
-//  }
-//
-//  template<class ToType>
-//  typename TypeWrapper<ToType>::REFTYPE get()
-//  {
-//    mDebugging(mImpl != NULL);
-//    IVariantContainer* impl = mImpl.get();
-//
-//    //VariantConversion<ToType> conversion;
-//    //impl->convert(conversion);
-//
-//    return conversion.get();
-//  }
-//
-//  //template<class T>
-//  //typename TypeWrapper<T>::REFTYPE get()
-//  //{
-//  //  //VariantContainer<typename TypeWrapper<T>::TYPE>* valRef = 
-//  //  //  reinterpret_cast<VariantContainer<typename TypeWrapper<T>::TYPE>*>(mImpl.get());
-//
-//  //  //mdebugAssert(valRef != NULL);
-//  //  //return valRef->get<typename TypeWrapper<T>::TYPE>();
-//  //  IVariantContainer* impl = mImpl.get();
-//  //  //return impl->get<typename TypeWrapper<T>::TYPE>();
-//  //}
-//
-//  //template<class T>
-//  //typename TypeWrapper<T>::CONSTREFTYPE get() const
-//  //{
-//  //  //VariantContainer<typename TypeWrapper<T>::TYPE>* valRef =
-//  //  //  reinterpret_cast<VariantContainer<typename TypeWrapper<T>::TYPE>*>(mImpl.get());
-//
-//  //  //mDebugAssert(valRef != NULL);
-//  //  //return valRef->get<typename TypeWrapper<T>::TYPE>();
-//  //  IVariantContainer* impl = mImpl.get();
-//  //  //return impl->get<typename TypeWrapper<T>::TYPE>();
-//  //}
-//
-//  template<class T>
-//  void set(typename TypeWrapper<T>::CONSTREFTYPE inValue)
-//  {
-//    // TODO: Allocator/deallocator
-//    mImpl = new VariantContainer<typename TypeWrapper<T>::TYPE>(inValue);
-//  }
-//
-//private:
-//  SharedPointer<IVariantContainer> mImpl;
-//};
-
 class Variant
 {
 public:
+  typedef int TypeInfo;
+  static const TypeInfo TypeInfo_Unknown = 0;
+  static const TypeInfo TypeInfo_Char = 1;
+  static const TypeInfo TypeInfo_String = 3;
+  static const TypeInfo TypeInfo_Int = 4;
+  //static const TypeInfo TypeInfo_UnsignedInt = 5;
+  static const TypeInfo TypeInfo_Float = 6;
+  static const TypeInfo TypeInfo_Double = 7;
+  /** Begin user types at 20 */
+
+
   Variant() :
     mContent(NULL)
   {
@@ -167,20 +89,6 @@ public:
     return mContent == NULL;
   }
 
-#ifdef mUseRtti
-  std::type_info& typeInfo() const
-  {
-    if (mContent != NULL)
-    {
-      return mContent->typeInfo();
-    }
-    else
-    {
-      return typeid(void);
-    }
-  }
-#endif // mUseRtti
-
   /**
    */
   Variant& swap(Variant& rhs)
@@ -210,21 +118,66 @@ public:
   /**
    */
   template <typename ValueType>
-  const ValueType* toPtr() const
+  const ValueType* ptr() const
   {
-#ifdef mUseRtti
-    if (typeInfo() == typeid(ValueType))
+    if (variant_type_info<ValueType>() == mContent->getTypeInfo())
     {
-#endif // mUseRtti
-      return &static_cast<Holder<ValueType> *>(mContent)->mHeld;
-#ifdef mUseRtti
+      return &static_cast<Holder<ValueType>*>(mContent)->mHeld;
     }
     else
     {
       return NULL;
     }
-#endif // mUseRtti
   }
+
+  template <typename ValueType>
+  const ValueType& value() const
+  {
+    mDebugAssert(variant_type_info<ValueType>() == mContent->getTypeInfo());
+    return static_cast<Holder<ValueType>*>(mContent)->mHeld;
+  }
+
+  template <typename ToType>
+  bool convertTo(ToType* outConverted) const
+  {
+    if (mContent != NULL)
+    {
+      Variant converted;
+
+      bool succeeded = false;
+      
+      succeeded = mContent->convertTo(
+        variant_type_info<ToType>(), 
+        &converted);
+      if (!succeeded)
+      {
+        return false;
+      }
+
+      const ToType* result = converted.ptr<ToType>();
+      mDebugAssert(result != NULL);
+
+      *outConverted = *result;
+      return succeeded;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  const TypeInfo& getTypeInfo() const
+  {
+    if (mContent != NULL)
+    {
+      return mContent->getTypeInfo();
+    }
+    else
+    {
+      return TypeInfo_Unknown;
+    }
+  }
+
 private:
   /**
    */
@@ -232,10 +185,9 @@ private:
   {
   public:
     virtual ~PlaceHolder() {}
-#ifdef mUseRtti
-    virtual std::type_info& typeInfo() const = 0;
-#endif // mUseRtti
     virtual PlaceHolder* clone() const = 0;
+    virtual const TypeInfo& getTypeInfo() const = 0;
+    virtual bool convertTo(const TypeInfo& toType, Variant* outConverted) const = 0;
   };
 
   /**
@@ -247,45 +199,53 @@ private:
     Holder(const TypeHeld& value)
       : mHeld(value)
     {
+      // You gotta make one of these:
+      mTypeInfo = variant_type_info<TypeHeld>();
     }
 
     /**
      */
-#ifdef mUseRtti
-    std::type_info& typeInfo() const
-    {
-      return typeid(TypeHeld);
-    }
-#endif // mUseRtti
-
-    /**
-     */
-    virtual PlaceHolder* clone() const
+    PlaceHolder* clone() const
     {
       // TODO: Allocator/Deallocator
       return new Holder(mHeld);
     }
+
+    const TypeInfo& getTypeInfo() const
+    {
+      return mTypeInfo;
+    }
+
+    bool convertTo(const TypeInfo& toType, Variant* outConverted) const
+    {
+      // You gotta make one of these:
+      return variant_convert<TypeHeld>(mHeld, toType, outConverted);
+    }
   
     const TypeHeld mHeld;
+    TypeInfo mTypeInfo;
   };
 
   PlaceHolder* mContent;
 };
 
 /**
+ * Variant type info method, specialize for your new type.
  */
 template <typename ValueType>
-const ValueType& variant_cast(const Variant& rhs)
-{
-  const ValueType* result = rhs.toPtr<ValueType>();
-  if (result == NULL)
-  {
-#ifdef mUseExceptions
-    throw std::bad_cast();
-#endif // mUseExceptions
-  }
+const Variant::TypeInfo& variant_type_info();
 
-  return *result;
+/**
+ * Variant type conversion, specialize for your new type.
+ */
+template <typename FromType>
+inline bool variant_convert(const FromType& from, 
+                     const Variant::TypeInfo& toType, 
+                     Variant* outVar)
+{
+  return false;
 }
+
+#include "VariantPrimitives.h"
 
 #endif // header guard
