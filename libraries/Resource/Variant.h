@@ -94,7 +94,7 @@ public:
 
   ~Variant()
   {
-    if (mContent)
+    if (mContent != NULL)
     {
       // TODO: allocator/deallocator
       delete mContent;
@@ -103,7 +103,7 @@ public:
 
   /**
    */
-  bool empty()
+  bool empty() const
   {
     return mContent == NULL;
   }
@@ -137,9 +137,9 @@ public:
   /**
    */
   template <typename ValueType>
-  const ValueType* ptr() const
+  const ValueType* get() const
   {
-    if (variant_type_info<ValueType>() == mContent->getTypeInfo())
+    if (mContent != NULL && isType<ValueType>())
     {
       return &static_cast<Holder<ValueType>*>(mContent)->mHeld;
     }
@@ -149,45 +149,75 @@ public:
     }
   }
 
+  /** Yeah, don't use this one */
   template <typename ValueType>
-  const ValueType& value() const
+  const ValueType& getValue() const
   {
-    mDebugAssert(variant_type_info<ValueType>() == mContent->getTypeInfo());
+    mDebugAssert(mContent != NULL && isType<ValueType());
     return static_cast<Holder<ValueType>*>(mContent)->mHeld;
+  }
+
+  template <typename ValueType>
+  bool getValue(ValueType* outValue) const
+  {
+    const ValueType* val  = get<ValueType>();
+    if (val == NULL)
+    {
+      return false;
+    }
+
+    *outValue = *val;
+
+    return true;
   }
 
   template <typename ToType>
   bool convertTo(ToType* outConverted) const
   {
-    if (mContent != NULL)
+    const ToType* result = NULL;
+
+    if (!empty())
     {
-      Variant converted;
-
-      bool succeeded = false;
-      
-      succeeded = mContent->convertTo(
-        variant_type_info<ToType>(), 
-        &converted);
-      if (!succeeded)
+      if (isType<ToType>())
       {
-        return false;
+        // Identity conversion
+        result = get<ToType>();
+        mDebugAssert(result != NULL);
+
+        *outConverted = *result; 
+        return true;
       }
+      else
+      {
+        // Other type conversion
+        Variant converted;
 
-      const ToType* result = converted.ptr<ToType>();
-      mDebugAssert(result != NULL);
+        bool succeeded = false;
+        succeeded = mContent->convertTo(
+          variant_type_info<ToType>(), 
+          &converted);
+        if (!succeeded)
+        {
+          return false;
+        }
 
-      *outConverted = *result;
-      return succeeded;
+        result = converted.get<ToType>();
+        mDebugAssert(result != NULL);
+
+        *outConverted = *result;
+        return true;
+      }
     }
     else
     {
+      // Empty
       return false;
     }
   }
 
   const TypeInfo& getTypeInfo() const
   {
-    if (mContent != NULL)
+    if (!empty())
     {
       return mContent->getTypeInfo();
     }
@@ -195,6 +225,12 @@ public:
     {
       return TypeInfo_Unknown;
     }
+  }
+
+  template <typename ValueType>
+  bool isType() const
+  {
+    return variant_type_info<ValueType>() == getTypeInfo();
   }
 
 private:

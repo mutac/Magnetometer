@@ -5,7 +5,7 @@
 
 //
 //
-// Variant primitives
+// Conversion implementations for built-in types
 //
 //
 

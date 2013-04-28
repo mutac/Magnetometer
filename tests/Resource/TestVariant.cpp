@@ -28,36 +28,43 @@ public:
     float toFloat;
     double toDouble;
     char toChar;
+    mString toStr;
 
     // Int conversions
     from = 10;
 
-    pass = from.convertTo<float>(&toFloat);
+    pass = from.convertTo(&toFloat);
     CFIX_ASSERT(pass);
     CFIX_ASSERT(toFloat == 10.0f);
 
-    pass = from.convertTo<double>(&toDouble);
+    pass = from.convertTo(&toDouble);
     CFIX_ASSERT(pass);
     CFIX_ASSERT(toDouble == 10.0);
 
-    pass = from.convertTo<char>(&toChar);
+    pass = from.convertTo(&toChar);
     CFIX_ASSERT(pass);
-    CFIX_ASSERT(toChar = 10);
+    CFIX_ASSERT(toChar == 10);
+
+    pass = from.convertTo(&toStr);
+    CFIX_ASSERT(pass);
+    CFIX_ASSERT(strcmp(toStr.c_Str(), "10") == 0);
 
     // Unsigned int conversions
     from = (unsigned int)10;
 
-    pass = from.convertTo<float>(&toFloat);
+    pass = from.convertTo(&toFloat);
     CFIX_ASSERT(pass);
     CFIX_ASSERT(toFloat == 10.0f);
 
-    pass = from.convertTo<double>(&toDouble);
+    pass = from.convertTo(&toDouble);
     CFIX_ASSERT(pass);
     CFIX_ASSERT(toDouble == 10.0);
 
-    pass = from.convertTo<char>(&toChar);
+    pass = from.convertTo(&toChar);
     CFIX_ASSERT(pass);
-    CFIX_ASSERT(toChar = 10);
+    CFIX_ASSERT(toChar == 10);
+
+
   }
 };
 

@@ -3,20 +3,37 @@
 #include <WiFiClient.h>
 #include <WiFiServer.h>
 #include <IRequest.h>
+#include <mString.h>
 
-class SerialResponse : public IResponse
+class SerialResponseHandler : public IResponse
 {
 public:
-  SerialResponse(int baud) :
+  SerialResponseHandler(int baud) :
     mFailed(false)
   {
     Serial.begin(baud);
   }
   
-  void write(const char* name, const Variant& val)
+  bool write(const char* name, const Variant& val)
   {
+    bool succeeded = true;
+    mString str;
+       
     Serial.print(name);
     Serial.print(": ");
+    
+    succeeded = val.convertTo(&str);
+    if (succeeded) 
+    {
+      Serial.println(str.c_Str());
+    }
+    else
+    {
+      Serial.println("Unknown");
+      succeeded = false;
+    }
+    
+    return succeeded;
   }
   
   void setFailure(const char* reason = "")
@@ -69,28 +86,23 @@ public:
     
     if (!checkHardware())
     {
-      request->respond()->setFailure();
+      request->respond()->setFailure("WiFi hardware not found!");
     }
     
     if (strlen(mSsid) == 0)
     {
-      request->respond()->setFailure();
+      request->respond()->setFailure("Invalid ssid");
     }
   
+    request->respond()->write("Connecting To", mSsid);
+    
     int connectionAttempt = 1;
     for (int attempts = 1; 
       attempts <= mMaxConnectionAttempts && WiFi.status() != WL_CONNECTED; 
       attempts++)
     {
-      Serial.print("[");
-      Serial.print(connectionAttempt);
-      Serial.print("]");
-      Serial.print("Attempting to connect to SSID: ");
-      Serial.println(mSsid);
-
-      char* ssid = const_cast<char*>(mSsid);
-      char* pass = const_cast<char*>(mPass);
-      WiFi.begin(ssid, pass);
+      request->respond()->write("Attempt: ", attempts);
+      WiFi.begin(const_cast<char*>(mSsid), const_cast<char*>(mPass));
       delay(10000); 
     }
     
@@ -98,7 +110,7 @@ public:
     
     if (WiFi.status() != WL_CONNECTED)
     {
-      request->respond()->setFailure();
+      request->respond()->setFailure("Unable to connect!");
     }
   }
   
@@ -119,9 +131,11 @@ public:
   
   void ssid(IRequest* request)
   {
+    bool succeeded = true;
+    
     if (request->type() == IRequest::eSet)
     {
-      //mSsid = variant_cast<const char*>(request->getValue());
+      succeeded = request->getArgument().getValue(&mSsid);
     }
     else if (request->type() == IRequest::eGet)
     {
@@ -129,21 +143,33 @@ public:
     }
     else
     {
+      succeeded = false;
+    }
+    
+    if (!succeeded)
+    {
       request->respond()->setFailure();
     }
   }
   
   void password(IRequest* request)
   {
+    bool succeeded = true;
+    
     if (request->type() == IRequest::eSet)
     {
-      //mPass = variant_cast<const char*>(request->getValue());
+      succeeded = request->getArgument().getValue(&mPass);
     }
     else if (request->type() == IRequest::eGet)
     {
-      request->respond()->write("passwor", mPass);
+      request->respond()->write("password", mPass);
     }
     else
+    {
+      succeeded = false;
+    }
+    
+    if (!succeeded)
     {
       request->respond()->setFailure();
     }
@@ -157,6 +183,7 @@ private:
 };
 
 Resources gSystem;
+SerialResponseHandler gSerialResponseHandler(9600);
 WiFiDevice gWiFiDevice;
 WiFiServer gServer(80);
 
@@ -171,8 +198,16 @@ void fatal(unsigned int code)
 }
 
 void setup()
-{ 
+{   
   Serial.begin(9600);
+  Serial.print("In ");
+  for (int i = 5; i > 0; i--)
+  {
+    Serial.print(i);
+    Serial.print(" ");
+    delay(1000);
+  }
+  Serial.println("");
   
   gWiFiDevice.addResources(&gSystem);
       
@@ -183,8 +218,8 @@ void setup()
   gSystem.set("system.wifi.ssid", "mySsid");
   gSystem.set("system.wifi.password", "secret");
 
-  gSystem.invoke("system.wifi.connect");
-  gSystem.invoke("system.wifi.status");
+  gSystem.invoke("system.wifi.connect", &gSerialResponseHandler);
+  gSystem.invoke("system.wifi.status", &gSerialResponseHandler);
 }
 
 void loop()

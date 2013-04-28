@@ -12,7 +12,7 @@
 class IResponse
 {
 public:
-  virtual void write(const char* name, const Variant& val) = 0;
+  virtual bool write(const char* name, const Variant& val) = 0;
   virtual void setFailure(const char* reason = "") = 0;
   virtual bool failed() const = 0;
 };
@@ -31,9 +31,10 @@ public:
   {
   }
 
-  void write(const char* name, const Variant& val)
+  bool write(const char* name, const Variant& val)
   {
     mVal = val;
+    return true;
   }
 
   void setFailure(const char* reason = "")
@@ -52,25 +53,6 @@ protected:
   Variant mVal;
 };
 
-class IRequest
-{
-public:
-  enum RequestType
-  {
-    /** Set property request */
-    eSet,
-    /** Get property request */
-    eGet,
-    /** Invoke/call method request */
-    eInvoke
-  };
-
-  virtual IResponse* respond() = 0;
-  virtual RequestType type() const = 0;
-  virtual const Variant& getValue() const = 0;
-  virtual bool failed() const = 0;
-};
-
 /**
  */
 class NullResponse : public IResponse
@@ -85,8 +67,9 @@ public:
   {
   }
 
-  void write(const char* name, const Variant& val)
+  bool write(const char* name, const Variant& val)
   {
+    return true;
   }
 
   void setFailure(const char* reason = "")
@@ -104,6 +87,27 @@ protected:
 };
 
 /**
+ */
+class IRequest
+{
+public:
+  enum RequestType
+  {
+    /** Set property request */
+    eSet,
+    /** Get property request */
+    eGet,
+    /** Invoke/call method request */
+    eInvoke
+  };
+
+  virtual IResponse* respond() = 0;
+  virtual RequestType type() const = 0;
+  virtual const Variant& getArgument() const = 0;
+  virtual bool failed() const = 0;
+};
+
+/**
  *
  */
 class Request : public IRequest
@@ -116,8 +120,8 @@ public:
     mDebugAssert(response != NULL);
   }
 
-  void setValue(const Variant& val) { mVal = val; }
-  const Variant& getValue() const { return mVal; }
+  void setArgument(const Variant& arg) { mArg = arg; }
+  const Variant& getArgument() const { return mArg; }
   IResponse* respond() { return mResponse; }
   RequestType type() const { return mType; }
   bool failed() const { return mResponse->failed(); }
@@ -125,7 +129,7 @@ public:
 protected:
   RequestType mType;
   IResponse* mResponse;
-  Variant mVal;
+  Variant mArg;
 };
 
 
@@ -157,15 +161,21 @@ public:
   {
     StoredResponse response;
     Request request(IRequest::eSet, &response);
-    request.setValue(val);
+    request.setArgument(val);
 
     return invoke(path, &request);
   }
 
-  bool invoke(const char* path)
+  bool invoke(const char* path, IResponse* response = NULL)
   {
-    NullResponse response;
-    Request request(IRequest::eInvoke, &response);
+    NullResponse nil;
+
+    if (response == NULL)
+    {
+      response = &nil;
+    }
+
+    Request request(IRequest::eInvoke, response);
 
     return invoke(path, &request);
   }

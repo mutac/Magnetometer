@@ -249,8 +249,7 @@ public:
     Iterator() :
       mOrigin(NULL),
       mCurrent(NULL),
-      mVisibility(kDefaultVisibility),
-      mDepth(0)
+      mVisibility(kDefaultVisibility)
     {
     }
 
@@ -314,8 +313,7 @@ public:
     Iterator(PathTree* root, Visibility visibility) :
       mOrigin(root),
       mCurrent(root),
-      mVisibility(visibility),
-      mDepth(0)
+      mVisibility(visibility)
     {
     }
 
@@ -360,7 +358,6 @@ public:
       }
     }
 
-    int mDepth;
     PathTree* mOrigin;
     PathTree* mCurrent;
     Visibility mVisibility;

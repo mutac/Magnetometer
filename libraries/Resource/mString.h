@@ -18,6 +18,23 @@ public:
   {
   }
 
+  mString(const mString& other) :
+    mStr(NULL),
+    mSize(0),
+    mOwned(true)
+  {
+    if (other.mOwned)
+    {
+      // Make a copy
+      *this = other.mStr;
+    }
+    else
+    {
+      // Hold onto the unowned str too
+      *this = (const char*)other.mStr;
+    }
+  }
+
   mString(char* other) :
     mStr(NULL),
     mSize(0),
@@ -39,9 +56,13 @@ public:
     mSize(0),
     mOwned(true)
   {
-    if (ensureSize(11 + 1))
+    if (ensureCapacity(11 + 1))
     {
       itoa(other, mStr, 10);
+    }
+    else
+    {
+      *this = (const char*)"NaN";
     }
   }
 
@@ -50,6 +71,7 @@ public:
     mSize(0),
     mOwned(true)
   {
+    *this = (const char*)"NaN";
   }
 
   mString(double other) :
@@ -57,6 +79,7 @@ public:
     mSize(0),
     mOwned(true)
   {
+    *this = (const char*)"NaN";
   }
 
   ~mString()
@@ -75,7 +98,13 @@ public:
     }
 
     mStr = NULL;
+    mSize = 0;
     mOwned = true;
+  }
+
+  size_t capacity() const
+  {
+    return mSize;
   }
 
   int length() const
@@ -90,14 +119,21 @@ public:
     }
   }
 
+  bool empty() const
+  {
+    return mStr == NULL;
+  }
+
   mString& operator=(char* other)
   {
     dispose();
 
-    mStr = new char[strlen(other) + 1];
-    if (mStr != NULL)
+    if (other != NULL)
     {
-      strcpy(mStr, other);
+      if (ensureCapacity(strlen(other) + 1))
+      {
+        strcpy(mStr, other);
+      }
     }
 
     return *this;
@@ -113,6 +149,30 @@ public:
     return *this;
   }
 
+  bool operator==(const mString& rhs) const
+  {
+    if (!empty() && !rhs.empty())
+    {
+      return strcmp(mStr, rhs.mStr) == 0;
+    }
+    else
+    {
+      return empty() && rhs.empty();
+    }
+  }
+
+  bool operator==(const char* rhs) const
+  {
+    if (!empty() && rhs != NULL)
+    {
+      return strcmp(mStr, rhs) == 0;
+    }
+    else
+    {
+      return empty() && rhs == NULL;
+    }
+  }
+
   const char* c_Str() const
   {
     return mStr;
@@ -120,13 +180,14 @@ public:
 
 private:
   
-  bool ensureSize(size_t size)
+  bool ensureCapacity(size_t size)
   {
     if (size > mSize)
     {
       dispose();
 
       mStr = new char[size];
+      mSize = size;
       mOwned = true;
       return mStr != NULL;
     }
