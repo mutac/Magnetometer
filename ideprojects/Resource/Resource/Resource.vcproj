@@ -169,6 +169,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mString.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\PathCollection.cpp"
 				>
 			</File>
@@ -220,10 +224,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\mStd.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libraries\Resource\mString.cpp"
 				>
 			</File>
 			<File

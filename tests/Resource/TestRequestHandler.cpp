@@ -27,6 +27,8 @@ public:
       if (request->type() == IRequest::eSet)
       {
         //mSsid = variant_cast<const char*>(request->getValue());
+        Variant arg = request->getArgument();
+        arg.convertTo(&mSsid);
       }
       else if (request->type() == IRequest::eGet)
       {
@@ -56,7 +58,7 @@ public:
     status = system.add("system.wifi.ssid", &wifiDevice, &WifiDevice::ssid);
     CFIX_ASSERT(status == true);
 
-    //status = system.set("system.wifi.ssid", "myWifiNetwork");
+    status = system.set("system.wifi.ssid", "myWifiNetwork");
     CFIX_ASSERT(status == true);
     CFIX_ASSERT(strcmp(wifiDevice.getSsid(), "myWifiNetwork") == 0);
   }
