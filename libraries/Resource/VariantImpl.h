@@ -98,7 +98,12 @@ template<>
 bool variant_convert(const char* const& from, 
                      const TypeInfo& toType, 
                      Variant* outVar);
-
+/**
+ */
+template<>
+bool variant_convert(const mString& from, 
+                     const TypeInfo& toType, 
+                     Variant* outVar);
 /**
  */
 template<>

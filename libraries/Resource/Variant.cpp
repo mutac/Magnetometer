@@ -14,12 +14,7 @@ bool variant_convert(const char& from,
                      const TypeInfo& toType, 
                      Variant* outVar)
 {
-  if (toType == TypeInfo_Char)
-  {
-    *outVar = (char)from;
-    return true;
-  }
-  else if (toType == TypeInfo_String)
+  if (toType == TypeInfo_String)
   {
     // Convert single char to string, rather than
     // treat as numeric type.
@@ -44,6 +39,11 @@ bool variant_convert(const char& from,
     *outVar = (float)from;
     return true;
   }
+  else if (toType == TypeInfo_Bool)
+  {
+    *outVar = from != 0;
+    return true;
+  }
   else
   {
     return false;
@@ -55,12 +55,7 @@ bool variant_convert(const char* const& from,
                      const TypeInfo& toType, 
                      Variant* outVar)
 {
-  if (toType == TypeInfo_ConstCharArray)
-  {
-    *outVar = (const char*)from;
-    return true;
-  }
-  else if (toType == TypeInfo_String)
+  if (toType == TypeInfo_String)
   {
     *outVar = mString(from);
     return true;
@@ -71,8 +66,10 @@ bool variant_convert(const char* const& from,
     {
       *outVar = (char)0;
     }
-
-    *outVar = (char)atoi(from);
+    else
+    {
+      *outVar = (char)atoi(from);
+    }
     return true;
   }
   else if (toType == TypeInfo_Int)
@@ -81,8 +78,10 @@ bool variant_convert(const char* const& from,
     {
       *outVar = (int)0;
     }
-
-    *outVar = (int)atoi(from);
+    else
+    {
+      *outVar = (int)atoi(from);
+    }
     return true;
   }
   else if (toType == TypeInfo_Double)
@@ -91,8 +90,10 @@ bool variant_convert(const char* const& from,
     {
       *outVar = (double)0;
     }
-
-    *outVar = (double)atof(from);
+    else
+    {
+      *outVar = (double)atof(from);
+    }
     return true;
   }
   else if (toType == TypeInfo_Float)
@@ -101,14 +102,39 @@ bool variant_convert(const char* const& from,
     {
       *outVar = (float)0;
     }
-
-    *outVar = (float)atof(from);
+    else
+    {
+      *outVar = (float)atof(from);
+    }
+    return true;
+  }
+  else if (toType == TypeInfo_Bool)
+  {
+    if (from == NULL)
+    {
+      *outVar = false;
+    }
+    else
+    {
+      *outVar = (stricmp(from, "true") == 0 || 
+                 stricmp(from, "True") == 0 ||
+                 stricmp(from, "TRUE") == 0);
+    }
     return true;
   }
   else
   {
     return false;
   }
+}
+
+template<>
+bool variant_convert(const mString& from, 
+                     const TypeInfo& toType, 
+                     Variant* outVar)
+{
+  // Use const char* conversion.
+  return variant_convert(from.c_Str(), toType, outVar);
 }
 
 template<>
@@ -126,11 +152,6 @@ bool variant_convert(const int& from,
     *outVar = mString(from);
     return true;
   }
-  else if (toType == TypeInfo_Int)
-  {
-    *outVar = (int)from;
-    return true;
-  }
   else if (toType == TypeInfo_Double)
   {
     *outVar = (double)from;
@@ -139,6 +160,11 @@ bool variant_convert(const int& from,
   else if (toType == TypeInfo_Float)
   {
     *outVar = (float)from;
+    return true;
+  }
+  else if (toType == TypeInfo_Bool)
+  {
+    *outVar = from != 0;
     return true;
   }
   else
@@ -159,7 +185,7 @@ bool variant_convert(const bool& from,
   }
   else if (toType == TypeInfo_String)
   {
-    *outVar = mString((char*)(from ? "true" : "false"));
+    *outVar = mString(const_cast<char*>(from ? "true" : "false"));
     return true;
   }
   else if (toType == TypeInfo_Int)
@@ -203,14 +229,14 @@ bool variant_convert(const double& from,
     *outVar = (int)(from + 0.5);
     return true;
   }
-  else if (toType == TypeInfo_Double)
-  {
-    *outVar = (double)from;
-    return true;
-  }
   else if (toType == TypeInfo_Float)
   {
     *outVar = (float)from;
+    return true;
+  }
+  else if (toType == TypeInfo_Bool)
+  {
+    *outVar = from != 0.0;
     return true;
   }
   else
@@ -244,9 +270,9 @@ bool variant_convert(const float& from,
     *outVar = (double)from;
     return true;
   }
-  else if (toType == TypeInfo_Float)
+  else if (toType == TypeInfo_Bool)
   {
-    *outVar = (float)from;
+    *outVar = from != 0.0f;
     return true;
   }
   else

@@ -33,6 +33,7 @@ public:
     unsigned char toUChar;
     float toFloat;
     double toDouble;
+    bool toBool;
     mString toStr;
 
     from = in;
@@ -61,6 +62,10 @@ public:
     CFIX_ASSERT(pass);
     CFIX_ASSERT(toDouble == (double)in);
 
+    pass = from.convertTo(&toBool);
+    CFIX_ASSERT(pass);
+    CFIX_ASSERT(toBool == (bool)in);
+
     pass = from.convertTo(&toStr);
     CFIX_ASSERT(pass);
     CFIX_ASSERT(toStr == str);
@@ -72,8 +77,10 @@ public:
     VerifyNumericConversionOf<unsigned int>(10, "10");
     VerifyNumericConversionOf<char>(97, "a");
     VerifyNumericConversionOf<unsigned char>(97, "a");
-    VerifyNumericConversionOf<float>(10.0f, "10.0");
-    VerifyNumericConversionOf<double>(10.0, "10.0");
+    //VerifyNumericConversionOf<float>(10.0f, "10.0");
+    //VerifyNumericConversionOf<double>(10.0, "10.0");
+    VerifyNumericConversionOf<bool>(true, "true");
+    VerifyNumericConversionOf<bool>(false, "false");
   }
 };
 
