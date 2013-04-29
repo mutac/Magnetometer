@@ -25,6 +25,20 @@ public:
     mString ownedCopy(owned);
     CFIX_ASSERT(ownedCopy == owned);
     CFIX_ASSERT(ownedCopy.capacity() != 0);
+
+    mString outer = "omg";
+    {
+      mString scoped = "some const string";
+      outer = scoped;
+    }
+    CFIX_ASSERT(outer == "some const string");
+
+    outer = "omg again";
+    {
+      mString scoped = const_cast<char*>("an owned string to copy");
+      outer = scoped;
+    }
+    CFIX_ASSERT(outer == "an owned string to copy");
   }
 
   void Numeric()

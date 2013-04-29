@@ -23,7 +23,10 @@ bool variant_convert(const char& from,
   {
     // Convert single char to string, rather than
     // treat as numeric type.
-    *outVar = mString((char*)from);
+    char str[2];
+    str[0] = from;
+    str[1] = '\0';
+    *outVar = mString(str);
     return true;
   }
   else if (toType == TypeInfo_Int)

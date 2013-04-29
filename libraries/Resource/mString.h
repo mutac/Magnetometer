@@ -23,16 +23,7 @@ public:
     mSize(0),
     mOwned(true)
   {
-    if (other.mOwned)
-    {
-      // Make a copy
-      *this = other.mStr;
-    }
-    else
-    {
-      // Hold onto the unowned str too
-      *this = (const char*)other.mStr;
-    }
+    *this = other;
   }
 
   mString(char* other) :
@@ -145,6 +136,22 @@ public:
 
     mStr = const_cast<char*>(other);
     mOwned = false;
+
+    return *this;
+  }
+
+  mString& operator=(const mString& other)
+  {
+    if (other.mOwned)
+    {
+      // Make a copy
+      *this = other.mStr;
+    }
+    else
+    {
+      // Hold onto the unowned str too
+      *this = (const char*)other.mStr;
+    }
 
     return *this;
   }
