@@ -6,6 +6,11 @@
 #include <string.h>
 #include <float.h>
 
+namespace mStd
+{
+  int strcasecmp(const char* left, const char* right);
+};
+
 /**
  */
 class mString

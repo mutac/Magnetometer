@@ -223,6 +223,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mString.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\mString.h"
 				>
 			</File>

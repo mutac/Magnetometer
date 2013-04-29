@@ -116,9 +116,7 @@ bool variant_convert(const char* const& from,
     }
     else
     {
-      *outVar = (stricmp(from, "true") == 0 || 
-                 stricmp(from, "True") == 0 ||
-                 stricmp(from, "TRUE") == 0);
+      *outVar = (mStd::strcasecmp(from, "true") == 0);
     }
     return true;
   }

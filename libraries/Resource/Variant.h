@@ -153,7 +153,7 @@ public:
   template <typename ValueType>
   const ValueType& getValue() const
   {
-    mDebugAssert(mContent != NULL && isType<ValueType());
+    mDebugAssert(mContent != NULL && isType<ValueType>());
     return static_cast<Holder<ValueType>*>(mContent)->mHeld;
   }
 
