@@ -17,7 +17,7 @@ public:
       }
       else
       {
-        request->respond()->setFailure();
+        request->sender()->setFailure();
       }
     }
 
@@ -32,11 +32,11 @@ public:
       }
       else if (request->type() == IRequest::eGet)
       {
-        //request->respond()->write("ssid", mSsid);
+        //request->sender()->write("ssid", mSsid);
       }
       else
       {
-        request->respond()->setFailure();
+        request->sender()->setFailure();
       }
     }
 

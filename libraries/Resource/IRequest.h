@@ -101,7 +101,7 @@ public:
     eInvoke
   };
 
-  virtual IResponse* respond() = 0;
+  virtual IResponse* sender() = 0;
   virtual RequestType type() const = 0;
   virtual const Variant& getArgument() const = 0;
   virtual bool failed() const = 0;
@@ -122,7 +122,7 @@ public:
 
   void setArgument(const Variant& arg) { mArg = arg; }
   const Variant& getArgument() const { return mArg; }
-  IResponse* respond() { return mResponse; }
+  IResponse* sender() { return mResponse; }
   RequestType type() const { return mType; }
   bool failed() const { return mResponse->failed(); }
 

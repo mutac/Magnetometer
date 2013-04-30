@@ -3,11 +3,14 @@
 #define _STRING_H_9385b533_444a_4cd8_8938_5caaee6127d6
 
 #include "mDefs.h"
+#include "mStd.h"
 #include <string.h>
 #include <float.h>
 
 namespace mStd
 {
+  /**
+   */
   int strcasecmp(const char* left, const char* right);
 };
 
@@ -18,39 +21,34 @@ class mString
 public:
   mString() :
     mStr(NULL),
-    mSize(0),
-    mOwned(true)
+    mCapacity(0)
   {
   }
 
   mString(const mString& other) :
     mStr(NULL),
-    mSize(0),
-    mOwned(true)
+    mCapacity(0)
   {
     *this = other;
   }
 
   mString(char* other) :
     mStr(NULL),
-    mSize(0),
-    mOwned(true)
+    mCapacity(0)
   {
     *this = other;
   }
 
   mString(const char* other) :
     mStr(NULL),
-    mSize(0),
-    mOwned(true)
+    mCapacity(0)
   {
     *this = other;
   }
 
   mString(int other) :
     mStr(NULL),
-    mSize(0),
-    mOwned(true)
+    mCapacity(0)
   {
     if (ensureCapacity(11 + 1))
     {
@@ -64,16 +62,14 @@ public:
 
   mString(float other) :
     mStr(NULL),
-    mSize(0),
-    mOwned(true)
+    mCapacity(0)
   {
     *this = (const char*)"NaN";
   }
 
   mString(double other) :
     mStr(NULL),
-    mSize(0),
-    mOwned(true)
+    mCapacity(0)
   {
     *this = (const char*)"NaN";
   }
@@ -85,7 +81,7 @@ public:
 
   void dispose()
   {
-    if (mOwned)
+    if (isOwned())
     {
       if (mStr)
       {
@@ -94,13 +90,12 @@ public:
     }
 
     mStr = NULL;
-    mSize = 0;
-    mOwned = true;
+    mCapacity = 0;
   }
 
   size_t capacity() const
   {
-    return mSize;
+    return mCapacity;
   }
 
   int length() const
@@ -140,14 +135,12 @@ public:
     dispose();
 
     mStr = const_cast<char*>(other);
-    mOwned = false;
-
     return *this;
   }
 
   mString& operator=(const mString& other)
   {
-    if (other.mOwned)
+    if (other.isOwned())
     {
       // Make a copy
       *this = other.mStr;
@@ -159,18 +152,6 @@ public:
     }
 
     return *this;
-  }
-
-  bool operator==(const mString& rhs) const
-  {
-    if (!empty() && !rhs.empty())
-    {
-      return strcmp(mStr, rhs.mStr) == 0;
-    }
-    else
-    {
-      return empty() && rhs.empty();
-    }
   }
 
   bool operator==(const char* rhs) const
@@ -185,22 +166,58 @@ public:
     }
   }
 
+  bool operator==(const mString& rhs) const
+  {
+    return *this == rhs.c_Str();
+  }
+
+  bool append(const char* a)
+  {
+    if (a != NULL)
+    {
+      int newLen = strlen(a) + 1;
+      if (!ensureCapacity(mCapacity + newLen))
+      {
+        return false;
+      }
+      
+      strcat(mStr, a);
+    }
+
+    return true;
+  }
+
   const char* c_Str() const
   {
     return mStr;
   }
+ 
+  inline bool isOwned() const
+  {
+    return mCapacity != 0;
+  }
 
-private:
-  
+protected:
+
+
   bool ensureCapacity(size_t size)
   {
-    if (size > mSize)
+    if (size > mCapacity && size > 0)
     {
-      dispose();
+      char* newStr = new char[size];
+      if (mStr != NULL && newStr != NULL)
+      {
+        strcpy(newStr, mStr);
+      }
+      else
+      {
+        newStr[0] = '\0';
+      }
 
-      mStr = new char[size];
-      mSize = size;
-      mOwned = true;
+      dispose();
+      
+      mStr = newStr;
+      mCapacity = size;
       return mStr != NULL;
     }
     else
@@ -210,8 +227,7 @@ private:
   }
 
   char* mStr;
-  size_t mSize;
-  bool mOwned;
+  size_t mCapacity;
 };
 
 #endif // header guard
