@@ -29,6 +29,11 @@ bool variant_convert(const char& from,
     *outVar = (int)from;
     return true;
   }
+  else if (toType == TypeInfo_Long)
+  {
+    *outVar = (long)from;
+    return true;
+  }
   else if (toType == TypeInfo_Double)
   {
     *outVar = (double)from;
@@ -81,6 +86,18 @@ bool variant_convert(const char* const& from,
     else
     {
       *outVar = (int)atoi(from);
+    }
+    return true;
+  }
+  else if (toType == TypeInfo_Long)
+  {
+    if (from == NULL)
+    {
+      *outVar = (long)0;
+    }
+    else
+    {
+      *outVar = (long)atol(from);
     }
     return true;
   }
@@ -145,9 +162,55 @@ bool variant_convert(const int& from,
     *outVar = (char)from;
     return true;
   }
+  else if (toType == TypeInfo_Long)
+  {
+    *outVar = (long)from;
+    return true;
+  }
   else if (toType == TypeInfo_String)
   {
     *outVar = mString(from);
+    return true;
+  }
+  else if (toType == TypeInfo_Double)
+  {
+    *outVar = (double)from;
+    return true;
+  }
+  else if (toType == TypeInfo_Float)
+  {
+    *outVar = (float)from;
+    return true;
+  }
+  else if (toType == TypeInfo_Bool)
+  {
+    *outVar = from != 0;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+template<>
+bool variant_convert(const long& from, 
+                     const TypeInfo& toType, 
+                     Variant* outVar)
+{
+  if (toType == TypeInfo_Char)
+  {
+    *outVar = (char)from;
+    return true;
+  }
+  else if (toType == TypeInfo_String)
+  {
+    *outVar = mString(from);
+    return true;
+  }
+  else if (toType == TypeInfo_Int)
+  {
+    *outVar = (int)from;
     return true;
   }
   else if (toType == TypeInfo_Double)
@@ -191,6 +254,11 @@ bool variant_convert(const bool& from,
     *outVar = (int)from;
     return true;
   }
+  else if (toType == TypeInfo_Long)
+  {
+    *outVar = (long)from;
+    return true;
+  }
   else if (toType == TypeInfo_Double)
   {
     *outVar = (double)from;
@@ -227,6 +295,11 @@ bool variant_convert(const double& from,
     *outVar = (int)(from + 0.5);
     return true;
   }
+  else if (toType == TypeInfo_Long)
+  {
+    *outVar = (long)from;
+    return true;
+  }
   else if (toType == TypeInfo_Float)
   {
     *outVar = (float)from;
@@ -261,6 +334,11 @@ bool variant_convert(const float& from,
   else if (toType == TypeInfo_Int)
   {
     *outVar = (int)(from + 0.5);
+    return true;
+  }
+  else if (toType == TypeInfo_Long)
+  {
+    *outVar = (long)from;
     return true;
   }
   else if (toType == TypeInfo_Double)

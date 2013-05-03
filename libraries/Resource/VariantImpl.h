@@ -33,6 +33,15 @@ inline const TypeInfo& variant_type_info<const char*>()
  * variant_type_info specialization for primitive types
  */
 template <>
+inline const TypeInfo& variant_type_info<char*>()
+{
+  // Store char* as a mString (for ownership)
+  return TypeInfo_String;
+}
+/**
+ * variant_type_info specialization for primitive types
+ */
+template <>
 inline const TypeInfo& variant_type_info<mString>()
 {
   return TypeInfo_String;
@@ -52,6 +61,22 @@ template <>
 inline const TypeInfo& variant_type_info<unsigned int>()
 {
   return variant_type_info<int>();
+}
+/**
+ * variant_type_info specialization for primitive types
+ */
+template <>
+inline const TypeInfo& variant_type_info<long>()
+{
+  return TypeInfo_Long;
+}
+/**
+ * variant_type_info specialization for primitive types
+ */
+template <>
+inline const TypeInfo& variant_type_info<unsigned long>()
+{
+  return variant_type_info<long>();
 }
 /**
  * variant_type_info specialization for primitive types
@@ -104,6 +129,15 @@ template<>
 bool variant_convert(const mString& from, 
                      const TypeInfo& toType, 
                      Variant* outVar);
+template<>
+inline bool variant_convert(char* const& from, 
+                            const TypeInfo& toType, 
+                            Variant* outVar)
+{
+  // char* type is internally stored as mStrings.
+  return variant_convert<mString>(from, toType, outVar);
+}
+
 /**
  */
 template<>
@@ -116,6 +150,20 @@ inline bool variant_convert(const unsigned int& from,
                             Variant* outVar)
 {
   return variant_convert<int>(from, toType, outVar);
+}
+
+/**
+ */
+template<>
+bool variant_convert(const long& from, 
+                     const TypeInfo& toType, 
+                     Variant* outVar);
+template<>
+inline bool variant_convert(const unsigned long& from, 
+                            const TypeInfo& toType, 
+                            Variant* outVar)
+{
+  return variant_convert<long>(from, toType, outVar);
 }
 
 /**

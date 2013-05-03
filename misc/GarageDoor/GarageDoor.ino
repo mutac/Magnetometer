@@ -1,76 +1,10 @@
 #include <string.h>
-#include <Print.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiServer.h>
 #include <IRequest.h>
 #include <mString.h>
-#include <SharedPointer.h>
-
-class mStringPrinter : public Print, public mString
-{
-public:
-  mStringPrinter()
-  {
-  }
-  
-  size_t write(uint8_t val) 
-  {
-    char str[2];
-    str[0] = (char)val;
-    str[1] = '\0';
-    append(str);
-  }
-};
-
-class PrintingResponseHandler : public IResponse
-{
-public:
-  PrintingResponseHandler(Print* printer) :
-    mPrinter(printer),
-    mFailed(false)
-  {
-    mDebugAssert(printer != NULL);
-  }
-  
-  bool write(const char* name, const Variant& val)
-  {
-    bool succeeded = true;
-    mString str;
-       
-    mPrinter->print(name);
-    mPrinter->print(": ");
-    
-    succeeded = val.convertTo(&str);
-    if (succeeded) 
-    {
-      mPrinter->println(str.c_Str());
-    }
-    else
-    {
-      mPrinter->println("Unknown");
-      succeeded = false;
-    }
-    
-    return succeeded;
-  }
-  
-  void setFailure(const char* reason = "")
-  {
-    mFailed = true;
-    mPrinter->print("Request failure: ");
-    mPrinter->println(reason);
-  }
-  
-  bool failed() const
-  {
-    return mFailed;
-  }
-  
-private:
-  bool mFailed;
-  Print* mPrinter;
-};
+#include <ArduinoRequestBindings.h>
 
 class WiFiDevice
 {
@@ -88,6 +22,7 @@ public:
     system->add("system.wifi.ssid", this, &WiFiDevice::ssid);
     system->add("system.wifi.password", this, &WiFiDevice::password);
     system->add("system.wifi.connect", this, &WiFiDevice::connect);
+    system->add("system.wifi.disconnect", this, &WiFiDevice::disconnect);
     system->add("system.wifi.status", this, &WiFiDevice::status);
     return true;
   }
@@ -95,6 +30,16 @@ public:
   bool checkHardware()
   {
     return WiFi.status() != WL_NO_SHIELD;
+  }
+  
+  void disconnect(IRequest* request)
+  {
+    if (request->type() != IRequest::eInvoke)
+    {
+      request->sender()->setFailure();
+    }
+    
+    WiFi.disconnect();
   }
   
   void connect(IRequest* request)
@@ -127,7 +72,7 @@ public:
       delay(10000); 
     }
     
-    request->sender()->write("status", WiFi.status() == WL_CONNECTED);
+    request->sender()->write("Connected", WiFi.status() == WL_CONNECTED);
     
     if (WiFi.status() != WL_CONNECTED)
     {
@@ -142,15 +87,15 @@ public:
       request->sender()->setFailure();
     }
     
-    IPAddress ip = WiFi.localIP();
-    int rssi = WiFi.RSSI();
+    mStringPrinter ip;
+    WiFi.localIP().printTo(ip);
+    mStringPrinter gateway;
+    WiFi.gatewayIP().printTo(gateway);
     
-    mStringPrinter ipString;
-    ip.printTo(ipString);
-    
-    request->sender()->write("SSID", const_cast<const char*>(WiFi.SSID()));
-    request->sender()->write("IP Address", static_cast<mString>(ipString));
-    request->sender()->write("Signal Strength (dBm)", rssi);
+    request->sender()->write("SSID", WiFi.SSID());
+    request->sender()->write("Signal Strength (dBm)", WiFi.RSSI());
+    request->sender()->write("IP Address", ip.toString());
+    request->sender()->write("Encryption", (int)WiFi.encryptionType());
   }
   
   void ssid(IRequest* request)
@@ -239,8 +184,8 @@ void setup()
   
   gWiFiDevice.addResources(&gSystem);
   
-  gSystem.set("system.wifi.ssid", "myssid");
-  gSystem.set("system.wifi.password", "mypass");
+  gSystem.set("system.wifi.ssid", "mySsid");
+  gSystem.set("system.wifi.password", "passw0rd");
 
   gSystem.invoke("system.wifi.connect", &gPrintResponse);
   gSystem.invoke("system.wifi.status", &gPrintResponse);

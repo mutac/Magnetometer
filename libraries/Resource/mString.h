@@ -50,9 +50,25 @@ public:
     mStr(NULL),
     mCapacity(0)
   {
+    // This is platform specific:
     if (ensureCapacity(11 + 1))
     {
       itoa(other, mStr, 10);
+    }
+    else
+    {
+      *this = (const char*)"NaN";
+    }
+  }
+
+  mString(long other) :
+    mStr(NULL),
+    mCapacity(0)
+  {
+    // This is platform specific:
+    if (ensureCapacity(11 + 1))
+    {
+      ltoa(other, mStr, 10);
     }
     else
     {

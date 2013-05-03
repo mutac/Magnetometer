@@ -192,8 +192,7 @@ protected:
 
     bool overall = true;
     for (ResourceCollection::Iterator it = found.begin();
-      it != found.end();
-      it++)
+      it != found.end(); ++it)
     {
       it->invoke(request);
       if (request->failed())

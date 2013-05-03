@@ -6,49 +6,27 @@
 #include "mDefs.h"
 #include "mStd.h"
 
-template <typename T>
-struct TypeWrapper
-{
-  typedef T TYPE;
-  typedef const T CONSTTYPE;
-  typedef T& REFTYPE;
-  typedef const T& CONSTREFTYPE;
-};
-
-template <typename T>
-struct TypeWrapper<const T>
-{
-  typedef T TYPE;
-  typedef const T CONSTTYPE;
-  typedef T& REFTYPE;
-  typedef const T& CONSTREFTYPE;
-};
-
-template <typename T>
-struct TypeWrapper<const T&>
-{
-  typedef T TYPE;
-  typedef const T CONSTTYPE;
-  typedef T& REFTYPE;
-  typedef const T& CONSTREFTYPE;
-};
-
-template <typename T>
-struct TypeWrapper<T&>
-{
-  typedef T TYPE;
-  typedef const T CONSTTYPE;
-  typedef T& REFTYPE;
-  typedef const T& CONSTREFTYPE;
-};
+/**
+ * Define to ensure conversion specializations are present for all types
+ * that are stored within a variant.
+ */
+// #define mVariantStaticallyEnsureConversions
 
 class Variant;
 
-typedef int TypeInfo;
+/**
+ * Variant type identifier.
+ */
+typedef unsigned char TypeInfo;
+
+/**
+ * Type identifiers for build-in types.
+ */
 static const TypeInfo TypeInfo_Unknown = 0;
 static const TypeInfo TypeInfo_Char = 1;
-static const TypeInfo TypeInfo_ConstCharArray = 3;
-static const TypeInfo TypeInfo_Int = 4;
+static const TypeInfo TypeInfo_ConstCharArray = 2;
+static const TypeInfo TypeInfo_Int = 3;
+static const TypeInfo TypeInfo_Long = 4;
 static const TypeInfo TypeInfo_Bool = 5;
 static const TypeInfo TypeInfo_Float = 6;
 static const TypeInfo TypeInfo_Double = 7;
@@ -56,23 +34,31 @@ static const TypeInfo TypeInfo_String = 8;
 /** Begin user types at 20 */
 
 /**
- * Variant type info method, specialize for your new type.
+ * Returns variant type information associated with a type.
+ * Specialize for your type.
  */
 template <typename ValueType>
 const TypeInfo& variant_type_info();
 
 /**
- * Variant type conversion, specialize for your new type.
+ * Convert a type to another type, storing the result in a variant.
+ * Specialize for your type.
  */
 template <typename FromType>
 inline bool variant_convert(const FromType& from, 
                      const TypeInfo& toType, 
                      Variant* outVar)
+#ifdef mVariantStaticallyEnsureConversions
+; // No default impl
+#else
 {
-  // TODO: Remove default impl
+  // Default impl -- no conversion possible
   return false;
 }
+#endif // mVariantStaticallyEnsureConversions
 
+/**
+ */
 class Variant
 {
 public:
@@ -96,7 +82,6 @@ public:
   {
     if (mContent != NULL)
     {
-      // TODO: allocator/deallocator
       delete mContent;
     }
   }
@@ -135,6 +120,9 @@ public:
   }
 
   /**
+   * Returns a pointer to the value contained by the variant.  'ValueType'
+   * must match the type of the contained value.  NULL will be returne if
+   * the type is incorrect.
    */
   template <typename ValueType>
   const ValueType* get() const
@@ -149,14 +137,11 @@ public:
     }
   }
 
-  /** Yeah, don't use this one */
-  template <typename ValueType>
-  const ValueType& getValue() const
-  {
-    mDebugAssert(mContent != NULL && isType<ValueType>());
-    return static_cast<Holder<ValueType>*>(mContent)->mHeld;
-  }
-
+  /**
+   * Returns the value contained by the variant.  'ValueType' must
+   * match the type of the contained value.  False will be returne
+   * if the type is incorrect.
+   */
   template <typename ValueType>
   bool getValue(ValueType* outValue) const
   {
@@ -171,6 +156,10 @@ public:
     return true;
   }
 
+  /**
+   * Convert a variant from one type to another.  False is returned
+   * if conversion is impossible.
+   */
   template <typename ToType>
   bool convertTo(ToType* outConverted) const
   {
@@ -178,13 +167,9 @@ public:
 
     if (!empty())
     {
-      if (isType<ToType>())
+      if (getValue(outConverted))
       {
         // Identity conversion
-        result = get<ToType>();
-        mDebugAssert(result != NULL);
-
-        *outConverted = *result; 
         return true;
       }
       else
@@ -192,20 +177,12 @@ public:
         // Other type conversion
         Variant converted;
 
-        bool succeeded = false;
-        succeeded = mContent->convertTo(
-          variant_type_info<ToType>(), 
-          &converted);
-        if (!succeeded)
+        if (!mContent->convertTo(variant_type_info<ToType>(), &converted))
         {
           return false;
         }
 
-        result = converted.get<ToType>();
-        mDebugAssert(result != NULL);
-
-        *outConverted = *result;
-        return true;
+        return converted.getValue(outConverted);
       }
     }
     else
@@ -215,6 +192,9 @@ public:
     }
   }
 
+  /**
+   * Returns the variant type information about the currently contained value.
+   */
   const TypeInfo& getTypeInfo() const
   {
     if (!empty())
@@ -227,6 +207,9 @@ public:
     }
   }
 
+  /**
+   * Returns true if variant current contains a value of 'ValueType'
+   */
   template <typename ValueType>
   bool isType() const
   {
@@ -257,23 +240,27 @@ private:
       // You gotta make one of these:
       mTypeInfo = variant_type_info<TypeHeld>();
     }
+
     /**
      */
     PlaceHolder* clone() const
     {
-      // TODO: Allocator/Deallocator
       return new Holder(mHeld);
     }
 
+    /**
+     */
     const TypeInfo& getTypeInfo() const
     {
       return mTypeInfo;
     }
 
+    /**
+     */
     bool convertTo(const TypeInfo& toType, Variant* outConverted) const
     {
       // You gotta make one of these too:
-      return variant_convert<TypeHeld>(mHeld, toType, outConverted);
+      return variant_convert(mHeld, toType, outConverted);
     }
   
     const TypeHeld mHeld;

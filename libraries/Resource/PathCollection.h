@@ -3,14 +3,13 @@
 #define _RESOURCE_COLLECTION_H_9daeee6d_4dd1_4918_9de9_5658eb715728
 
 #include "mDefs.h"
-#include "Allocator.h"
 #include "PathName.h"
 #include <string.h>
 
 /**
  * 
  */
-template<typename T, typename Alloc = Allocator<T> >
+template<typename T>
 class PathCollection
 {
 public: 
@@ -29,18 +28,6 @@ public:
   class PathTree
   {
   public:
-    class IVisitor
-    {
-    public:
-      virtual void visit(PathTree* node) = 0;
-    };
-
-    class IConstVisitor
-    {
-    public:
-      virtual void visit(const PathTree* node) = 0;
-    };
-
     PathTree() :
       mValue(NULL),
       mParent(NULL),
@@ -137,36 +124,6 @@ public:
       }
     }
 
-    void visit(IVisitor& visitor) 
-    {
-      visitor.visit(this);
-
-      if (mNextCousin != NULL)
-      {
-        mNextCousin->visit(visitor);
-      }
-
-      if (mChild != NULL)
-      {
-        mChild->visit(visitor);
-      }
-    }
-
-    void visitConst(IConstVisitor& visitor) const
-    {
-      visitor.visit(this);
-
-      if (mNextCousin != NULL)
-      {
-        mNextCousin->visitConst(visitor);
-      }
-
-      if (mChild != NULL)
-      {
-        mChild->visitConst(visitor);
-      }
-    }
-
     inline PathTree* getParent() { return mParent; }
     inline PathTree* getChild() { return mChild; }
     inline PathTree* getCousin() { return mNextCousin; }
@@ -247,7 +204,6 @@ public:
     friend class PathCollection;
 
     Iterator() :
-      mOrigin(NULL),
       mCurrent(NULL),
       mVisibility(kDefaultVisibility)
     {
@@ -311,7 +267,6 @@ public:
 
   protected:
     Iterator(PathTree* root, Visibility visibility) :
-      mOrigin(root),
       mCurrent(root),
       mVisibility(visibility)
     {
@@ -358,7 +313,6 @@ public:
       }
     }
 
-    PathTree* mOrigin;
     PathTree* mCurrent;
     Visibility mVisibility;
   };
@@ -366,20 +320,17 @@ public:
   /**
    */
   PathCollection(
-      Alloc allocator = Alloc(),
       PathTree* root = NULL,
       Visibility visibility = kAllVisibility) 
     :
     mRoot(root),
-    mVisibility(visibility),
-    mAllocator(allocator)
+    mVisibility(visibility)
   {
   }
 
   PathCollection(const PathCollection& rhs) :
     mRoot(rhs.mRoot),
-    mVisibility(rhs.mVisibility),
-    mAllocator(rhs.mAllocator)
+    mVisibility(rhs.mVisibility)
   {
   }
 
@@ -421,7 +372,6 @@ public:
       // Returning a const, so no need for it to have
       // an allocator.
       return PathCollection<T>(
-        mAllocator,
         found, 
         visibility);
     }
@@ -454,12 +404,11 @@ public:
       return false;
     }
 
-    PathTree* node = mAllocator.allocate(1);
+    PathTree* node = new PathTree();
     if (node == NULL)
     {
       return false;
     }
-    mAllocator.construct(node);
     
     node->setPath(path);
     node->setValue(v);
@@ -477,11 +426,8 @@ public:
   }
 
 private:
-  typedef typename Alloc::template rebind<PathTree>::other NodeAllocator;
-
   PathTree* mRoot;
   Visibility mVisibility;
-  NodeAllocator mAllocator;
 };
 
 #endif
