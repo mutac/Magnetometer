@@ -19,6 +19,108 @@ namespace mStd
 class mString
 {
 public:
+
+  /**
+   * A string character/token iterator
+   */
+  class Iterator
+  {
+  public:
+    friend class mString;
+
+    Iterator() :
+      mPos(NULL),
+      mToken(NULL),
+      mTokLen(0)
+    {
+    }
+
+    Iterator& operator++()
+    {
+      next();
+      return *this;
+    }
+
+    Iterator& operator++(int)
+    {
+      Iterator temp(*this);
+      next();
+      return temp;
+    }
+
+    bool operator==(const Iterator& rhs)
+    {
+      return mPos == rhs.mPos;
+    }
+
+    bool operator!=(const Iterator& rhs)
+    {
+      return mPos != rhs.mPos;
+    }
+
+    mString operator*()
+    {
+      mString part((char*)mPos);
+
+      // HACKKKKK
+      char* nextPart = const_cast<char*>(part.find(mToken));
+      if (nextPart != NULL)
+      {
+        *nextPart = '\0';
+      }
+
+      return part;
+    }
+
+  private:
+    Iterator(const mString& str, const char* token) :
+      mPos(str.c_Str()),
+      mToken(token),
+      mTokLen(strlen(token))
+    {
+    }
+
+    /**
+     * Advances iterator to the next token.
+     */
+    void next()
+    {
+      if (mPos != NULL)
+      {
+        if (!emptyToken())
+        {
+          mPos = strstr(mPos, mToken);
+          if (mPos != NULL)
+          {
+            mPos += mTokLen;
+          }
+        }
+        else
+        {
+          mPos++;
+        }
+      }
+
+      // Normalize end() conditions
+      if (mPos != NULL && *mPos == '\0')
+      {
+        mPos = NULL;
+      }
+    }
+
+    /**
+     * Returns true if the token is... empty!
+     */
+    bool emptyToken() const
+    {
+      return mToken == NULL || *mToken == '\0';
+    }
+
+    const char* mPos;
+    const char* mToken;
+    size_t mTokLen;
+  };
+
   mString() :
     mStr(NULL),
     mCapacity(0)
@@ -128,7 +230,7 @@ public:
 
   bool empty() const
   {
-    return mStr == NULL;
+    return mStr == NULL || *mStr == '\0';
   }
 
   mString& operator=(char* other)
@@ -187,6 +289,55 @@ public:
     return *this == rhs.c_Str();
   }
 
+  Iterator split(const char* token) const
+  {
+    return Iterator(*this, token);
+  }
+
+  Iterator begin() const
+  {
+    return Iterator(*this, NULL);
+  }
+
+  Iterator end() const
+  {
+    return Iterator();
+  }
+
+  /**
+   * Returns location of first instance of 'search'
+   */
+  const char* find(const char* search) const
+  {
+    if (mStr != NULL)
+    {
+      return strstr(mStr, search);
+    }
+    else
+    {
+      return NULL;
+    }
+  }
+
+  /**
+   * Returns true if string begins with 'search'
+   */
+  bool beginsWith(const char* search) const
+  {
+    if (mStr != NULL)
+    {
+      const char* found = find(search);
+      return found == mStr;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  /**
+   * Appends 'a' to this string.
+   */
   bool append(const char* a)
   {
     if (a != NULL)
@@ -203,19 +354,39 @@ public:
     return true;
   }
 
+  /**
+   * Appends 'a' to this string.
+   */
+  bool append(char a)
+  {
+    char s[2];
+    s[0] = a;
+    s[1] = '\0';
+
+    return append(s);
+  }
+
+  /**
+   * Returns the c-compatible string, null if string is empty
+   */
   const char* c_Str() const
   {
     return mStr;
   }
  
+  /**
+   * Returns true if this stream ownes the memory in which the
+   * underlying string is stored.
+   */
   inline bool isOwned() const
   {
     return mCapacity != 0;
   }
 
-protected:
-
-
+  /**
+   * Ensures that the underlying memory location can hold 'size'
+   * number of bytes.  Any existing string is preserved.
+   */
   bool ensureCapacity(size_t size)
   {
     if (size > mCapacity && size > 0)
@@ -241,6 +412,8 @@ protected:
       return true;
     }
   }
+
+protected:
 
   char* mStr;
   size_t mCapacity;

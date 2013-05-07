@@ -9,6 +9,9 @@ public:
     mString empty;
     CFIX_ASSERT(empty.empty());
 
+    mString otherEmpty("");
+    CFIX_ASSERT(otherEmpty.empty());
+
     mString unowned((const char*)"hello");
     CFIX_ASSERT(unowned == "hello");
     CFIX_ASSERT(unowned.isOwned() == false);
@@ -71,10 +74,48 @@ public:
     CFIX_ASSERT(succeeded);
     CFIX_ASSERT(startEmpty == "one two three ");
   }
+
+  void Find()
+  {
+    bool succeeded = false;
+    const char* found = NULL;
+
+    mString aString("This is a long string");
+
+    found = aString.find("is");
+    CFIX_ASSERT(found != NULL);
+    CFIX_ASSERT(strcmp(found, "is a long string"));
+
+    found = aString.find("nothing");
+    CFIX_ASSERT(found == NULL);
+
+    succeeded = aString.beginsWith("This");
+    CFIX_ASSERT(succeeded);
+  }
+
+  void Iterate()
+  {
+    mString aString("This is a space separated string.");
+
+    mString::Iterator it = aString.split(" ");
+    CFIX_ASSERT(*it == "This");
+    ++it;
+    CFIX_ASSERT(*it == "is");
+    ++it;
+    CFIX_ASSERT(*it == "a");
+    ++it;
+    CFIX_ASSERT(*it == "space");
+    ++it;
+    CFIX_ASSERT(*it == "separated");
+    ++it;
+    CFIX_ASSERT(*it == "string.");
+  }
 };
 
 CFIXCC_BEGIN_CLASS(TestString)
   CFIXCC_METHOD(Simple)
   CFIXCC_METHOD(Numeric)
   CFIXCC_METHOD(Append)
+  CFIXCC_METHOD(Find)
+  CFIXCC_METHOD(Iterate)
 CFIXCC_END_CLASS()

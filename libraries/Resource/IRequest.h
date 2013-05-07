@@ -96,9 +96,7 @@ public:
     /** Set property request */
     eSet,
     /** Get property request */
-    eGet,
-    /** Invoke/call method request */
-    eInvoke
+    eGet
   };
 
   virtual IResponse* sender() = 0;
@@ -136,6 +134,9 @@ protected:
 class Resources
 {
 public:
+  typedef Delegate<void, IRequest*> Handler;
+  typedef PathCollection<Handler> Path;
+
   Resources()
   {
   }
@@ -144,16 +145,26 @@ public:
   {
   }
 
+  Path::Iterator begin() const
+  {
+    return mRoot.begin();
+  }
+
+  Path::Iterator end() const
+  {
+    return mRoot.end();
+  }
+
   template <typename MethodType>
   bool add(const char* path, MethodType method)
   {
-    return mRoot.add(path, new RequestHandler(method));
+    return mRoot.add(path, new Handler(method));
   }
 
   template <typename ObjectType, typename MethodType>
   bool add(const char* path, ObjectType* object, MethodType method)
   {
-    return mRoot.add(path, new RequestHandler(object, method));
+    return mRoot.add(path, new Handler(object, method));
   }
 
   template <typename ArgType>
@@ -175,7 +186,7 @@ public:
       response = &nil;
     }
 
-    Request request(IRequest::eInvoke, response);
+    Request request(IRequest::eGet, response);
 
     return invoke(path, &request);
   }
@@ -183,7 +194,7 @@ public:
 protected:
   bool invoke(const char* path, IRequest* request)
   {
-    ResourceCollection found = mRoot.find(path);
+    Path found = mRoot.find(path);
 
     if (found.empty())
     {
@@ -191,7 +202,7 @@ protected:
     }
 
     bool overall = true;
-    for (ResourceCollection::Iterator it = found.begin();
+    for (Path::Iterator it = found.begin();
       it != found.end(); ++it)
     {
       it->invoke(request);
@@ -204,10 +215,7 @@ protected:
     return overall;
   }
 
-  typedef Delegate<void, IRequest*> RequestHandler;
-  typedef PathCollection<RequestHandler> ResourceCollection;
-
-  ResourceCollection mRoot;
+  Path mRoot;
 };
 
 #endif // Header guard

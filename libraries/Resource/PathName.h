@@ -69,6 +69,11 @@ public:
    */
   bool popFront();
 
+  friend inline bool operator==(PathName const & lhs, const char* rhs)
+  {
+    return lhs.matches(rhs);
+  }
+
   /**
    */
   friend inline bool operator==(PathName const & lhs, PathName const & rhs)
@@ -143,6 +148,12 @@ public:
     else
       return strlen(mRelativePath);
   }
+
+  inline const char* c_Str() const
+  {
+    return getPath();
+  }
+
 
 private:
   /**

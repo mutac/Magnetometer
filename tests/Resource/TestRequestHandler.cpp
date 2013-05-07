@@ -11,14 +11,7 @@ public:
     static bool GetInitialized() { return sInitialized; }
     static void Initialize(IRequest* request)
     {
-      if (request->type() == IRequest::eInvoke)
-      {
-        sInitialized = true;
-      }
-      else
-      {
-        request->sender()->setFailure();
-      }
+      sInitialized = true;
     }
 
     const char* getSsid() { return mSsid; }
@@ -45,6 +38,22 @@ public:
     static bool sInitialized;
   };
 
+  class TestHandler
+  {
+  public:
+    void methodA(IRequest* request)
+    {
+    }
+
+    void methodB(IRequest* request)
+    {
+    }
+
+    void methodC(IRequest* request)
+    {
+    }
+  };
+
   void Simple()
   {
     bool status = false;
@@ -62,10 +71,34 @@ public:
     CFIX_ASSERT(status == true);
     CFIX_ASSERT(strcmp(wifiDevice.getSsid(), "myWifiNetwork") == 0);
   }
+
+  void Iterate()
+  {
+    bool status = false;
+
+    TestHandler testHandler;
+    Resources system;
+
+    status = system.add("system.test.a", &testHandler, &TestHandler::methodA);
+    CFIX_ASSERT(status == true);
+    status = system.add("system.test.b", &testHandler, &TestHandler::methodB);
+    CFIX_ASSERT(status == true);
+    status = system.add("system.test.c", &testHandler, &TestHandler::methodC);
+    CFIX_ASSERT(status == true);
+
+    Resources::Path::Iterator it = system.begin();
+    CFIX_ASSERT(*it.path() == "system.test.a"); 
+    ++it;
+    CFIX_ASSERT(*it.path() == "system.test.b"); 
+    ++it;
+    CFIX_ASSERT(*it.path() == "system.test.c"); 
+    ++it;
+  }
 };
 
 bool TestRequest::WifiDevice::sInitialized = false;
 
 CFIXCC_BEGIN_CLASS(TestRequest)
   CFIXCC_METHOD(Simple)
+  CFIXCC_METHOD(Iterate)
 CFIXCC_END_CLASS()

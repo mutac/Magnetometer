@@ -35,30 +35,37 @@ public:
 class PrintingResponseHandler : public IResponse
 {
 public:
-  PrintingResponseHandler(Print* printer) :
+  PrintingResponseHandler(Print* printer = NULL) :
     mPrinter(printer),
     mFailed(false)
   {
-    mDebugAssert(printer != NULL);
+  }
+
+  void setPrinter(Print* printer)
+  {
+    mPrinter = printer;
   }
   
   bool write(const char* name, const Variant& val)
   {
-    bool succeeded = true;
-    mString str;
-       
-    mPrinter->print(name);
-    mPrinter->print(": ");
-    
-    succeeded = val.convertTo(&str);
-    if (succeeded) 
+    bool succeeded = false;
+
+    if (mPrinter != NULL)
     {
-      mPrinter->println(str.c_Str());
-    }
-    else
-    {
-      mPrinter->println("Unknown");
-      succeeded = false;
+      mString str;
+         
+      mPrinter->print(name);
+      mPrinter->print(": ");
+      
+      succeeded = val.convertTo(&str);
+      if (succeeded) 
+      {
+        mPrinter->println(str.c_Str());
+      }
+      else
+      {
+        mPrinter->println("Unknown");
+      }
     }
     
     return succeeded;
@@ -67,8 +74,12 @@ public:
   void setFailure(const char* reason = "")
   {
     mFailed = true;
-    mPrinter->print("Request failure: ");
-    mPrinter->println(reason);
+
+    if (mPrinter != NULL)
+    {
+      mPrinter->print("Request failure: ");
+      mPrinter->println(reason);
+    }
   }
   
   bool failed() const

@@ -6,6 +6,219 @@
 #include <mString.h>
 #include <ArduinoRequestBindings.h>
 
+class Console
+{
+public:
+  Console(Resources* root = NULL, Stream* stream = NULL) :
+    mStream(stream),
+    mRoot(root),
+    mHandler(),
+    mReadingCommand(true),
+    mEcho(true)
+  {
+    mLine.ensureCapacity(80);
+  }
+  
+  void setRoot(Resources* root)
+  {
+    mRoot = root;
+  }
+  
+  void setStream(Stream* stream)
+  {
+    mStream = stream;
+    mHandler.setPrinter(stream);
+  }
+  
+  void echo(IRequest* request)
+  {
+    bool succeeded = false;
+    
+    if (request->type() == IRequest::eSet)
+    {
+      succeeded = request->getArgument().convertTo(&mEcho);
+    }
+    else if (request->type() == IRequest::eGet)
+    {
+      request->sender()->write("echo", mEcho);
+      succeeded = true;
+    }
+    
+    if (!succeeded)
+    {
+      request->sender()->setFailure();
+    }
+  }
+  
+  bool addResources(Resources* system)
+  {  
+    system->add("system.console.echo", this, &Console::echo);
+    return true;
+  }
+  
+  bool available() 
+  {
+    return mStream && mStream->available();
+  }
+  
+  char read()
+  {
+    if (mStream != NULL)
+    {
+      return mStream->read();
+    }
+    else
+    {
+      return '\0';
+    }
+  }
+  
+  void print(const char* str)
+  {
+    if (mStream != NULL)
+    {
+      mStream->print(str);
+    }
+  }
+  
+  void println(const char* str)
+  {
+    if (mStream != NULL)
+    {
+      mStream->println(str);
+    }
+  }
+  
+  void serviceInput()
+  {
+    while (available() && mReadingCommand)
+    {
+      char in = read();
+      if (in == '\n')
+      {
+        mReadingCommand = false;
+      }
+      else if (in == '\r')
+      {
+        // ignore
+      }
+      else
+      {
+        mLine.append(in);
+      }
+    }
+  }
+  
+  void serviceRequest()
+  { 
+    if (!mReadingCommand)
+    {
+      bool succeeded = false;
+      IRequest::RequestType type;
+      mString command;
+      mString arg;
+      
+      succeeded = ParseCommand(mLine, &type, &command, &arg);
+      if (!succeeded || command == "?" || command == "help")
+      {
+        println("Syntax: [get|set] path [arg]");
+        println("Paths:");
+        for (Resources::Path::Iterator it = mRoot->begin(); 
+          it != mRoot->end(); ++it)
+        {
+          print("  ");
+          println(it.path()->c_Str());
+        }
+        println("");
+      }
+      else
+      {
+        if (type == IRequest::eGet)
+        {
+          if (mEcho)
+          {
+            print(command.c_Str());
+            println(": ");
+          }
+          succeeded = mRoot->invoke(command.c_Str(), &mHandler);
+        }
+        else if (type == IRequest::eSet)
+        {
+          succeeded = mRoot->set(command.c_Str(), arg);
+          if (succeeded && mEcho)
+          {
+            print(command.c_Str());
+            print(" <- \"");
+            print(arg.c_Str());
+            println("\"");
+          }
+        }
+        else
+        {
+          succeeded = false;
+        }
+        
+        if (!succeeded)
+        {
+          println("Command failed");
+        }
+      }
+      
+      mLine = "";
+      mReadingCommand = true;
+    }
+  }
+  
+protected:
+
+ static bool ParseCommand(const mString& cmdString, 
+   IRequest::RequestType* outType, 
+   mString* outCommand,
+   mString* outArg)
+ {
+   IRequest::RequestType type;
+   mString::Iterator parts = cmdString.split(" ");
+   mString command;
+   mString arg;
+   
+   if (*parts == "get")
+   {
+     type = IRequest::eGet;
+     ++parts;
+     *outCommand = *parts;
+   }
+   else if (*parts == "set")
+   {
+     type = IRequest::eSet;
+     ++parts; 
+     *outCommand = *parts;
+     
+     if (parts != cmdString.end())
+     {
+       ++parts;
+       *outArg = *parts; 
+     }
+   }
+   else
+   {
+     // Default to get/invoke
+     type = IRequest::eGet;
+     *outCommand = *parts;
+   }
+   
+   *outType = type;
+   
+   return !outCommand->empty();
+ }
+
+ bool mEcho;
+ Stream* mStream;
+ PrintingResponseHandler mHandler;
+ Resources* mRoot;
+ mString mLine;
+ bool mReadingCommand;
+};
+
 class WiFiDevice
 {
 public:
@@ -19,6 +232,7 @@ public:
   
   bool addResources(Resources* system)
   {
+    system->add("system.wifi.rssi", this, &WiFiDevice::rssi);
     system->add("system.wifi.ssid", this, &WiFiDevice::ssid);
     system->add("system.wifi.password", this, &WiFiDevice::password);
     system->add("system.wifi.connect", this, &WiFiDevice::connect);
@@ -34,21 +248,11 @@ public:
   
   void disconnect(IRequest* request)
   {
-    if (request->type() != IRequest::eInvoke)
-    {
-      request->sender()->setFailure();
-    }
-    
     WiFi.disconnect();
   }
   
   void connect(IRequest* request)
   {
-    if (request->type() != IRequest::eInvoke)
-    {
-      request->sender()->setFailure();
-    }
-    
     if (!checkHardware())
     {
       request->sender()->setFailure("WiFi hardware not found!");
@@ -82,7 +286,7 @@ public:
   
   void status(IRequest* request) 
   {
-    if (request->type() != IRequest::eInvoke)
+    if (request->type() != IRequest::eGet)
     {
       request->sender()->setFailure();
     }
@@ -98,9 +302,19 @@ public:
     request->sender()->write("Encryption", (int)WiFi.encryptionType());
   }
   
+  void rssi(IRequest* request)
+  {
+    if (request->type() != IRequest::eGet)
+    {
+      request->sender()->setFailure();
+    }
+    
+    request->sender()->write("Signal Strength (dBm)", WiFi.RSSI());
+  }
+  
   void ssid(IRequest* request)
   {
-    bool succeeded = true;
+    bool succeeded = false;
     
     if (request->type() == IRequest::eSet)
     {
@@ -109,10 +323,7 @@ public:
     else if (request->type() == IRequest::eGet)
     {
       request->sender()->write("ssid", mSsid);
-    }
-    else
-    {
-      succeeded = false;
+      succeeded = true;
     }
     
     if (!succeeded)
@@ -123,7 +334,7 @@ public:
   
   void password(IRequest* request)
   {
-    bool succeeded = true;
+    bool succeeded = false;
     
     if (request->type() == IRequest::eSet)
     {
@@ -132,10 +343,7 @@ public:
     else if (request->type() == IRequest::eGet)
     {
       request->sender()->write("password", mPass);
-    }
-    else
-    {
-      succeeded = false;
+      succeeded = true;
     }
     
     if (!succeeded)
@@ -151,10 +359,56 @@ private:
   int mMaxConnectionAttempts;
 };
 
+class TelnetConsoleServer
+{
+public:
+  TelnetConsoleServer() :
+    mServer(23),
+    mRoot(NULL)
+  {
+  }
+  
+  void setRoot(Resources* root)
+  {
+    mRoot = root;
+  }
+  
+  bool addResources(Resources* system)
+  {
+    system->add("system.telnet.start", this, &TelnetConsoleServer::start);
+    return true;
+  }
+  
+  void start(IRequest* request)
+  {
+    mServer.begin();
+    request->sender()->write("started", true);
+  }
+  
+  Console available()
+  { 
+    WiFiClient client = mServer.available();
+    
+    if (client && client.connected())
+    {
+      Console telnetClient(mRoot, &client);
+      return telnetClient;
+    }
+    else
+    {
+      return Console();
+    }
+  }
+  
+private:
+  WiFiServer mServer;
+  Resources* mRoot;
+};
+
 Resources gSystem;
-PrintingResponseHandler gPrintResponse(&Serial);
 WiFiDevice gWiFiDevice;
-WiFiServer gServer(80);
+TelnetConsoleServer gTelnetConsoleServer;
+Console gSerialConsole;
 
 void fatal(unsigned int code)
 {
@@ -169,30 +423,32 @@ void fatal(unsigned int code)
 void setup()
 {   
   Serial.begin(9600);
-  Serial.print("In ");
-  for (int i = 5; i > 0; i--)
-  {
-    Serial.print(i);
-    Serial.print(" ");
-    delay(1000);
-  }
-  Serial.println("");
-      
+  Serial.println("?/help");
+    
+  gSerialConsole.setStream(&Serial);
+  gSerialConsole.setRoot(&gSystem);
+  
   // 
   // Configure
   //
   
+  gSerialConsole.addResources(&gSystem);
   gWiFiDevice.addResources(&gSystem);
-  
-  gSystem.set("system.wifi.ssid", "mySsid");
-  gSystem.set("system.wifi.password", "passw0rd");
-
-  gSystem.invoke("system.wifi.connect", &gPrintResponse);
-  gSystem.invoke("system.wifi.status", &gPrintResponse);
+  gTelnetConsoleServer.addResources(&gSystem);
 }
 
 void loop()
 {
+  gSerialConsole.serviceRequest();
+  
+  Console telnetConsole = gTelnetConsoleServer.available();
+  telnetConsole.serviceInput();  
+  telnetConsole.serviceRequest();
+}
+
+void serialEvent() 
+{
+  gSerialConsole.serviceInput();
 }
 
 
