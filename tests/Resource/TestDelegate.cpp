@@ -46,6 +46,22 @@ public:
     }
   };
 
+  class OneClass
+  {
+  public:
+    void oneClassMethod(int)
+    {
+    }
+  };
+
+  class AnotherClass
+  {
+  public:
+    void anotherClassMethod(int)
+    {
+    }
+  };
+
   void Simple()
   {
     DeviceProperty someProperty;
@@ -62,8 +78,15 @@ public:
     staticPropertyDelegate.invoke(&test);
     CFIX_ASSERT(test.isHandled());
   }
+
+  void TypeCheck()
+  {
+    OneClass oneClass;
+    //Delegate<void, int> del(&oneClass, &AnotherClass::anotherClassMethod);
+  }
 };
 
 CFIXCC_BEGIN_CLASS(TestDelegate)
   CFIXCC_METHOD(Simple)
+  CFIXCC_METHOD(TypeCheck)
 CFIXCC_END_CLASS()

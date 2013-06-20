@@ -6,99 +6,99 @@
 #include "mString.h"
 
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<char>()
+inline const TypeInfo& type_info_of<char>()
 {
   return TypeInfo_Char;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<unsigned char>()
+inline const TypeInfo& type_info_of<unsigned char>()
 {
-  return variant_type_info<char>();
+  return type_info_of<char>();
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<const char*>()
+inline const TypeInfo& type_info_of<const char*>()
 {
   return TypeInfo_ConstCharArray;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<char*>()
+inline const TypeInfo& type_info_of<char*>()
 {
   // Store char* as a mString (for ownership)
   return TypeInfo_String;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<mString>()
+inline const TypeInfo& type_info_of<mString>()
 {
   return TypeInfo_String;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<int>()
+inline const TypeInfo& type_info_of<int>()
 {
   return TypeInfo_Int;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<unsigned int>()
+inline const TypeInfo& type_info_of<unsigned int>()
 {
-  return variant_type_info<int>();
+  return type_info_of<int>();
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<long>()
+inline const TypeInfo& type_info_of<long>()
 {
   return TypeInfo_Long;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<unsigned long>()
+inline const TypeInfo& type_info_of<unsigned long>()
 {
-  return variant_type_info<long>();
+  return type_info_of<long>();
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<bool>()
+inline const TypeInfo& type_info_of<bool>()
 {
   return TypeInfo_Bool;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<float>()
+inline const TypeInfo& type_info_of<float>()
 {
   return TypeInfo_Float;
 }
 /**
- * variant_type_info specialization for primitive types
+ * type_info_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& variant_type_info<double>()
+inline const TypeInfo& type_info_of<double>()
 {
   return TypeInfo_Double;
 }

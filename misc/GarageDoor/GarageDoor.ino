@@ -6,6 +6,83 @@
 #include <mString.h>
 #include <ArduinoRequestBindings.h>
 
+class Debug
+{
+public:    
+  static bool AddResources(Resources* system)
+  {  
+    system->add("system.debug.enabled", Instance(), &Debug::enable);
+    return true;
+  }
+  
+  int GetLevel()
+  {
+    return Instance()->mLevel;
+  }
+  
+  static void Trace(const char* msg, int level = 1)
+  {
+    if (Instance()->mLevel >= level)
+    {
+      Serial.println(msg);
+    }
+  }
+  
+  static void Fatal(unsigned int code)
+  {
+    while(1)
+    {
+      Serial.print("Fatal: ");
+      Serial.println(code);
+      delay(5000);
+    }
+  }
+  
+private:
+  Debug() :
+    mLevel(0)
+  {
+  }
+  
+  static Debug* Instance()
+  {
+    if (sInstance == NULL)
+    {
+      sInstance = new Debug();
+    }
+    
+    return sInstance;
+  }
+  
+  void enable(IRequest* request)
+  {
+    bool succeeded = false;
+    
+    if (request->type() == IRequest::eSet)
+    {
+      bool enabled = false;
+      succeeded = request->getArgument().convertTo(&enabled);
+      
+      mLevel = enabled ? 1 : 0;
+    }
+    else if (request->type() == IRequest::eGet)
+    {
+      request->sender()->write("enabled", mLevel > 0);
+      succeeded = true;
+    }
+    
+    if (!succeeded)
+    {
+      request->sender()->setFailure();
+    }
+  }
+  
+  int mLevel;
+  static Debug* sInstance;
+};
+
+Debug* Debug::sInstance = NULL;
+
 class Console
 {
 public:
@@ -38,7 +115,8 @@ public:
     {
       succeeded = request->getArgument().convertTo(&mEcho);
     }
-    else if (request->type() == IRequest::eGet)
+    
+    if (succeeded || request->type() == IRequest::eGet)
     {
       request->sender()->write("echo", mEcho);
       succeeded = true;
@@ -364,18 +442,22 @@ class TelnetConsoleServer
 public:
   TelnetConsoleServer() :
     mServer(23),
-    mRoot(NULL)
+    mRoot(NULL),
+    mConnected(false)
   {
   }
   
   void setRoot(Resources* root)
   {
     mRoot = root;
+    mConnectedConsole.setRoot(mRoot);
   }
   
   bool addResources(Resources* system)
   {
     system->add("system.telnet.start", this, &TelnetConsoleServer::start);
+    system->add("system.telnet.reset", this, &TelnetConsoleServer::reset);
+    system->add("system.telnet.connected", this, &TelnetConsoleServer::connected);
     return true;
   }
   
@@ -385,40 +467,54 @@ public:
     request->sender()->write("started", true);
   }
   
-  Console available()
+  void reset(IRequest* request)
+  {
+    mClient = WiFiClient();
+    mConnected = false;
+    mConnectedConsole = Console();
+    request->sender()->write("reset", true);
+  }
+  
+  void connected(IRequest* request)
+  {
+    request->sender()->write("connected", mConnected);
+  }
+  
+  Console& available()
   { 
-    WiFiClient client = mServer.available();
+    mClient = mServer.available();
     
-    if (client && client.connected())
+    if (mClient && mClient.connected() && !mConnected)
     {
-      Console telnetClient(mRoot, &client);
-      return telnetClient;
+      Debug::Trace("Connected to telnet client");
+      
+      mConnectedConsole.setStream(&mClient);
+      mConnected = true;
     }
-    else
+    else if (mClient && !mClient.connected() && mConnected)
     {
-      return Console();
+      Debug::Trace("Disconnected from telnet client");
+      
+      // Client disconnected, reset.
+      mConnectedConsole.setStream(NULL);
+      mConnected = false;
     }
+
+    return mConnectedConsole;
   }
   
 private:
   WiFiServer mServer;
   Resources* mRoot;
+  bool mConnected;
+  WiFiClient mClient;
+  Console mConnectedConsole;
 };
 
 Resources gSystem;
 WiFiDevice gWiFiDevice;
 TelnetConsoleServer gTelnetConsoleServer;
 Console gSerialConsole;
-
-void fatal(unsigned int code)
-{
-  while(1)
-  {
-    Serial.print("Fatal: ");
-    Serial.println(code);
-    delay(5000);
-  }
-}
 
 void setup()
 {   
@@ -431,7 +527,7 @@ void setup()
   // 
   // Configure
   //
-  
+  Debug::AddResources(&gSystem);
   gSerialConsole.addResources(&gSystem);
   gWiFiDevice.addResources(&gSystem);
   gTelnetConsoleServer.addResources(&gSystem);
@@ -441,9 +537,9 @@ void loop()
 {
   gSerialConsole.serviceRequest();
   
-  Console telnetConsole = gTelnetConsoleServer.available();
-  telnetConsole.serviceInput();  
-  telnetConsole.serviceRequest();
+  //Console& telnetConsole = gTelnetConsoleServer.available();
+  //telnetConsole.serviceInput();  
+  //telnetConsole.serviceRequest();
 }
 
 void serialEvent() 

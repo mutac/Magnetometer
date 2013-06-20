@@ -38,7 +38,7 @@ static const TypeInfo TypeInfo_String = 8;
  * Specialize for your type.
  */
 template <typename ValueType>
-const TypeInfo& variant_type_info();
+const TypeInfo& type_info_of();
 
 /**
  * Convert a type to another type, storing the result in a variant.
@@ -177,7 +177,7 @@ public:
         // Other type conversion
         Variant converted;
 
-        if (!mContent->convertTo(variant_type_info<ToType>(), &converted))
+        if (!mContent->convertTo(type_info_of<ToType>(), &converted))
         {
           return false;
         }
@@ -208,12 +208,12 @@ public:
   }
 
   /**
-   * Returns true if variant current contains a value of 'ValueType'
+   * Returns true if variant currently contains a value of type 'T'
    */
-  template <typename ValueType>
+  template <typename T>
   bool isType() const
   {
-    return variant_type_info<ValueType>() == getTypeInfo();
+    return type_info_of<T>() == getTypeInfo();
   }
 
 private:
@@ -238,7 +238,7 @@ private:
       : mHeld(value)
     {
       // You gotta make one of these:
-      mTypeInfo = variant_type_info<TypeHeld>();
+      mTypeInfo = type_info_of<TypeHeld>();
     }
 
     /**

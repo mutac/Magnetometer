@@ -16,7 +16,7 @@ template<typename ReturnType,
 class MethodDelegate_1 : public IDelegateFunction_1<ReturnType, Arg1Type>
 {
 public:
-  MethodDelegate_1(void* object, MethodType methodPtr) :
+  MethodDelegate_1(ObjectType* object, MethodType methodPtr) :
     mObject(object),
     mMethodPtr(methodPtr)
   {
@@ -24,12 +24,11 @@ public:
 
   virtual ReturnType invoke(Arg1Type arg1)
   {
-    ObjectType* obj = static_cast<ObjectType*>(mObject);
-    return (obj->*mMethodPtr)(arg1);
+    return (mObject->*mMethodPtr)(arg1);
   }
 
 private:
-  void* mObject;
+  ObjectType* mObject;
   MethodType mMethodPtr;
 };
 
