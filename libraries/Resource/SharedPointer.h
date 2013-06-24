@@ -5,14 +5,6 @@
 #include "mDefs.h"
 #include "SharedCount.h"
 
-// TODO: make more memory efficient:
-//
-// SharedPointer<Type> x;
-// x = yPtr;
-//
-// Will allocate two SharedCount objects.
-//
-
 template<class T>
 class SharedPointer
 {
@@ -28,7 +20,6 @@ public:
   }
 
   SharedPointer(SharedPointer<T> const & rhs) :
-    // TODO: Do these two need to be done atomically?
     mCount(rhs.mCount),
     mShared(rhs.mShared)
   {
@@ -56,6 +47,11 @@ public:
     return mShared;
   }
 
+  inline bool operator!() const
+  {
+    return mShared == NULL;
+  }
+
   SharedPointer<T>& operator=(SharedPointer<T> const & rhs)
   {
     SharedCount rhsCount(rhs.mCount);
@@ -79,7 +75,7 @@ private:
   {
     if (mShared != NULL)
     {
-      if (mCount.getUseCount() == 1)
+      if (mCount.getRefCount() == 1)
       {
         delete mShared;
       }

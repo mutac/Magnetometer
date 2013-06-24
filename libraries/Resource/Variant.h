@@ -38,16 +38,16 @@ static const TypeInfo TypeInfo_String = 8;
  * Specialize for your type.
  */
 template <typename ValueType>
-const TypeInfo& type_info_of();
+const TypeInfo& type_of();
 
 /**
  * Convert a type to another type, storing the result in a variant.
  * Specialize for your type.
  */
 template <typename FromType>
-inline bool variant_convert(const FromType& from, 
+inline bool type_conversion(const FromType& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 #ifdef mVariantStaticallyEnsureConversions
 ; // No default impl
 #else
@@ -177,7 +177,7 @@ public:
         // Other type conversion
         Variant converted;
 
-        if (!mContent->convertTo(type_info_of<ToType>(), &converted))
+        if (!mContent->convertTo(type_of<ToType>(), &converted))
         {
           return false;
         }
@@ -195,11 +195,11 @@ public:
   /**
    * Returns the variant type information about the currently contained value.
    */
-  const TypeInfo& getTypeInfo() const
+  const TypeInfo& getType() const
   {
     if (!empty())
     {
-      return mContent->getTypeInfo();
+      return mContent->getType();
     }
     else
     {
@@ -213,7 +213,7 @@ public:
   template <typename T>
   bool isType() const
   {
-    return type_info_of<T>() == getTypeInfo();
+    return type_of<T>() == getType();
   }
 
 private:
@@ -224,7 +224,7 @@ private:
   public:
     virtual ~PlaceHolder() {}
     virtual PlaceHolder* clone() const = 0;
-    virtual const TypeInfo& getTypeInfo() const = 0;
+    virtual const TypeInfo& getType() const = 0;
     virtual bool convertTo(const TypeInfo& toType, Variant* outConverted) const = 0;
   };
 
@@ -238,7 +238,7 @@ private:
       : mHeld(value)
     {
       // You gotta make one of these:
-      mTypeInfo = type_info_of<TypeHeld>();
+      mTypeInfo = type_of<TypeHeld>();
     }
 
     /**
@@ -250,7 +250,7 @@ private:
 
     /**
      */
-    const TypeInfo& getTypeInfo() const
+    const TypeInfo& getType() const
     {
       return mTypeInfo;
     }
@@ -260,7 +260,7 @@ private:
     bool convertTo(const TypeInfo& toType, Variant* outConverted) const
     {
       // You gotta make one of these too:
-      return variant_convert(mHeld, toType, outConverted);
+      return type_conversion(mHeld, toType, outConverted);
     }
   
     const TypeHeld mHeld;

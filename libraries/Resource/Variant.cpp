@@ -10,9 +10,9 @@
 //
 
 template<>
-bool variant_convert(const char& from, 
+bool type_conversion(const char& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   if (toType == TypeInfo_String)
   {
@@ -21,32 +21,32 @@ bool variant_convert(const char& from,
     char str[2];
     str[0] = from;
     str[1] = '\0';
-    *outVar = mString(str);
+    *to = mString(str);
     return true;
   }
   else if (toType == TypeInfo_Int)
   {
-    *outVar = (int)from;
+    *to = (int)from;
     return true;
   }
   else if (toType == TypeInfo_Long)
   {
-    *outVar = (long)from;
+    *to = (long)from;
     return true;
   }
   else if (toType == TypeInfo_Double)
   {
-    *outVar = (double)from;
+    *to = (double)from;
     return true;
   }
   else if (toType == TypeInfo_Float)
   {
-    *outVar = (float)from;
+    *to = (float)from;
     return true;
   }
   else if (toType == TypeInfo_Bool)
   {
-    *outVar = from != 0;
+    *to = from != 0;
     return true;
   }
   else
@@ -56,24 +56,24 @@ bool variant_convert(const char& from,
 }
 
 template<>
-bool variant_convert(const char* const& from, 
+bool type_conversion(const char* const& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   if (toType == TypeInfo_String)
   {
-    *outVar = mString(from);
+    *to = mString(from);
     return true;
   }
   else if (toType == TypeInfo_Char)
   {
     if (from == NULL)
     {
-      *outVar = (char)0;
+      *to = (char)0;
     }
     else
     {
-      *outVar = (char)atoi(from);
+      *to = (char)atoi(from);
     }
     return true;
   }
@@ -81,11 +81,11 @@ bool variant_convert(const char* const& from,
   {
     if (from == NULL)
     {
-      *outVar = (int)0;
+      *to = (int)0;
     }
     else
     {
-      *outVar = (int)atoi(from);
+      *to = (int)atoi(from);
     }
     return true;
   }
@@ -93,11 +93,11 @@ bool variant_convert(const char* const& from,
   {
     if (from == NULL)
     {
-      *outVar = (long)0;
+      *to = (long)0;
     }
     else
     {
-      *outVar = (long)atol(from);
+      *to = (long)atol(from);
     }
     return true;
   }
@@ -105,11 +105,11 @@ bool variant_convert(const char* const& from,
   {
     if (from == NULL)
     {
-      *outVar = (double)0;
+      *to = (double)0;
     }
     else
     {
-      *outVar = (double)atof(from);
+      *to = (double)atof(from);
     }
     return true;
   }
@@ -117,11 +117,11 @@ bool variant_convert(const char* const& from,
   {
     if (from == NULL)
     {
-      *outVar = (float)0;
+      *to = (float)0;
     }
     else
     {
-      *outVar = (float)atof(from);
+      *to = (float)atof(from);
     }
     return true;
   }
@@ -129,11 +129,11 @@ bool variant_convert(const char* const& from,
   {
     if (from == NULL)
     {
-      *outVar = false;
+      *to = false;
     }
     else
     {
-      *outVar = (mStd::strcasecmp(from, "true") == 0);
+      *to = (mStd::strcasecmp(from, "true") == 0);
     }
     return true;
   }
@@ -144,47 +144,47 @@ bool variant_convert(const char* const& from,
 }
 
 template<>
-bool variant_convert(const mString& from, 
+bool type_conversion(const mString& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   // Use const char* conversion.
-  return variant_convert(from.c_Str(), toType, outVar);
+  return type_conversion(from.c_Str(), toType, to);
 }
 
 template<>
-bool variant_convert(const int& from, 
+bool type_conversion(const int& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   if (toType == TypeInfo_Char)
   {
-    *outVar = (char)from;
+    *to = (char)from;
     return true;
   }
   else if (toType == TypeInfo_Long)
   {
-    *outVar = (long)from;
+    *to = (long)from;
     return true;
   }
   else if (toType == TypeInfo_String)
   {
-    *outVar = mString(from);
+    *to = mString(from);
     return true;
   }
   else if (toType == TypeInfo_Double)
   {
-    *outVar = (double)from;
+    *to = (double)from;
     return true;
   }
   else if (toType == TypeInfo_Float)
   {
-    *outVar = (float)from;
+    *to = (float)from;
     return true;
   }
   else if (toType == TypeInfo_Bool)
   {
-    *outVar = from != 0;
+    *to = from != 0;
     return true;
   }
   else
@@ -194,38 +194,38 @@ bool variant_convert(const int& from,
 }
 
 template<>
-bool variant_convert(const long& from, 
+bool type_conversion(const long& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   if (toType == TypeInfo_Char)
   {
-    *outVar = (char)from;
+    *to = (char)from;
     return true;
   }
   else if (toType == TypeInfo_String)
   {
-    *outVar = mString(from);
+    *to = mString(from);
     return true;
   }
   else if (toType == TypeInfo_Int)
   {
-    *outVar = (int)from;
+    *to = (int)from;
     return true;
   }
   else if (toType == TypeInfo_Double)
   {
-    *outVar = (double)from;
+    *to = (double)from;
     return true;
   }
   else if (toType == TypeInfo_Float)
   {
-    *outVar = (float)from;
+    *to = (float)from;
     return true;
   }
   else if (toType == TypeInfo_Bool)
   {
-    *outVar = from != 0;
+    *to = from != 0;
     return true;
   }
   else
@@ -235,38 +235,38 @@ bool variant_convert(const long& from,
 }
 
 template<>
-bool variant_convert(const bool& from, 
+bool type_conversion(const bool& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   if (toType == TypeInfo_Char)
   {
-    *outVar = (char)from;
+    *to = (char)from;
     return true;
   }
   else if (toType == TypeInfo_String)
   {
-    *outVar = mString(const_cast<char*>(from ? "true" : "false"));
+    *to = mString(const_cast<char*>(from ? "true" : "false"));
     return true;
   }
   else if (toType == TypeInfo_Int)
   {
-    *outVar = (int)from;
+    *to = (int)from;
     return true;
   }
   else if (toType == TypeInfo_Long)
   {
-    *outVar = (long)from;
+    *to = (long)from;
     return true;
   }
   else if (toType == TypeInfo_Double)
   {
-    *outVar = (double)from;
+    *to = (double)from;
     return true;
   }
   else if (toType == TypeInfo_Float)
   {
-    *outVar = (float)from;
+    *to = (float)from;
     return true;
   }
   else
@@ -276,38 +276,38 @@ bool variant_convert(const bool& from,
 }
 
 template<>
-bool variant_convert(const double& from, 
+bool type_conversion(const double& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   if (toType == TypeInfo_Char)
   {
-    *outVar = (char)(from + 0.5);
+    *to = (char)(from + 0.5);
     return true;
   }
   else if (toType == TypeInfo_String)
   {
-    *outVar = mString(from);
+    *to = mString(from);
     return true;
   }
   else if (toType == TypeInfo_Int)
   {
-    *outVar = (int)(from + 0.5);
+    *to = (int)(from + 0.5);
     return true;
   }
   else if (toType == TypeInfo_Long)
   {
-    *outVar = (long)from;
+    *to = (long)from;
     return true;
   }
   else if (toType == TypeInfo_Float)
   {
-    *outVar = (float)from;
+    *to = (float)from;
     return true;
   }
   else if (toType == TypeInfo_Bool)
   {
-    *outVar = from != 0.0;
+    *to = from != 0.0;
     return true;
   }
   else
@@ -317,38 +317,38 @@ bool variant_convert(const double& from,
 }
 
 template<>
-bool variant_convert(const float& from, 
+bool type_conversion(const float& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar)
+                     Variant* to)
 {
   if (toType == TypeInfo_Char)
   {
-    *outVar = (char)(from + 0.5);
+    *to = (char)(from + 0.5);
     return true;
   }
   else if (toType == TypeInfo_String)
   {
-    *outVar = mString(from);
+    *to = mString(from);
     return true;
   }
   else if (toType == TypeInfo_Int)
   {
-    *outVar = (int)(from + 0.5);
+    *to = (int)(from + 0.5);
     return true;
   }
   else if (toType == TypeInfo_Long)
   {
-    *outVar = (long)from;
+    *to = (long)from;
     return true;
   }
   else if (toType == TypeInfo_Double)
   {
-    *outVar = (double)from;
+    *to = (double)from;
     return true;
   }
   else if (toType == TypeInfo_Bool)
   {
-    *outVar = from != 0.0f;
+    *to = from != 0.0f;
     return true;
   }
   else

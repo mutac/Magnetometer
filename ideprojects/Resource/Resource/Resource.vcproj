@@ -161,6 +161,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\..\libraries\Resource\Critical.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\mAtomic.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\mNew.cpp"
 				>
 			</File>
@@ -203,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\Critical.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\Delegate.h"
 				>
 			</File>
@@ -212,6 +224,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\IResource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\mAtomic.h"
 				>
 			</File>
 			<File

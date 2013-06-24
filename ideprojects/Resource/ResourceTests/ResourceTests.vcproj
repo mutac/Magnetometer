@@ -175,7 +175,15 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\..\tests\Resource\TestCritical.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\tests\Resource\TestDelegate.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\tests\Resource\TestmAtomic.cpp"
 			>
 		</File>
 		<File

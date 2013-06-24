@@ -13,6 +13,14 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
+  #define mPlatformWindows
+#elif defined (__AVR_ARCH__)
+  #define mPlatformAvr
+#else 
+  #define mPlatformUnknown
+#endif
+
 //
 // Compiler warning
 //

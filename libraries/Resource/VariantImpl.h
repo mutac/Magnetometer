@@ -6,99 +6,99 @@
 #include "mString.h"
 
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<char>()
+inline const TypeInfo& type_of<char>()
 {
   return TypeInfo_Char;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<unsigned char>()
+inline const TypeInfo& type_of<unsigned char>()
 {
-  return type_info_of<char>();
+  return type_of<char>();
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<const char*>()
+inline const TypeInfo& type_of<const char*>()
 {
   return TypeInfo_ConstCharArray;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<char*>()
+inline const TypeInfo& type_of<char*>()
 {
   // Store char* as a mString (for ownership)
   return TypeInfo_String;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<mString>()
+inline const TypeInfo& type_of<mString>()
 {
   return TypeInfo_String;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<int>()
+inline const TypeInfo& type_of<int>()
 {
   return TypeInfo_Int;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<unsigned int>()
+inline const TypeInfo& type_of<unsigned int>()
 {
-  return type_info_of<int>();
+  return type_of<int>();
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<long>()
+inline const TypeInfo& type_of<long>()
 {
   return TypeInfo_Long;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<unsigned long>()
+inline const TypeInfo& type_of<unsigned long>()
 {
-  return type_info_of<long>();
+  return type_of<long>();
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<bool>()
+inline const TypeInfo& type_of<bool>()
 {
   return TypeInfo_Bool;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<float>()
+inline const TypeInfo& type_of<float>()
 {
   return TypeInfo_Float;
 }
 /**
- * type_info_of specialization for primitive types
+ * type_of specialization for primitive types
  */
 template <>
-inline const TypeInfo& type_info_of<double>()
+inline const TypeInfo& type_of<double>()
 {
   return TypeInfo_Double;
 }
@@ -106,85 +106,85 @@ inline const TypeInfo& type_info_of<double>()
 /**
  */
 template<>
-bool variant_convert(const char& from, 
+bool type_conversion(const char& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 template<>
-inline bool variant_convert(const unsigned char& from, 
+inline bool type_conversion(const unsigned char& from, 
                             const TypeInfo& toType, 
-                            Variant* outVar)
+                            Variant* to)
 {
-  return variant_convert<char>(from, toType, outVar);
+  return type_conversion<char>(from, toType, to);
 }
 
 /**
  */
 template<>
-bool variant_convert(const char* const& from, 
+bool type_conversion(const char* const& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 /**
  */
 template<>
-bool variant_convert(const mString& from, 
+bool type_conversion(const mString& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 template<>
-inline bool variant_convert(char* const& from, 
+inline bool type_conversion(char* const& from, 
                             const TypeInfo& toType, 
-                            Variant* outVar)
+                            Variant* to)
 {
   // char* type is internally stored as mStrings.
-  return variant_convert<mString>(from, toType, outVar);
+  return type_conversion<mString>(from, toType, to);
 }
 
 /**
  */
 template<>
-bool variant_convert(const int& from, 
+bool type_conversion(const int& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 template<>
-inline bool variant_convert(const unsigned int& from, 
+inline bool type_conversion(const unsigned int& from, 
                             const TypeInfo& toType, 
-                            Variant* outVar)
+                            Variant* to)
 {
-  return variant_convert<int>(from, toType, outVar);
+  return type_conversion<int>(from, toType, to);
 }
 
 /**
  */
 template<>
-bool variant_convert(const long& from, 
+bool type_conversion(const long& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 template<>
-inline bool variant_convert(const unsigned long& from, 
+inline bool type_conversion(const unsigned long& from, 
                             const TypeInfo& toType, 
-                            Variant* outVar)
+                            Variant* to)
 {
-  return variant_convert<long>(from, toType, outVar);
+  return type_conversion<long>(from, toType, to);
 }
 
 /**
  */
 template<>
-bool variant_convert(const bool& from, 
+bool type_conversion(const bool& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 
 /**
  */
 template<>
-bool variant_convert(const double& from, 
+bool type_conversion(const double& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 
 /**
  */
 template<>
-bool variant_convert(const float& from, 
+bool type_conversion(const float& from, 
                      const TypeInfo& toType, 
-                     Variant* outVar);
+                     Variant* to);
 
 #endif // header guard

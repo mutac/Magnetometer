@@ -3,64 +3,20 @@
 #define _SHAREDCOUNT_H_19519545_a1e1_4a41_860d_49eab62331f0
 
 #include "mDefs.h"
+#include "mAtomic.h"
 
 /**
  * @brief Type used to count references
  */
-typedef int AtomicCountType;
+typedef unsigned int RefCountType;
 
 /**
- * @brief A platform specific implementation of an atomic counter
+ * @brief Type used to count references atomically
  */
-class AtomicCount
-{
-public:
-  AtomicCount() :
-    mCount(1)
-  {
-  }
-
-  virtual ~AtomicCount()
-  {
-  }
-
-  void addRef()
-  {
-    // TODO: make atomic
-    ++mCount;
-  }
-
-  void release()
-  {
-    // TODO: make atomic
-    if (--mCount == 0)
-    {
-      destroy();
-    }
-  }
-
-  int getUseCount() const
-  {
-    return mCount;
-  }
-
-  void destroy()
-  {
-    // TODO: Deallocator
-    delete this;
-  }
-
-private:
-  AtomicCountType mCount;
-};
+typedef mAtomic<RefCountType> AtomicRefCount;
 
 /**
- * @brief Type used to count references
- */
-typedef AtomicCountType SharedCountType;
-
-/**
- * @brief A shared counter.  Used to implement reference counting.
+ * @brief A shared counter.  Used to implement reference counting.  On construction, the count is 1.
  * @description Optimized to not allocate a counter until a reference
  *              is made.
  */
@@ -83,10 +39,10 @@ public:
     release();
   }
 
-  inline SharedCountType getUseCount() const
+  inline RefCountType getRefCount() const
   {
     // Empty counts as a ref of 1
-    return mCount != NULL ? mCount->getUseCount() : 1;
+    return mCount != NULL ? *mCount : 1;
   }
 
   inline bool empty() const
@@ -96,13 +52,8 @@ public:
 
   SharedCount& operator=(SharedCount const & rhs)
   {
-    //
-    // TODO: does this need to be done atomically?
-    //
-
-    if (*this != rhs || empty())
+    if (empty() || *this != rhs)
     {
-      // TODO: Is this ordered correctly?
       rhs.addRef();
       release();
       mCount = rhs.mCount;
@@ -137,10 +88,10 @@ private:
   {
     if (mCount == NULL)
     {
-      // TODO: Allocator/Deallocator
-      mCount = new AtomicCount();
+      mCount = new AtomicRefCount(1);
     }
-    mCount->addRef();
+    
+    ++(*mCount);
   }
 
   /**
@@ -150,12 +101,16 @@ private:
   {
     if (mCount != NULL)
     {
-      mCount->release();
-      mCount = NULL;
+      int refCount = --(*mCount);
+      if (refCount == 0)
+      {
+        delete mCount;
+        mCount = NULL;
+      }
     }
   }
 
-  // Cheating: 
+  // Mutation: 
   //
   // Pretend that adding or releasing a reference
   // is a const operation.  This allows counters to be 
@@ -163,7 +118,7 @@ private:
   // time both the left hand and right hand sides need to be
   // updated, through a const operations of assignment and
   // copy construction.
-  mutable AtomicCount* mCount;
+  mutable AtomicRefCount* mCount;
 };
 
 #endif

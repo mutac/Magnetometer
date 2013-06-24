@@ -4,6 +4,7 @@
 
 #include "mDefs.h"
 #include "mStd.h"
+#include "SharedPointer.h"
 #include <string.h>
 #include <float.h>
 
@@ -41,7 +42,7 @@ public:
       return *this;
     }
 
-    Iterator& operator++(int)
+    Iterator operator++(int)
     {
       Iterator temp(*this);
       next();
