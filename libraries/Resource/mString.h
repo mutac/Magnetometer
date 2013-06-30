@@ -186,16 +186,22 @@ public:
     set("NaN");
   }
 
-  /* default copy ctor ok */
-
   ~mString()
   {
   }
 
-  mString clone()
+  mString clone(size_t capacity = npos)
   {
-    return mString(c_Str());
+    return mString(c_Str(), capacity);
   }
+
+  void dispose()
+  {
+    mStr = NULL;
+    mCapacity = 0;
+  }
+
+  /*** Const operations ***/
 
   int length() const
   {
@@ -229,6 +235,7 @@ public:
   mString& operator=(const mString& other)
   {
     mStr = other.mStr;
+    mCapacity = other.mCapacity;
     return *this;
   }
 
@@ -333,16 +340,13 @@ public:
     return mString((((char*)mStr) + start), len);
   }
 
-  char& operator[](size_t idx) 
-  {
-    return ((char*)(mStr))[idx];
-  }
+  /*** Non-const operations ***/
 
   bool set(const char* other, size_t count = npos)
   {
     // Optimization: release current string to 
     // avoid copy in ensureCapacity()
-    mStr = NULL;
+    dispose();
 
     if (other != NULL)
     {
@@ -362,6 +366,16 @@ public:
     return true;
   }
 
+  char& operator[](size_t idx) 
+  {
+    if (!canMutate())
+    {
+      *this = clone();
+    }
+
+    return ((char*)(mStr))[idx];
+  }
+
   /**
    * Appends 'a' to this string.
    */
@@ -369,10 +383,18 @@ public:
   {
     if (a != NULL)
     {
-      int newLen = strlen(a) + 1;
-      if (!ensureCapacity(length() + newLen))
+      size_t neededCapacity = length() + strlen(a) + 1;
+
+      if (!canMutate())
       {
-        return false;
+        *this = clone(neededCapacity);
+      }
+      else
+      {
+        if (!ensureCapacity(neededCapacity))
+        {
+          return false;
+        }
       }
       
       strcat(mStr, a);

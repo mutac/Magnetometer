@@ -120,6 +120,38 @@ public:
     ++it2;
     CFIX_ASSERT(it2 == another.end());
   }
+
+  void Mutate()
+  {
+    mString m1("woohoo");
+    const mString m2(m1);
+
+    //
+    // const operations should maintain the common reference
+    // between the two string object.
+    //
+    CFIX_ASSERT(m1.c_Str() == m2.c_Str());
+    m1.beginsWith("w");
+    CFIX_ASSERT(m1.c_Str() == m2.c_Str());
+    m2[0] == 'w';
+    CFIX_ASSERT(m1.c_Str() == m2.c_Str());
+
+    //
+    // Non-const operations should cause one to create
+    // a new, unreferenced, string buffer.
+    //
+    m1[0] = 'a';
+    CFIXCC_ASSERT(m1 == "aoohoo");
+    CFIX_ASSERT(m1.c_Str() != m2.c_Str());
+    CFIXCC_ASSERT(m2 == "woohoo");
+
+    mString m3(m2);
+    CFIX_ASSERT(m3.c_Str() == m2.c_Str());
+    m3.append("doo");
+    CFIXCC_ASSERT(m3 == "woohoodoo");
+    CFIX_ASSERT(m3.c_Str() != m2.c_Str());
+    CFIXCC_ASSERT(m2 == "woohoo");
+  }
 };
 
 CFIXCC_BEGIN_CLASS(TestString)
@@ -128,4 +160,5 @@ CFIXCC_BEGIN_CLASS(TestString)
   CFIXCC_METHOD(Append)
   CFIXCC_METHOD(Find)
   CFIXCC_METHOD(Iterate)
+  CFIXCC_METHOD(Mutate)
 CFIXCC_END_CLASS()
