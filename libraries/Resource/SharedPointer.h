@@ -30,9 +30,19 @@ public:
     release();
   }
 
+  inline RefCountType getRefCount() const
+  {
+    return mCount.getRefCount();
+  }
+
   inline T* get() const
   {
     return mShared;
+  }
+
+  inline operator T*() const
+  {
+    return get();
   }
 
   inline T& operator*() const

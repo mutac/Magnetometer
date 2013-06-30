@@ -29,23 +29,22 @@ public:
   public:
     friend class mString;
 
-    Iterator() :
-      mPos(NULL),
-      mToken(NULL),
-      mTokLen(0)
+    /* Default copy c-tor ok */
+
+    ~Iterator()
     {
     }
 
     Iterator& operator++()
     {
-      next();
+      mPos = nextPos();
       return *this;
     }
 
     Iterator operator++(int)
     {
       Iterator temp(*this);
-      next();
+      mPos = nextPos();
       return temp;
     }
 
@@ -61,52 +60,53 @@ public:
 
     mString operator*()
     {
-      mString part((char*)mPos);
-
-      // HACKKKKK
-      char* nextPart = const_cast<char*>(part.find(mToken));
-      if (nextPart != NULL)
-      {
-        *nextPart = '\0';
-      }
-
-      return part;
+      size_t nxtPos = nextPos();
+      return mStr.substr(mPos, 
+        nxtPos != mString::npos ? (nxtPos - mTokLen) - mPos : mString::npos);
     }
 
   private:
-    Iterator(const mString& str, const char* token) :
-      mPos(str.c_Str()),
+    Iterator(const mString& str, size_t pos) :
+      mStr(str),
+      mPos(pos),
+      mToken(NULL),
+      mTokLen(0)
+    {
+    }
+
+    Iterator(const mString& str, size_t pos, const char* token) :
+      mStr(str),
+      mPos(pos),
       mToken(token),
       mTokLen(strlen(token))
     {
     }
 
-    /**
-     * Advances iterator to the next token.
-     */
-    void next()
+    size_t nextPos() const
     {
-      if (mPos != NULL)
+      if (mPos != mString::npos && mStr[mPos] != '\0')
       {
-        if (!emptyToken())
+        if (emptyToken())
         {
-          mPos = strstr(mPos, mToken);
-          if (mPos != NULL)
+          // No token, iterate through all chars
+          if (mStr[mPos + 1] != '\0')
           {
-            mPos += mTokLen;
+            return mPos + 1;
           }
         }
         else
         {
-          mPos++;
+          // Otherwise advance beyond the next token
+          const char* next = strstr(mStr.c_Str() + mPos, mToken);
+          if (next != NULL)
+          {
+            return (size_t)(next - mStr.c_Str()) + mTokLen;
+          }
         }
       }
 
-      // Normalize end() conditions
-      if (mPos != NULL && *mPos == '\0')
-      {
-        mPos = NULL;
-      }
+      // No further tokens, or end of string
+      return mString::npos;
     }
 
     /**
@@ -117,40 +117,36 @@ public:
       return mToken == NULL || *mToken == '\0';
     }
 
-    const char* mPos;
+    const mString& mStr;
+    size_t mPos;
     const char* mToken;
     size_t mTokLen;
   };
 
   mString() :
-    mStr(NULL),
     mCapacity(0)
   {
   }
 
   mString(const mString& other) :
-    mStr(NULL),
     mCapacity(0)
   {
     *this = other;
   }
 
-  mString(char* other) :
-    mStr(NULL),
+  mString(char* other, size_t count = npos) :
     mCapacity(0)
   {
-    *this = other;
+    set(other, count);
   }
 
-  mString(const char* other) :
-    mStr(NULL),
+  mString(const char* other, size_t count = npos) :
     mCapacity(0)
   {
-    *this = other;
+    set(other, count);
   }
 
-  mString(int other) :
-    mStr(NULL),
+  mString(int other)  :
     mCapacity(0)
   {
     // This is platform specific:
@@ -160,12 +156,11 @@ public:
     }
     else
     {
-      *this = (const char*)"NaN";
+      set("NaN");
     }
   }
 
-  mString(long other) :
-    mStr(NULL),
+  mString(long other)  :
     mCapacity(0)
   {
     // This is platform specific:
@@ -175,46 +170,31 @@ public:
     }
     else
     {
-      *this = (const char*)"NaN";
+      set("NaN");
     }
   }
 
   mString(float other) :
-    mStr(NULL),
     mCapacity(0)
   {
-    *this = (const char*)"NaN";
+    set("NaN");
   }
 
   mString(double other) :
-    mStr(NULL),
     mCapacity(0)
   {
-    *this = (const char*)"NaN";
+    set("NaN");
   }
+
+  /* default copy ctor ok */
 
   ~mString()
   {
-    dispose();
   }
 
-  void dispose()
+  mString clone()
   {
-    if (isOwned())
-    {
-      if (mStr)
-      {
-        delete [] mStr;
-      }
-    }
-
-    mStr = NULL;
-    mCapacity = 0;
-  }
-
-  size_t capacity() const
-  {
-    return mCapacity;
+    return mString(c_Str());
   }
 
   int length() const
@@ -236,40 +216,19 @@ public:
 
   mString& operator=(char* other)
   {
-    dispose();
-
-    if (other != NULL)
-    {
-      if (ensureCapacity(strlen(other) + 1))
-      {
-        strcpy(mStr, other);
-      }
-    }
-
+    set(other);
     return *this;
   }
 
   mString& operator=(const char* other)
   {
-    dispose();
-
-    mStr = const_cast<char*>(other);
+    set(other);
     return *this;
   }
 
   mString& operator=(const mString& other)
   {
-    if (other.isOwned())
-    {
-      // Make a copy
-      *this = other.mStr;
-    }
-    else
-    {
-      // Hold onto the unowned str too
-      *this = (const char*)other.mStr;
-    }
-
+    mStr = other.mStr;
     return *this;
   }
 
@@ -290,19 +249,24 @@ public:
     return *this == rhs.c_Str();
   }
 
+  char operator[](size_t idx) const
+  {
+    return ((char*)(mStr))[idx];
+  }
+
   Iterator split(const char* token) const
   {
-    return Iterator(*this, token);
+    return Iterator(*this, 0, token);
   }
 
   Iterator begin() const
   {
-    return Iterator(*this, NULL);
+    return Iterator(*this, 0);
   }
 
   Iterator end() const
   {
-    return Iterator();
+    return Iterator(*this, npos);
   }
 
   /**
@@ -318,6 +282,20 @@ public:
     {
       return NULL;
     }
+  }
+
+  size_t findAt(const char* search) const
+  {
+    if (mStr != NULL)
+    {
+      const char* found = find(search);
+      if (found != NULL)
+      {
+        return (size_t)(found - mStr.get());
+      }
+    }
+
+    return npos;
   }
 
   /**
@@ -337,6 +315,54 @@ public:
   }
 
   /**
+   * Returns the c-compatible string, null if string is empty
+   */
+  const char* c_Str() const
+  {
+    return mStr;
+  }
+
+  /**
+   * Returns a new substring beginning at 'start', and of length 'len'.
+   * If 'len' is greater than the length of the full string, the 
+   * result will be truncated.  A len of mString::npos indicates
+   * all characters to the end of the string.
+   */
+  mString substr(size_t start = 0, size_t len = npos) const
+  {
+    return mString((((char*)mStr) + start), len);
+  }
+
+  char& operator[](size_t idx) 
+  {
+    return ((char*)(mStr))[idx];
+  }
+
+  bool set(const char* other, size_t count = npos)
+  {
+    // Optimization: release current string to 
+    // avoid copy in ensureCapacity()
+    mStr = NULL;
+
+    if (other != NULL)
+    {
+      if (count == npos)
+      {
+        count = strlen(other);
+      }
+
+      if (!ensureCapacity(count + 1))
+      {
+        return false;
+      }
+
+      strncpy(mStr, other, count);
+    }
+
+    return true;
+  }
+
+  /**
    * Appends 'a' to this string.
    */
   bool append(const char* a)
@@ -344,7 +370,7 @@ public:
     if (a != NULL)
     {
       int newLen = strlen(a) + 1;
-      if (!ensureCapacity(mCapacity + newLen))
+      if (!ensureCapacity(length() + newLen))
       {
         return false;
       }
@@ -368,44 +394,47 @@ public:
   }
 
   /**
-   * Returns the c-compatible string, null if string is empty
-   */
-  const char* c_Str() const
-  {
-    return mStr;
-  }
- 
-  /**
-   * Returns true if this stream ownes the memory in which the
-   * underlying string is stored.
-   */
-  inline bool isOwned() const
-  {
-    return mCapacity != 0;
-  }
-
-  /**
    * Ensures that the underlying memory location can hold 'size'
    * number of bytes.  Any existing string is preserved.
    */
   bool ensureCapacity(size_t size)
   {
-    if (size > mCapacity && size > 0)
+    if (size > mCapacity)
     {
-      char* newStr = new char[size];
+      return expand(size);
+    }
+    else
+    {
+      return true;
+    }
+  }
+
+  static const size_t npos = (size_t)-1;
+
+protected:
+
+  /**
+   * Ensures that the underlying memory location can hold 'size'
+   * number of bytes.  Any existing string is preserved.
+   */
+  bool expand(size_t size) 
+  {
+    if (size > 0)
+    {
+      SharedPointer<char> newStr = new char[size];
+
       if (mStr != NULL && newStr != NULL)
       {
         strcpy(newStr, mStr);
       }
-      else
+      else if (newStr != NULL)
       {
-        newStr[0] = '\0';
+        memset(newStr, 0, size);
       }
 
-      dispose();
-      
       mStr = newStr;
       mCapacity = size;
+      
       return mStr != NULL;
     }
     else
@@ -414,9 +443,12 @@ public:
     }
   }
 
-protected:
+  bool canMutate() const
+  {
+    return mStr.getRefCount() == 1;
+  }
 
-  char* mStr;
+  SharedPointer<char> mStr;
   size_t mCapacity;
 };
 

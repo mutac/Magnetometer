@@ -4,7 +4,7 @@
 class TestString : public cfixcc::TestFixture
 {
 public:
-  void Simple()
+  void Referencing()
   {
     mString empty;
     CFIX_ASSERT(empty.empty());
@@ -12,22 +12,18 @@ public:
     mString otherEmpty("");
     CFIX_ASSERT(otherEmpty.empty());
 
-    mString unowned((const char*)"hello");
-    CFIX_ASSERT(unowned == "hello");
-    CFIX_ASSERT(unowned.isOwned() == false);
+    mString s1((const char*)"hello");
+    CFIX_ASSERT(s1 == "hello");
 
-    mString owned((char*)"hello");
-    CFIX_ASSERT(owned == "hello");
-    CFIX_ASSERT(owned == unowned);
-    CFIX_ASSERT(owned.isOwned());
+    mString s2((char*)"hello");
+    CFIX_ASSERT(s2 == "hello");
+    CFIX_ASSERT(s2 == s1);
 
-    mString unownedCopy(unowned);
-    CFIX_ASSERT(unownedCopy == unowned);
-    CFIX_ASSERT(unownedCopy.isOwned() == false);
+    mString s3(s2);
+    CFIX_ASSERT(s3 == s2);
 
-    mString ownedCopy(owned);
-    CFIX_ASSERT(ownedCopy == owned);
-    CFIX_ASSERT(ownedCopy.isOwned());
+    mString s4(s1);
+    CFIX_ASSERT(s4 == s1);
 
     mString outer = "omg";
     {
@@ -49,11 +45,11 @@ public:
     mString fortyTwo(42);
     CFIX_ASSERT(fortyTwo == "42");
 
-    mString piFloat(3.14159f);
-    CFIX_ASSERT(piFloat == "3.14159");
+    //mString piFloat(3.14159f);
+    //CFIX_ASSERT(piFloat == "3.14159");
 
-    mString piDouble(3.1415926);
-    CFIX_ASSERT(piFloat == "3.14159");
+    //mString piDouble(3.1415926);
+    //CFIX_ASSERT(piFloat == "3.14159");
   }
 
   void Append()
@@ -109,11 +105,25 @@ public:
     CFIX_ASSERT(*it == "separated");
     ++it;
     CFIX_ASSERT(*it == "string.");
+    ++it;
+    CFIX_ASSERT(it == aString.end());
+
+    mString another("abcd");
+    mString::Iterator it2 = another.begin();
+    CFIX_ASSERT(*it2 == "a");
+    ++it2;
+    CFIX_ASSERT(*it2 == "b");
+    ++it2;
+    CFIX_ASSERT(*it2 == "c");
+    ++it2;
+    CFIX_ASSERT(*it2 == "d");
+    ++it2;
+    CFIX_ASSERT(it2 == another.end());
   }
 };
 
 CFIXCC_BEGIN_CLASS(TestString)
-  CFIXCC_METHOD(Simple)
+  CFIXCC_METHOD(Referencing)
   CFIXCC_METHOD(Numeric)
   CFIXCC_METHOD(Append)
   CFIXCC_METHOD(Find)
