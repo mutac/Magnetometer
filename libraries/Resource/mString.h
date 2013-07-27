@@ -5,8 +5,6 @@
 #include "mDefs.h"
 #include "mStd.h"
 #include "SharedPointer.h"
-#include <string.h>
-#include <float.h>
 
 namespace mStd
 {
@@ -97,10 +95,10 @@ public:
         else
         {
           // Otherwise advance beyond the next token
-          const char* next = strstr(mStr.c_Str() + mPos, mToken);
+          const char* next = strstr(mStr.c_str() + mPos, mToken);
           if (next != NULL)
           {
-            return (size_t)(next - mStr.c_Str()) + mTokLen;
+            return (size_t)(next - mStr.c_str()) + mTokLen;
           }
         }
       }
@@ -146,53 +144,14 @@ public:
     set(other, count);
   }
 
-  mString(int other)  :
-    mCapacity(0)
-  {
-    // This is platform specific:
-    if (ensureCapacity(11 + 1))
-    {
-      itoa(other, mStr, 10);
-    }
-    else
-    {
-      set("NaN");
-    }
-  }
-
-  mString(long other)  :
-    mCapacity(0)
-  {
-    // This is platform specific:
-    if (ensureCapacity(11 + 1))
-    {
-      ltoa(other, mStr, 10);
-    }
-    else
-    {
-      set("NaN");
-    }
-  }
-
-  mString(float other) :
-    mCapacity(0)
-  {
-    set("NaN");
-  }
-
-  mString(double other) :
-    mCapacity(0)
-  {
-    set("NaN");
-  }
-
   ~mString()
   {
+    dispose();
   }
 
-  mString clone(size_t capacity = npos)
+  mString clone(size_t count = npos)
   {
-    return mString(c_Str(), capacity);
+    return mString(c_str(), count);
   }
 
   void dispose()
@@ -253,7 +212,7 @@ public:
 
   bool operator==(const mString& rhs) const
   {
-    return *this == rhs.c_Str();
+    return *this == rhs.c_str();
   }
 
   char operator[](size_t idx) const
@@ -324,7 +283,7 @@ public:
   /**
    * Returns the c-compatible string, null if string is empty
    */
-  const char* c_Str() const
+  const char* c_str() const
   {
     return mStr;
   }
@@ -366,14 +325,20 @@ public:
     return true;
   }
 
-  char& operator[](size_t idx) 
+  char* get()
   {
     if (!canMutate())
     {
       *this = clone();
     }
 
-    return ((char*)(mStr))[idx];
+    return mStr;
+  }
+
+  char& operator[](size_t idx) 
+  {
+    char* buf = get();
+    return buf[idx];
   }
 
   /**
@@ -455,7 +420,7 @@ protected:
       }
 
       mStr = newStr;
-      mCapacity = size;
+      mCapacity = newStr != NULL ? size : 0;
       
       return mStr != NULL;
     }
@@ -473,5 +438,13 @@ protected:
   SharedPointer<char> mStr;
   size_t mCapacity;
 };
+
+/**
+ * Convert a type to an mString
+ */
+template <class FromType>
+mString to_string(const FromType& from);
+
+#include "mStringImpl.h"
 
 #endif // header guard

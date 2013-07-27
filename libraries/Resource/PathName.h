@@ -149,7 +149,7 @@ public:
       return strlen(mRelativePath);
   }
 
-  inline const char* c_Str() const
+  inline const char* c_str() const
   {
     return getPath();
   }

@@ -149,7 +149,7 @@ bool type_conversion(const mString& from,
                      Variant* to)
 {
   // Use const char* conversion.
-  return type_conversion(from.c_Str(), toType, to);
+  return type_conversion(from.c_str(), toType, to);
 }
 
 template<>
@@ -169,7 +169,7 @@ bool type_conversion(const int& from,
   }
   else if (toType == TypeInfo_String)
   {
-    *to = mString(from);
+    *to = to_string(from);
     return true;
   }
   else if (toType == TypeInfo_Double)
@@ -205,7 +205,7 @@ bool type_conversion(const long& from,
   }
   else if (toType == TypeInfo_String)
   {
-    *to = mString(from);
+    *to = to_string(from);
     return true;
   }
   else if (toType == TypeInfo_Int)
@@ -246,7 +246,7 @@ bool type_conversion(const bool& from,
   }
   else if (toType == TypeInfo_String)
   {
-    *to = mString(const_cast<char*>(from ? "true" : "false"));
+    *to = mString(from ? "true" : "false");
     return true;
   }
   else if (toType == TypeInfo_Int)
@@ -287,7 +287,7 @@ bool type_conversion(const double& from,
   }
   else if (toType == TypeInfo_String)
   {
-    *to = mString(from);
+    *to = to_string(from);
     return true;
   }
   else if (toType == TypeInfo_Int)
@@ -328,7 +328,7 @@ bool type_conversion(const float& from,
   }
   else if (toType == TypeInfo_String)
   {
-    *to = mString(from);
+    *to = to_string(from);
     return true;
   }
   else if (toType == TypeInfo_Int)

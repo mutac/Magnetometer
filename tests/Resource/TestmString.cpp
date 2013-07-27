@@ -42,8 +42,11 @@ public:
 
   void Numeric()
   {
-    mString fortyTwo(42);
+    mString fortyTwo = to_string(42);
     CFIX_ASSERT(fortyTwo == "42");
+
+    mString fortyTwoLong = to_string((long)42);
+    CFIX_ASSERT(fortyTwoLong == "42");
 
     //mString piFloat(3.14159f);
     //CFIX_ASSERT(piFloat == "3.14159");
@@ -130,11 +133,11 @@ public:
     // const operations should maintain the common reference
     // between the two string object.
     //
-    CFIX_ASSERT(m1.c_Str() == m2.c_Str());
+    CFIX_ASSERT(m1.c_str() == m2.c_str());
     m1.beginsWith("w");
-    CFIX_ASSERT(m1.c_Str() == m2.c_Str());
+    CFIX_ASSERT(m1.c_str() == m2.c_str());
     m2[0] == 'w';
-    CFIX_ASSERT(m1.c_Str() == m2.c_Str());
+    CFIX_ASSERT(m1.c_str() == m2.c_str());
 
     //
     // Non-const operations should cause one to create
@@ -142,14 +145,14 @@ public:
     //
     m1[0] = 'a';
     CFIXCC_ASSERT(m1 == "aoohoo");
-    CFIX_ASSERT(m1.c_Str() != m2.c_Str());
+    CFIX_ASSERT(m1.c_str() != m2.c_str());
     CFIXCC_ASSERT(m2 == "woohoo");
 
     mString m3(m2);
-    CFIX_ASSERT(m3.c_Str() == m2.c_Str());
+    CFIX_ASSERT(m3.c_str() == m2.c_str());
     m3.append("doo");
     CFIXCC_ASSERT(m3 == "woohoodoo");
-    CFIX_ASSERT(m3.c_Str() != m2.c_Str());
+    CFIX_ASSERT(m3.c_str() != m2.c_str());
     CFIXCC_ASSERT(m2 == "woohoo");
   }
 };

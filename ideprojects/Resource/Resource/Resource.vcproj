@@ -247,6 +247,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mStringImpl.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\ObjectTraits.h"
 				>
 			</File>
