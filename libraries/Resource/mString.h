@@ -58,6 +58,7 @@ public:
 
     mString operator*()
     {
+      mAssert(mPos != mString::npos);
       size_t nxtPos = nextPos();
       return mStr.substr(mPos, 
         nxtPos != mString::npos ? (nxtPos - mTokLen) - mPos : mString::npos);
@@ -206,13 +207,23 @@ public:
     }
     else
     {
-      return empty() && rhs == NULL;
+      return empty() && (rhs == NULL || *rhs == '\0');
     }
+  }
+
+  bool operator!=(const char* rhs) const
+  {
+    return !(*this == rhs);
   }
 
   bool operator==(const mString& rhs) const
   {
-    return *this == rhs.c_str();
+    return mStr == rhs.mStr || *this == rhs.c_str();
+  }
+
+  bool operator!=(const mString& rhs) const
+  {
+    return !(*this == rhs);
   }
 
   char operator[](size_t idx) const
@@ -222,12 +233,12 @@ public:
 
   Iterator split(const char* token) const
   {
-    return Iterator(*this, 0, token);
+    return Iterator(*this, empty() ? npos : 0, token);
   }
 
   Iterator begin() const
   {
-    return Iterator(*this, 0);
+    return Iterator(*this, empty() ? npos : 0);
   }
 
   Iterator end() const
@@ -290,9 +301,8 @@ public:
 
   /**
    * Returns a new substring beginning at 'start', and of length 'len'.
-   * If 'len' is greater than the length of the full string, the 
-   * result will be truncated.  A len of mString::npos indicates
-   * all characters to the end of the string.
+   * A len of mString::npos indicates all characters to the end of 
+   * the string.
    */
   mString substr(size_t start = 0, size_t len = npos) const
   {
@@ -396,6 +406,9 @@ public:
     }
   }
 
+  /** Indicates 'the end of the string' when used as a length.
+   *  Indicates 'not found' when returned from a search.
+   */
   static const size_t npos = (size_t)-1;
 
 protected:

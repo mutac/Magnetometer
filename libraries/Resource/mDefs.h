@@ -50,7 +50,9 @@
 /** 
  * @description Configure STL usage
  */
-// #define mUseStl
+#if defined(mPlatformWindows)
+#define mUseStl
+#endif
 
 //
 // RTTI

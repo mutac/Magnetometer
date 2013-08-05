@@ -4,6 +4,14 @@
 #include <string.h>
 #include <float.h>
 
+#if define(mPlatformAvr)
+#include <stdlib.h>
+#else defined(mUseStl)
+#include <sstream>
+#include <iomanip>
+#endif
+
+
 int mStd::strcasecmp(const char* left, const char* right)
 {
   while(true)
@@ -41,14 +49,40 @@ mString to_string(const int& from)
   return to_string((long)from);
 }
 
+#ifdef mPlatformAvr
 template<>
 mString to_string(const float& from)
 {
   return mString("NaN");
 }
+#endif
 
+#ifdef mPlatformAvr
 template<>
 mString to_string(const double& from)
 {
   return mString("NaN");
 }
+#endif
+
+#ifdef mUseStl
+template<>
+mString to_string(const float& from)
+{
+  std::stringstream s;
+  s << from;
+
+  return mString(s.str().c_str());
+}
+#endif
+
+#ifdef mUseStl
+template<>
+mString to_string(const double& from)
+{
+  std::stringstream s;
+  s << std::setprecision(16) << from;
+
+  return mString(s.str().c_str());
+}
+#endif

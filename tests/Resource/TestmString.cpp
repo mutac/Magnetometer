@@ -40,7 +40,7 @@ public:
     CFIX_ASSERT(outer == "an owned string to copy");
   }
 
-  void Numeric()
+  void Conversion()
   {
     mString fortyTwo = to_string(42);
     CFIX_ASSERT(fortyTwo == "42");
@@ -48,11 +48,11 @@ public:
     mString fortyTwoLong = to_string((long)42);
     CFIX_ASSERT(fortyTwoLong == "42");
 
-    //mString piFloat(3.14159f);
-    //CFIX_ASSERT(piFloat == "3.14159");
+    mString piFloat = to_string(3.14159f);
+    CFIX_ASSERT(piFloat == "3.14159");
 
-    //mString piDouble(3.1415926);
-    //CFIX_ASSERT(piFloat == "3.14159");
+    mString piDouble = to_string(3.1415926);
+    CFIX_ASSERT(piDouble == "3.1415926");
   }
 
   void Append()
@@ -122,6 +122,56 @@ public:
     CFIX_ASSERT(*it2 == "d");
     ++it2;
     CFIX_ASSERT(it2 == another.end());
+
+    //
+    // Nasty cases
+    //
+
+    mString hi("hello");
+    mString::Iterator it3 = hi.begin();
+    CFIX_ASSERT(*it3 == "h");
+    it3++;
+    CFIX_ASSERT(*it3 == "e");
+    it3++;
+    CFIX_ASSERT(*it3 == "l");
+    it3++;
+    CFIX_ASSERT(*it3 == "l");
+    it3++;
+    CFIX_ASSERT(*it3 == "o");
+    it3++;
+    CFIX_ASSERT(it3 == hi.end());
+    it3++;
+    CFIX_ASSERT(it3 == hi.end());
+    it3++;
+    CFIX_ASSERT(it3 == hi.end());
+    it3++;
+    CFIX_ASSERT(it3 == hi.end());
+
+    mString nothing;
+    mString::Iterator it4 = nothing.begin();
+    CFIX_ASSERT(it4 == nothing.end());
+    it4++;
+    CFIX_ASSERT(it4 == nothing.end());
+    it4++;
+    CFIX_ASSERT(it4 == nothing.end());
+    it4++;
+    CFIX_ASSERT(it4 == nothing.end());
+    it4++;
+    CFIX_ASSERT(it4 == nothing.end());
+    it4++;
+    CFIX_ASSERT(it4 == nothing.end());
+
+    mString splits("toot");
+    mString::Iterator it5 = splits.split("");
+    CFIX_ASSERT(*it5 == "t");
+    it5++;
+    CFIX_ASSERT(*it5 == "o");
+    it5++;
+    CFIX_ASSERT(*it5 == "o");
+    it5++;
+    CFIX_ASSERT(*it5 == "t");
+    it5++;
+    CFIX_ASSERT(it5 == splits.end());
   }
 
   void Mutate()
@@ -140,28 +190,49 @@ public:
     CFIX_ASSERT(m1.c_str() == m2.c_str());
 
     //
-    // Non-const operations should cause one to create
-    // a new, unreferenced, string buffer.
+    // Non-const operations should cause class to create
+    // a new, unreferenced string buffer.
     //
     m1[0] = 'a';
-    CFIXCC_ASSERT(m1 == "aoohoo");
+    CFIX_ASSERT(m1 == "aoohoo");
     CFIX_ASSERT(m1.c_str() != m2.c_str());
-    CFIXCC_ASSERT(m2 == "woohoo");
+    CFIX_ASSERT(m2 == "woohoo");
 
     mString m3(m2);
     CFIX_ASSERT(m3.c_str() == m2.c_str());
     m3.append("doo");
-    CFIXCC_ASSERT(m3 == "woohoodoo");
+    CFIX_ASSERT(m3 == "woohoodoo");
     CFIX_ASSERT(m3.c_str() != m2.c_str());
-    CFIXCC_ASSERT(m2 == "woohoo");
+    CFIX_ASSERT(m2 == "woohoo");
+  }
+
+  void Equality()
+  {
+    mString empty;
+    mString empty2;
+    CFIX_ASSERT(empty == "");
+    CFIX_ASSERT(empty == NULL);
+    CFIX_ASSERT(empty == empty2);
+
+    mString something("Same reference");
+    mString something2(something);
+    CFIX_ASSERT(something == something2);
+
+    mString s("Same string");
+    mString s2("Same string");
+    CFIX_ASSERT(s == s2);
+
+    CFIX_ASSERT(empty != something);
+    CFIX_ASSERT(something2 != s);
   }
 };
 
 CFIXCC_BEGIN_CLASS(TestString)
   CFIXCC_METHOD(Referencing)
-  CFIXCC_METHOD(Numeric)
+  CFIXCC_METHOD(Conversion)
   CFIXCC_METHOD(Append)
   CFIXCC_METHOD(Find)
   CFIXCC_METHOD(Iterate)
   CFIXCC_METHOD(Mutate)
+  CFIXCC_METHOD(Equality)
 CFIXCC_END_CLASS()
