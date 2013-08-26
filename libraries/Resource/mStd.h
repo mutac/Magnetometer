@@ -1,6 +1,6 @@
 
-#ifndef STD_H_06c7ac8b_2eb5_4f6f_8e77_183aadad9001
-#define STD_H_06c7ac8b_2eb5_4f6f_8e77_183aadad9001
+#ifndef _STD_H_06c7ac8b_2eb5_4f6f_8e77_183aadad9001
+#define _STD_H_06c7ac8b_2eb5_4f6f_8e77_183aadad9001
 
 namespace mStd
 {

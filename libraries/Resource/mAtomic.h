@@ -1,6 +1,6 @@
 
-#ifndef _mATOMIC_H_1683d48d_eae8_4afe_95c9_34b6baeabffa
-#define _mATOMIC_H_1683d48d_eae8_4afe_95c9_34b6baeabffa
+#ifndef _ATOMIC_H_1683d48d_eae8_4afe_95c9_34b6baeabffa
+#define _ATOMIC_H_1683d48d_eae8_4afe_95c9_34b6baeabffa
 
 /**
  * Default atomic type.  Operations are supported only from

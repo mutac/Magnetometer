@@ -11,7 +11,6 @@
 #include <iomanip>
 #endif
 
-
 int mStd::strcasecmp(const char* left, const char* right)
 {
   while(true)
@@ -49,22 +48,6 @@ mString to_string(const int& from)
   return to_string((long)from);
 }
 
-#ifdef mPlatformAvr
-template<>
-mString to_string(const float& from)
-{
-  return mString("NaN");
-}
-#endif
-
-#ifdef mPlatformAvr
-template<>
-mString to_string(const double& from)
-{
-  return mString("NaN");
-}
-#endif
-
 #ifdef mUseStl
 template<>
 mString to_string(const float& from)
@@ -73,6 +56,12 @@ mString to_string(const float& from)
   s << from;
 
   return mString(s.str().c_str());
+}
+#else
+template<>
+mString to_string(const float& from)
+{
+  return mString("NaN");
 }
 #endif
 
@@ -84,5 +73,11 @@ mString to_string(const double& from)
   s << std::setprecision(16) << from;
 
   return mString(s.str().c_str());
+}
+#else
+template<>
+mString to_string(const double& from)
+{
+  return mString("NaN");
 }
 #endif

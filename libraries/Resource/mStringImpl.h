@@ -1,6 +1,6 @@
 
-#ifndef _MSTRING_IMPL_H_e48fa270_5be7_433c_b93b_a97aa405bcf4
-#define _MSTRING_IMPL_H_e48fa270_5be7_433c_b93b_a97aa405bcf4
+#ifndef _STRING_IMPL_H_e48fa270_5be7_433c_b93b_a97aa405bcf4
+#define _STRING_IMPL_H_e48fa270_5be7_433c_b93b_a97aa405bcf4
 
 // Do not inclue directly
 

@@ -1,6 +1,6 @@
 
-#ifndef _VARIANT_PRIMITIVES_H_227500b5_53ed_4aae_b16f_7d462f91b0a3
-#define _VARIANT_PRIMITIVES_H_227500b5_53ed_4aae_b16f_7d462f91b0a3
+#ifndef _VARIANT_IMPL_H_227500b5_53ed_4aae_b16f_7d462f91b0a3
+#define _VARIANT_IMPL_H_227500b5_53ed_4aae_b16f_7d462f91b0a3
 
 #include "Variant.h"
 #include "mString.h"
