@@ -5,6 +5,7 @@
 #include "mDefs.h"
 #include "mStd.h"
 #include "SharedPointer.h"
+#include <string.h>
 
 namespace mStd
 {

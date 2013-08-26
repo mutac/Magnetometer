@@ -22,14 +22,22 @@
 #endif
 
 //
+// Compilation assertion
+//
+#define mCompilerAssert(name, expr) \
+  extern char __ ## name ## __compilerAssert[(expr) == 1];
+
+//
 // Compiler warning
 //
 #ifdef _MSC_VER
 // Visual Studio 
-#define mCompilerWarning(str) message(__FILE__ "(" mConcat(__LINE__) ") : Warning: " #str)
+#define mCompilerWarning(str) \
+  message(__FILE__ "(" mConcat(__LINE__) ") : Warning: " #str)
 #elif __GNUC__
 // Gcc
-#define mCompilerWarning(str) message __FILE__ "(" mConcat(__LINE__) ") : Warning: " #str
+#define mCompilerWarning(str) \
+  message __FILE__ "(" mConcat(__LINE__) ") : Warning: " #str
 #endif
 
 //

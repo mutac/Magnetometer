@@ -173,6 +173,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mPlatformWindows.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\mStd.cpp"
 				>
 			</File>
@@ -231,11 +235,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libraries\Resource\mAtomicImpl.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libraries\Resource\mDefs.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\libraries\Resource\mNew.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\mPlatform.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libraries\Resource\mPlatformWindows.h"
 				>
 			</File>
 			<File

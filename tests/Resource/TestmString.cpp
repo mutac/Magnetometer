@@ -27,15 +27,15 @@ public:
 
     mString outer = "omg";
     {
-      mString scoped = "some const string";
-      outer = scoped;
+      mString lockd = "some const string";
+      outer = lockd;
     }
     CFIX_ASSERT(outer == "some const string");
 
     outer = "omg again";
     {
-      mString scoped = const_cast<char*>("an owned string to copy");
-      outer = scoped;
+      mString lockd = const_cast<char*>("an owned string to copy");
+      outer = lockd;
     }
     CFIX_ASSERT(outer == "an owned string to copy");
   }

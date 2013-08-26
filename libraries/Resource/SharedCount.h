@@ -13,7 +13,8 @@ typedef unsigned int RefCountType;
 /**
  * @brief Type used to count references atomically
  */
-typedef mAtomic<RefCountType> AtomicRefCount;
+//typedef mAtomic<RefCountType> AtomicRefCount;
+typedef RefCountType AtomicRefCount;
 
 /**
  * @brief A shared counter.  Used to implement reference counting.  On construction, the count is 1.
@@ -86,6 +87,8 @@ private:
    */
   void addRef() const
   {
+    // TODO: This isn't thread safe:
+
     if (mCount == NULL)
     {
       mCount = new AtomicRefCount(1);
@@ -99,9 +102,11 @@ private:
    */
   void release() const
   {
+    // TODO: This isn't thread safe.
+
     if (mCount != NULL)
     {
-      int refCount = --(*mCount);
+      RefCountType refCount = --(*mCount);
       if (refCount == 0)
       {
         delete mCount;
