@@ -1,9 +1,9 @@
-#ifndef _PLATFORM_WINDOWS_H_8d892d16_a062_45a2_ac65_d34974ad475d
-#define _PLATFORM_WINDOWS_H_8d892d16_a062_45a2_ac65_d34974ad475d
+#ifndef _PLATFORM_AVR_H_49f11cf9_9e43_4cfa_8cc1_84672829f012
+#define _PLATFORM_AVR_H_49f11cf9_9e43_4cfa_8cc1_84672829f012
 
 // Do not include directly
 
-#ifdef mPlatformWindows
+#ifdef mPlatformAvr
 namespace mPlatform
 {
   /** 
@@ -17,11 +17,7 @@ namespace mPlatform
   int atomic_add_and_fetch(int volatile* v, int dV);
   template <>
   int atomic_subract_and_fetch(int volatile* v, int dV);
-  template <>
-  int atomic_load(int const volatile* v);
-  template <>
-  void atomic_store(int volatile* v, int nV);
 }
-#endif // mPlatformWindows
+#endif // mPlatformAvr
 
 #endif // Header guard

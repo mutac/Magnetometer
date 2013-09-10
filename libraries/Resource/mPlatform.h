@@ -21,6 +21,12 @@ namespace mPlatform
 
   template <typename T>
   T atomic_subract_and_fetch(T volatile* v, T dV);
+
+  template <typename T>
+  T atomic_load(T const volatile* v);
+
+  template <typename T>
+  void atomic_store(T volatile* v, T nV);
 }
 
 #if defined(mPlatformWindows)

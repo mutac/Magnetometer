@@ -73,12 +73,12 @@ namespace mAtomicImpl
 
     T load() const volatile
     {
-      return mVal;
+      return mPlatform::atomic_load(&mVal);
     }
 
     void store(T v) volatile
     {
-      mVal = v;
+      mPlatform::atmoic_store(&mVal, v);
     }
 
   private:

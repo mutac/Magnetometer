@@ -1,8 +1,8 @@
 
 #include "mPlatform.h"
-#include <windows.h>
 
 #ifdef mPlatformWindows
+#include <windows.h>
 
 namespace mPlatform
 {
@@ -34,6 +34,20 @@ namespace mPlatform
   {
     mAssert((INT_PTR)v % 4 == 0);
     return InterlockedExchangeAdd((volatile LONG*)v, -dV) - dV;
+  }
+  
+  template <>
+  int atomic_load(int const volatile* v)
+  {
+    mAssert((INT_PTR)v % 4 == 0);
+    return *v;
+  }
+
+  template <>
+  void atomic_store(int volatile* v, int nV)
+  {
+    mAssert((INT_PTR)v % 4 == 0);
+    *v = nV;
   }
 }
 
