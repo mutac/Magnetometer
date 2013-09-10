@@ -31,6 +31,8 @@ namespace mPlatform
 
 #if defined(mPlatformWindows)
   #include "mPlatformWindows.h"
+#elif defined(mAvrPlatform)
+  #include "mPlatformAvr.h"
 #else
   #error Unknown platform...
 #endif

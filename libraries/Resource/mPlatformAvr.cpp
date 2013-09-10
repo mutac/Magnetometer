@@ -11,7 +11,7 @@ namespace mPlatform
   {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE);
     int tmp = *v;
-    *v = *v + dV;
+    *v = tmp + dV;
     return tmp;
   }
 
@@ -20,7 +20,7 @@ namespace mPlatform
   {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE);
     int tmp = *v;
-    *v = *v - dV;
+    *v = tmp - dV;
     return tmp;
   }
 
@@ -28,16 +28,14 @@ namespace mPlatform
   int atomic_add_and_fetch(int volatile* v, int dV)
   {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE);
-    *v = *v + dV;
-    return *v;
+    return (*v = *v + dV);
   }
 
   template <>
   int atomic_subract_and_fetch(int volatile* v, int dV)
   {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE);
-    *v = *v - dV;
-    return *v;
+    return (*v = *v - dV);
   }
 
   template <>
