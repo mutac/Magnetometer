@@ -4,7 +4,7 @@
 
 #include "mDefs.h"
 #include "mStd.h"
-#include "SharedPointer.h"
+#include <memory>
 #include <string.h>
 
 namespace mStd
@@ -168,7 +168,7 @@ public:
   {
     if (mStr != NULL)
     {
-      return strlen(mStr);
+      return strlen(mStr.get());
     }
     else
     {
@@ -204,7 +204,7 @@ public:
   {
     if (!empty() && rhs != NULL)
     {
-      return strcmp(mStr, rhs) == 0;
+      return strcmp(mStr.get(), rhs) == 0;
     }
     else
     {
@@ -229,7 +229,7 @@ public:
 
   char operator[](size_t idx) const
   {
-    return ((char*)(mStr))[idx];
+    return ((char*)(mStr.get()))[idx];
   }
 
   Iterator split(const char* token) const
@@ -254,7 +254,7 @@ public:
   {
     if (mStr != NULL)
     {
-      return strstr(mStr, search);
+      return strstr(mStr.get(), search);
     }
     else
     {
@@ -284,7 +284,7 @@ public:
     if (mStr != NULL)
     {
       const char* found = find(search);
-      return found == mStr;
+      return found == mStr.get();
     }
     else
     {
@@ -297,7 +297,7 @@ public:
    */
   const char* c_str() const
   {
-    return mStr;
+    return mStr.get();
   }
 
   /**
@@ -307,7 +307,7 @@ public:
    */
   mString substr(size_t start = 0, size_t len = npos) const
   {
-    return mString((((char*)mStr) + start), len);
+    return mString((((char*)mStr.get()) + start), len);
   }
 
   /*** Non-const operations ***/
@@ -330,7 +330,7 @@ public:
         return false;
       }
 
-      strncpy(mStr, other, count);
+      strncpy(mStr.get(), other, count);
     }
 
     return true;
@@ -343,7 +343,7 @@ public:
       *this = clone();
     }
 
-    return mStr;
+    return mStr.get();
   }
 
   char& operator[](size_t idx) 
@@ -373,7 +373,7 @@ public:
         }
       }
       
-      strcat(mStr, a);
+      strcat(mStr.get(), a);
     }
 
     return true;
@@ -422,15 +422,15 @@ protected:
   {
     if (size > 0)
     {
-      SharedPointer<char> newStr = new char[size];
+      std::shared_ptr<char> newStr(new char[size]);
 
       if (mStr != NULL && newStr != NULL)
       {
-        strcpy(newStr, mStr);
+        strcpy(newStr.get(), mStr.get());
       }
       else if (newStr != NULL)
       {
-        memset(newStr, 0, size);
+        memset(newStr.get(), 0, size);
       }
 
       mStr = newStr;
@@ -446,10 +446,10 @@ protected:
 
   bool canMutate() const
   {
-    return mStr.getRefCount() == 1;
+    return mStr.unique();
   }
 
-  SharedPointer<char> mStr;
+  std::shared_ptr<char> mStr;
   size_t mCapacity;
 };
 

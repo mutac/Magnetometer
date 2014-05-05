@@ -4,7 +4,7 @@
 #include <string.h>
 #include <float.h>
 
-#if define(mPlatformAvr)
+#if defined(mPlatformAvr)
 #include <stdlib.h>
 #else defined(mUseStl)
 #include <sstream>

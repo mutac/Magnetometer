@@ -25,6 +25,7 @@
     <ClInclude Include="..\..\..\..\..\libraries\Resource\mStd.h" />
     <ClInclude Include="..\..\..\..\..\libraries\Resource\mString.h" />
     <ClInclude Include="..\..\..\..\..\libraries\Resource\mStringImpl.h" />
+    <ClInclude Include="..\..\..\..\..\libraries\Resource\TypeInfo.h" />
     <ClInclude Include="..\..\..\..\..\libraries\Resource\Variant.h" />
     <ClInclude Include="..\..\..\..\..\libraries\Resource\VariantImpl.h" />
   </ItemGroup>
@@ -57,14 +58,16 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
