@@ -2,7 +2,7 @@
 #ifndef __TYPE_INFO_H__
 #define __TYPE_INFO_H__
 
-namespace mResource
+namespace mStd
 {
   /**
   * Variant type identifier.
@@ -22,8 +22,6 @@ namespace mResource
   static const TypeInfo TypeInfo_Double = 7;
   static const TypeInfo TypeInfo_String = 8;
   /** Begin user types at 20 */
-  static const TypeInfo TypeInfo_Date = 20;
-  static const TypeInfo TypeInfo_Time = 21;
 
   /**
   * Returns variant type information associated with a type.

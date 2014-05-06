@@ -5,7 +5,7 @@
 #include "Variant.h"
 #include "mString.h"
 
-namespace mResource
+namespace mStd
 {
   /**
   * type_of specialization for primitive types

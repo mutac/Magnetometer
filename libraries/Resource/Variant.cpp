@@ -3,7 +3,7 @@
 #include "mString.h"
 #include <string.h>
 
-namespace mResource
+namespace mStd
 {
   //
   //

@@ -7,7 +7,7 @@
 #include "mStd.h"
 #include "TypeInfo.h"
 
-namespace mResource
+namespace mStd
 {
   /**
   * Define to ensure conversion specializations are present for all types

@@ -11,73 +11,76 @@
 #include <iomanip>
 #endif
 
-int mStd::strcasecmp(const char* left, const char* right)
+namespace mStd
 {
-  while(true)
+  int strcasecmp(const char* left, const char* right)
   {
-    int l = tolower((int)*left++);
-    int r = tolower((int)*right++);
-    if (l == 0 || l != r)
+    while (true)
     {
-      return l - r;
+      int l = tolower((int)*left++);
+      int r = tolower((int)*right++);
+      if (l == 0 || l != r)
+      {
+        return l - r;
+      }
     }
   }
-}
 
-template<>
-mString to_string(const long& from)
-{
-  mString s;
-
-  // This is platform specific:
-  if (s.ensureCapacity(11 + 1))
+  template<>
+  mString to_string(const long& from)
   {
-    ltoa(from, s.get(), 10);
+    mString s;
+
+    // This is platform specific:
+    if (s.ensureCapacity(11 + 1))
+    {
+      ltoa(from, s.get(), 10);
+    }
+    else
+    {
+      s = "NaN";
+    }
+
+    return s;
   }
-  else
+
+  template<>
+  mString to_string(const int& from)
   {
-    s = "NaN";
+    return to_string((long)from);
   }
-
-  return s;
-}
-
-template<>
-mString to_string(const int& from)
-{
-  return to_string((long)from);
-}
 
 #ifdef mUseStl
-template<>
-mString to_string(const float& from)
-{
-  std::stringstream s;
-  s << from;
+  template<>
+  mString to_string(const float& from)
+  {
+    std::stringstream s;
+    s << from;
 
-  return mString(s.str().c_str());
-}
+    return mString(s.str().c_str());
+  }
 #else
-template<>
-mString to_string(const float& from)
-{
-  return mString("NaN");
-}
+  template<>
+  mString to_string(const float& from)
+  {
+    return mString("NaN");
+  }
 #endif
 
 #ifdef mUseStl
-template<>
-mString to_string(const double& from)
-{
-  std::stringstream s;
-  s << std::setprecision(16) << from;
+  template<>
+  mString to_string(const double& from)
+  {
+    std::stringstream s;
+    s << std::setprecision(16) << from;
 
-  return mString(s.str().c_str());
-}
+    return mString(s.str().c_str());
+  }
 #else
-template<>
-mString to_string(const double& from)
-{
-  return mString("NaN");
-}
+  template<>
+  mString to_string(const double& from)
+  {
+    return mString("NaN");
+  }
 #endif
+}
