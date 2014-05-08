@@ -359,4 +359,10 @@ namespace mStd
     }
   }
 
+  template<>
+  bool type_compare_equal(const char* const& left,
+    const char* const& right)
+  {
+    return strcmp(left, right) == 0;
+  }
 }

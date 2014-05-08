@@ -35,6 +35,16 @@ namespace mStd
 #endif // mVariantStaticallyEnsureConversions
 
   /**
+   Specialize this for a type.  By default operator == is used for
+   equality.
+  */
+  template <typename Type>
+  inline bool type_compare_equal(const Type& left, const Type& right)
+  {
+    return left == right;
+  }
+
+  /**
   */
   class Variant
   {
@@ -67,6 +77,8 @@ namespace mStd
       return mContent == NULL;
     }
 
+    /**
+    */
     void clear()
     {
       if (mContent != NULL)
@@ -100,6 +112,25 @@ namespace mStd
     {
       Variant tmp(rhs);
       return swap(tmp);
+    }
+
+    /**
+     Returns true if the values are exactly the same (including type)
+    */
+    bool operator==(const Variant& rhs) const
+    {
+      if (mContent == NULL && rhs.mContent == NULL)
+      {
+        return true;
+      }
+      else if (mContent == NULL || rhs.mContent == NULL)
+      {
+        return false;
+      }
+      else
+      {
+        return mContent->equals(rhs.mContent);
+      }
     }
 
     /**
@@ -235,6 +266,7 @@ namespace mStd
       virtual PlaceHolder* clone() const = 0;
       virtual const TypeInfo& getType() const = 0;
       virtual bool convertTo(const TypeInfo& toType, Variant* outConverted) const = 0;
+      virtual bool equals(const PlaceHolder* other) const = 0;
     };
 
     /**
@@ -270,6 +302,24 @@ namespace mStd
       {
         // You gotta make one of these too:
         return type_conversion(mHeld, toType, outConverted);
+      }
+
+      /**
+      */
+      bool equals(const PlaceHolder* other) const
+      {
+        if (other->getType() == getType())
+        {
+          //static_cast<Holder<ValueType>*>(mContent)->mHeld;
+          const Holder<TypeHeld>* otherOfMyType = 
+            static_cast<const Holder<TypeHeld>*>(other);
+
+          return type_compare_equal(mHeld, otherOfMyType->mHeld);
+        }
+        else
+        {
+          return false;
+        }
       }
 
       const TypeHeld mHeld;
