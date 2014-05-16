@@ -221,6 +221,22 @@ namespace mStd
       return mStr == rhs.mStr || *this == rhs.c_str();
     }
 
+    bool operator<(const mString& rhs) const
+    {
+      if (mStr == rhs.mStr)
+        return false;
+
+      return strcmp(c_str(), rhs.c_str()) < 0;
+    }
+
+    bool operator>(const mString& rhs) const
+    {
+      if (mStr == rhs.mStr)
+        return false;
+
+      return strcmp(c_str(), rhs.c_str()) > 0;
+    }
+
     bool operator!=(const mString& rhs) const
     {
       return !(*this == rhs);

@@ -45,6 +45,26 @@ namespace mStd
   }
 
   /**
+  Specialize this for a type.  By default operator < is used for
+  equality.
+  */
+  template <typename Type>
+  inline bool type_compare_lessThan(const Type& left, const Type& right)
+  {
+    return left < right;
+  }
+
+  /**
+  Specialize this for a type.  By default operator > is used for
+  equality.
+  */
+  template <typename Type>
+  inline bool type_compare_greaterThan(const Type& left, const Type& right)
+  {
+    return left > right;
+  }
+
+  /**
   */
   class Variant
   {
@@ -130,6 +150,46 @@ namespace mStd
       else
       {
         return mContent->equals(rhs.mContent);
+      }
+    }
+
+    /**
+      Returns true if 'this' variant is less than 'rhs'.  Types must
+      be exactly the same.
+    */
+    bool operator<(const Variant& rhs) const
+    {
+      if (mContent == NULL && rhs.mContent == NULL)
+      {
+        return true;
+      }
+      else if (mContent == NULL || rhs.mContent == NULL)
+      {
+        return false;
+      }
+      else
+      {
+        return mContent->lessThan(rhs.mContent);
+      }
+    }
+
+    /**
+    Returns true if 'this' variant is greater than 'rhs'.  Types must
+    be exactly the same.
+    */
+    bool operator>(const Variant& rhs) const
+    {
+      if (mContent == NULL && rhs.mContent == NULL)
+      {
+        return true;
+      }
+      else if (mContent == NULL || rhs.mContent == NULL)
+      {
+        return false;
+      }
+      else
+      {
+        return mContent->greaterThan(rhs.mContent);
       }
     }
 
@@ -267,6 +327,8 @@ namespace mStd
       virtual const TypeInfo& getType() const = 0;
       virtual bool convertTo(const TypeInfo& toType, Variant* outConverted) const = 0;
       virtual bool equals(const PlaceHolder* other) const = 0;
+      virtual bool lessThan(const PlaceHolder* other) const = 0;
+      virtual bool greaterThan(const PlaceHolder* other) const = 0;
     };
 
     /**
@@ -310,11 +372,44 @@ namespace mStd
       {
         if (other->getType() == getType())
         {
-          //static_cast<Holder<ValueType>*>(mContent)->mHeld;
           const Holder<TypeHeld>* otherOfMyType = 
             static_cast<const Holder<TypeHeld>*>(other);
 
           return type_compare_equal(mHeld, otherOfMyType->mHeld);
+        }
+        else
+        {
+          return false;
+        }
+      }
+
+      /**
+      */
+      bool lessThan(const PlaceHolder* other) const
+      {
+        if (other->getType() == getType())
+        {
+          const Holder<TypeHeld>* otherOfMyType =
+            static_cast<const Holder<TypeHeld>*>(other);
+
+          return type_compare_lessThan(mHeld, otherOfMyType->mHeld);
+        }
+        else
+        {
+          return false;
+        }
+      }
+
+      /**
+      */
+      bool greaterThan(const PlaceHolder* other) const
+      {
+        if (other->getType() == getType())
+        {
+          const Holder<TypeHeld>* otherOfMyType =
+            static_cast<const Holder<TypeHeld>*>(other);
+
+          return type_compare_greaterThan(mHeld, otherOfMyType->mHeld);
         }
         else
         {
