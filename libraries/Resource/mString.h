@@ -175,6 +175,11 @@ namespace mStd
       }
     }
 
+    size_t capacity() const
+    {
+      return mCapacity;
+    }
+
     bool empty() const
     {
       return mStr == NULL || *mStr == '\0';

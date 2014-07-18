@@ -6,7 +6,7 @@
 
 #if defined(mPlatformAvr)
 #include <stdlib.h>
-#else defined(mUseStl)
+#elif defined(mUseStl)
 #include <sstream>
 #include <iomanip>
 #endif
@@ -34,7 +34,7 @@ namespace mStd
     // This is platform specific:
     if (s.ensureCapacity(11 + 1))
     {
-      ltoa(from, s.get(), 10);
+      snprintf(s.get(), s.capacity(), "%ld", from);
     }
     else
     {

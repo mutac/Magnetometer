@@ -63,7 +63,12 @@ namespace mStd
   {
     return left > right;
   }
+} // End namespace mStd
 
+#include "VariantImpl.h"
+
+namespace mStd
+{
   /**
   */
   class Variant
@@ -423,8 +428,6 @@ namespace mStd
 
     PlaceHolder* mContent;
   };
-}
-
-#include "VariantImpl.h"
+} // end namespace mStd
 
 #endif // header guard

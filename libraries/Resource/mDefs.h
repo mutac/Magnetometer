@@ -17,8 +17,19 @@
   #define mPlatformWindows
 #elif defined (__AVR_ARCH__)
   #define mPlatformAvr
+#elif defined (__unix__)
+  #define mPlatformUnix
 #else 
   #define mPlatformUnknown
+#endif
+
+//
+// Call a pragma from a macro (GCC only)
+//
+#ifdef __GNUC__
+  #define mDoPragma(x) _Pragma (#x)
+#else
+  #define mDoPragma(x)
 #endif
 
 //
@@ -37,7 +48,7 @@
 #elif __GNUC__
 // Gcc
 #define mCompilerWarning(str) \
-  message __FILE__ "(" mConcat(__LINE__) ") : Warning: " #str
+  mDoPragma(message __FILE__ "(" mConcat(__LINE__) ") : Warning: " #str)
 #endif
 
 //
@@ -58,7 +69,7 @@
 /** 
  * @description Configure STL usage
  */
-#if defined(mPlatformWindows)
+#if defined(mPlatformWindows) || defined(mPlatformUnix)
 #define mUseStl
 #endif
 
