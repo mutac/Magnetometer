@@ -36,7 +36,7 @@
 // Compilation assertion
 //
 #define mCompilerAssert(name, expr) \
-  extern char __ ## name ## __compilerAssert[(expr) == 1];
+  extern char mConcat(__TheFollowingCompilerAssertHappend__, name) [(expr) ? 1 : -1];
 
 //
 // Compiler warning
@@ -44,11 +44,11 @@
 #ifdef _MSC_VER
 // Visual Studio 
 #define mCompilerWarning(str) \
-  message(__FILE__ "(" mConcat(__LINE__) ") : Warning: " #str)
+  message(__FILE__ "(" mStringize(__LINE__) ") : Warning: " #str)
 #elif __GNUC__
 // Gcc
 #define mCompilerWarning(str) \
-  mDoPragma(message __FILE__ "(" mConcat(__LINE__) ") : Warning: " #str)
+  mDoPragma(message __FILE__ "(" mStringize(__LINE__) ") : Warning: " #str)
 #endif
 
 //
@@ -66,7 +66,7 @@
 // STL use
 //
 
-/** 
+/**
  * @description Configure STL usage
  */
 #if defined(mPlatformWindows) || defined(mPlatformUnix)
@@ -156,11 +156,21 @@
 /**
  * @see mConcat
  */
-#define mConcatImpl(s) #s
+#define mConcatImpl(a, b) a ## b
 
 /**
  * Concatenate two macro tokens
  */
-#define mConcat(s) mConcatImpl(s)
+#define mConcat(a, b) mConcatImpl(a, b)
+
+/**
+ * @see mStringize
+ */
+#define mStringizeImpl(s) #s
+
+/**
+ * Stringize a macro token
+ */
+#define mStringize(s) mStringizeImpl(s)
 
 #endif // Header guard

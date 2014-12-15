@@ -2,6 +2,8 @@
 #ifndef __TYPE_INFO_H__
 #define __TYPE_INFO_H__
 
+#include <Resource/mDefs.h>
+
 namespace mStd
 {
   /**
@@ -21,7 +23,12 @@ namespace mStd
   static const TypeInfo TypeInfo_Float = 6;
   static const TypeInfo TypeInfo_Double = 7;
   static const TypeInfo TypeInfo_String = 8;
-  /** Begin user types at 20 */
+  static const TypeInfo TypeInfo__MaximumValue = 255;
+
+  /** Begin user types at 20
+   * @see mTypeInfoDecl
+   */
+  static const TypeInfo TypeInfo__UserTypeBase = 20;
 
   /**
   * Returns variant type information associated with a type.
@@ -30,5 +37,12 @@ namespace mStd
   template <typename ValueType>
   const TypeInfo& type_of();
 }
+
+/**
+ * Declare a new TypeInfo
+ */
+#define mTypeInfoDecl(name, val) \
+  mCompilerAssert(TypeInfo_ValueIsTooBig, mStd::TypeInfo__UserTypeBase + (val) < mStd::TypeInfo__MaximumValue) \
+  static const mStd::TypeInfo name = mStd::TypeInfo__UserTypeBase + (val)
 
 #endif
